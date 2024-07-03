@@ -1,0 +1,15 @@
+@startuml
+
+title UC33 - List all measurements of device in a period
+autonumber
+
+box "  <<System>>\n:SmartHome"
+participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+[o-> Backend: list all measurements of device in period
+activate Backend
+[o<-- Backend: measurements
+deactivate Backend
+
+@enduml

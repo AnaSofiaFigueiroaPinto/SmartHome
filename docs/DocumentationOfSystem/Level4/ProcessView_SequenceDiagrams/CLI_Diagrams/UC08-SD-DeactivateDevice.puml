@@ -1,0 +1,57 @@
+@startuml
+title UC08 - Deactivate Device
+autonumber
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":DeactivateDeviceController" as Controller <<component>>
+participant "deviceDTO:DeviceDTO" as deviceDTO
+participant "deviceID:DeviceID" as deviceID
+participant ":DeviceService" as Service <<component>>
+participant ":DeviceRepository" as Repo <<component>>
+participant "device:Device" as Device
+
+ref over Controller
+[[docs/DocumentationOfSystem/UC06-ListAllDevicesInRoom/UC06SequenceDiagram.puml]]
+end ref
+
+'GET DOMAIN DEVICE FOR A GIVEN DEVICEDTO
+activate Controller
+[o-> Controller: deactivateDevice(deviceDTO)
+Controller -> deviceDTO : deviceName
+activate deviceDTO
+deviceDTO --> Controller: String deviceName
+deactivate deviceDTO
+Controller --> deviceID**: <<create>>
+
+'Make the request to the service
+Controller -> Service: deactivateDevice(deviceID)
+activate Service
+
+'CHECK IF ENTITY EXISTS IN REPO
+Service -> Repo: findEntityByID(deviceID)
+activate Repo
+Repo --> Service: Optional<Device>
+deactivate Repo
+alt if Device is active
+Service -> Device: deactivate()
+activate Device
+Device --> Service: true
+deactivate Device
+end alt
+
+
+Service -> Repo: update(Device)
+activate Repo
+Repo --> Service: Device
+deactivate Repo
+
+Service --> Controller: true
+
+deactivate Service
+[o<-- Controller: true
+deactivate Controller
+'END
+@enduml

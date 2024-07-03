@@ -1,0 +1,85 @@
+@startuml
+title UC08 - Deactivate Device
+autonumber
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":Router" as Router <<Component>>
+participant ":DeviceControllerWeb" as Controller <<Component>>
+participant "deviceID:\nDeviceID" as deviceID
+participant ":DeviceService" as Service <<Component>>
+participant ":DeviceRepository" as Repo <<Component>>
+participant "device:\nDevice" as Device
+participant ":MapperDeviceDataModel" as DeviceMapperDataModel <<Component>>
+participant ":DB Driver" as dbDriver <<Component>>
+
+ref over Router
+[UC06-SD-ListAllDevicesInRoom]
+end ref
+
+[o-> Router: PATCH api/devices/{id}
+activate Router
+
+'GET DOMAIN DEVICE FOR A GIVEN DEVICEDTO
+Router -> Controller: PATCH editDevice(@PathVariable \nString deviceName)
+activate Controller
+Controller -> Controller : deactivateDevice\n(deviceName)
+Controller --> deviceID**: <<create>>
+
+'Make the request to the service
+Controller -> Service: deactivateDevice(deviceID)
+activate Service
+
+'CHECK IF ENTITY EXISTS IN REPO
+Service -> Repo: findEntityByID(deviceID)
+activate Repo
+
+Repo -> dbDriver: findEntityByID(deviceID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> Repo: Optional <Device> deviceDataModel
+deactivate dbDriver
+
+Repo -> DeviceMapperDataModel: toDomain(factoryDevice, deviceDataModel)
+activate DeviceMapperDataModel
+DeviceMapperDataModel --> Repo: Optional<Device>
+deactivate DeviceMapperDataModel
+
+Repo --> Service: Optional<Device>
+deactivate Repo
+
+Service -> Device: deactivate()
+activate Device
+Device --> Service: true
+deactivate Device
+
+Service -> Repo: update(device)
+activate Repo
+Repo -> dbDriver: save(device)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver -> Repo: DeviceDataModel
+deactivate dbDriver
+Repo -> DeviceMapperDataModel: toDomain(factoryDevice, DeviceDataModel)
+activate DeviceMapperDataModel
+DeviceMapperDataModel --> Repo: Device
+deactivate DeviceMapperDataModel
+Repo --> Service: Device
+deactivate Repo
+
+Service --> Controller: true
+deactivate Service
+Router <-- Controller: true, HttpStatus.OK
+deactivate Controller
+
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+'END
+@enduml

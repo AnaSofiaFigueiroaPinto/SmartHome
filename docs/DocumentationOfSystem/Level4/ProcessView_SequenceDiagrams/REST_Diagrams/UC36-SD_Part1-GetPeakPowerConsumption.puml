@@ -1,0 +1,142 @@
+@startuml
+
+title UC36 - Get Peak Power consumption of the House in a given period - Part 1
+
+!pragma teoz true
+
+
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+
+participant ":Router" as router <<Component>>
+participant ":HouseWebController" as controller <<Component>>
+participant ":PeakPowerService" as service <<Component>>
+participant ":Config Scraper" as configScraper <<Component>>
+participant "gridPowerID:DeviceID" as gpdID
+participant "gridPowerFunc:SensorFunctionalityID" as gpF
+participant ":SensorRepository" as repoSensor <<Component>>
+participant ":PeriodTimeValueRepository" as periodRepo <<Component>>
+participant "powerSourceFunc:SensorFunctionalityID" as psF
+participant "mapOfPowerSourcesValues:\nMap<DeviceID,Map<Timestamp, InstantTimeValue>>" as mapOfPowerSourcesValues
+participant "powerSourceSensor:Sensor" as psSensor
+participant ":InstantTimeValueRepository" as instantRepo <<Component>>
+participant ":Database Driver" as dbDriver <<Component>>
+
+end box
+
+
+
+[o-> router: GET /house?givenStart=[start]&givenEnd=[end]
+activate router
+'END SECTION 0
+
+'SECTION 1: INTERACTION BETWEEN APPLICATION AND DATABASE
+router -> controller : getObjectByHouseID(\n@PathVariable("id")String houseID,\n@RequestParam\LocalTime givenStart, \n@RequestParam\LocalDateTime givenEnd)
+activate controller
+
+'SUBSECTION
+    controller -> controller : getPeakPowerConsumption\n(start, end)
+    activate controller
+    controller -> service : getPeakPowerConsumption\n(Timestamp start,\n Timestamp end)
+    activate service
+    service -> configScraper : loadGridPowerMeterID()
+    activate configScraper
+    configScraper --> service : String devicePowerGridName
+    service -> configScraper : loadGridPowerMeterSensorFunctionality()
+    configScraper --> service : String devicePowerGridFunctionality
+    service -> configScraper : loadPowerSourceSensorFunctionality()
+    configScraper --> service : String powerSourceFunctionality
+    deactivate configScraper
+
+    service --> gpdID** : <<create>>
+    service --> gpF** : <<create>>
+    'END SECTION 2'
+
+    'SECTION 3: CALL SENSOR REPOSITORY TO FIND SENSOR BY DEVICE ID AND SENSOR FUNCTIONALITY'
+    'CALL PERIOD VALUE REPO TO RETRIEVE ALL VALUES FOR THIS SENSOR WITHIN THE GIVEN PERIOD'
+    service -> repoSensor : findByDeviceIDAndSensorFunctionality\n(gridPowerID, gridPowerFunc)
+    activate repoSensor
+    repoSensor -> dbDriver : findByDeviceIDAndSensorFunctionalityID\n(gridPowerID, gridPowerFunc)
+    activate dbDriver
+    dbDriver ->o]: DATABASE QUERY
+    dbDriver <--o]: QUERY RESPONSE
+    dbDriver --> repoSensor : Iterable<SensorDataModel> lstSensorDataModel
+    deactivate dbDriver
+    repoSensor --> service : Sensor sensor
+    deactivate repoSensor
+
+    service -> periodRepo : findBySensorIdBetweenPeriodOfTime(sensor.identity(), start, end)
+    activate periodRepo
+    periodRepo -> dbDriver : findBySensorIDAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual\n(sensorID.toString(), start, end)
+    activate dbDriver
+    dbDriver ->o]: DATABASE QUERY
+    dbDriver <--o]: QUERY RESPONSE
+    dbDriver --> periodRepo : List<PeriodTimeValueDataModel> listPeriodTimeValueDataModel
+    deactivate dbDriver
+    periodRepo --> service : List<Value> powerGridValues
+    deactivate periodRepo
+    'END SECTION 3'
+
+    'SECTION 4: CREATE POWER SOURCE FUNCTIONALITY ID AND GO TO SENSOR REPO AND'
+    'GRAB ALL SENSORS WITH THAT FUNCTIONALITY'
+    service --> psF** : <<create>>
+    service -> repoSensor : findBySensorFunctionality(powerSourceFunc)
+    activate repoSensor
+    repoSensor --> service : Iterable<Sensor> listOfSensorsFromPowerSources
+    deactivate repoSensor
+    'END SECTION 4'
+
+    'SECTION 5: CREATE HOLDING MAP FOR DEVICEID, TIMESTAMP, INSTANTIMEVALUE'
+    'LOOP THROUGH EACH SENSOR IN ITERABLE GIVEN IN SECTION 4 AND GRAB THEIR'
+    'GRAB THEIR VALUES WITHIN PERIOD AND POPULATE MAP'
+
+    service --> mapOfPowerSourcesValues**: <<create>>
+
+    loop for each Sensor in listOfSensorsFromPowerSources
+        service -> psSensor : getDeviceID()
+        activate psSensor
+        psSensor --> service : DeviceID deviceIDOfPowerSource
+        deactivate psSensor
+
+        service -> instantRepo : findBySensorIDBetweenPeriodOfTime(sensor.identity(), start, end)
+        activate instantRepo
+        instantRepo -> dbDriver : findBySensorIDAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual\n(sensorID.toString(), start, end)
+        activate dbDriver
+        dbDriver ->o]: DATABASE QUERY
+        dbDriver <--o]: QUERY RESPONSE
+        dbDriver --> instantRepo : List<InstantTimeValueDataModel> listPeriodTimeValueDataModel
+        deactivate dbDriver
+        instantRepo --> service : List<Value> powerSourceValues
+        deactivate instantRepo
+
+        'SECTION 5.1: ITERATE THROUGH VALUES IN LIST AND POPULATE MAP'
+        service -> mapOfPowerSourcesValues: computeIfAbsent (deviceIDOfPowerSource, k -> new Hashmap<>())
+        activate mapOfPowerSourcesValues
+        loop for each Value in powerSourceValues
+            service -> mapOfPowerSourcesValues : put(deviceIDOfPowerSource,\n Value.getInstantTimeReading(), Value)
+            deactivate mapOfPowerSourcesValues
+        end
+        'END SECTION 5.1'
+    end
+    'END SECTION 5'
+
+    'SECTION 6: CALCULATION OF PEAK POWER PLACED IN NEW DIAGRAM'
+    service -> service : calculatePeakPowerConsumption\n(powerGridValues, mapOfPowerSourcesValues)
+    activate service
+    ref over service : UC36-SD_Part2-GetPeakPowerConsumption
+    service --> service : double peakPowerConsumption
+    deactivate service
+    'END SECTION 6'
+
+    'SECTION 7: RETURN PEAK POWER TO CONTROLLER'
+    service --> controller: peakPowerConsumption
+    deactivate service
+    controller --> controller: peakPower
+    deactivate controller
+    'END SECTION 7'
+controller --> router: peakPower, HttpStatus.OK
+deactivate controller
+[o<-- router: JSON peakPower, \nHttpStatus.OK
+deactivate router
+@enduml

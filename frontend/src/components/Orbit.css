@@ -1,0 +1,146 @@
+#background {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10vh; /* Alter the height as desired */
+    pointer-events: none;
+    overflow: hidden; /* Ensure content respects the rounded corners */
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); /* Gradient transition */
+}
+
+.sky {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    border-radius: inherit; /* Inherit border-radius from parent */
+    opacity: 0.6;
+}
+
+.sky__phase {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    transition: opacity 0.2s;
+    border-radius: inherit; /* Inherit border-radius from parent */
+}
+
+.sky__dawn {
+    background: linear-gradient(to top, rgba(254, 215, 102, 0.8) 0%, rgba(205, 237, 246, 0.0) 100%);
+    animation: dawn 30s ease-in-out infinite;
+    border-radius: inherit; /* Inherit border-radius from parent */
+}
+
+.sky__noon {
+    background: linear-gradient(to top, rgba(205, 237, 246, 0.8) 0%, rgba(36, 123, 160, 0.0) 100%);
+    animation: noon 30s ease-in-out infinite;
+    border-radius: inherit; /* Inherit border-radius from parent */
+}
+
+.sky__dusk {
+    background: linear-gradient(to top, rgba(255, 32, 110, 0.8) 0%, rgba(10, 0, 94, 0.0) 100%);
+    animation: dusk 30s ease-in-out infinite;
+    border-radius: inherit; /* Inherit border-radius from parent */
+}
+
+.sky__midnight {
+    background: linear-gradient(to top, rgba(2, 0, 20, 0.8) 0%, rgba(10, 0, 94, 0.0) 100%);
+    animation: midnight 30s ease-in-out infinite;
+    border-radius: inherit; /* Inherit border-radius from parent */
+}
+
+.orbit {
+    position: fixed;
+    width: 20vw;
+    height: 48vh; /* Alter as needed to cover the desired height */
+    bottom: -65vh; /* Move the orbit to the bottom of the page */
+    left: 51.5%;
+    transform: translate(-50%, 0) rotate(90deg);
+    animation: orbit 30s linear infinite; /* Set a lower z-index to ensure it's behind the toggle drawer */
+    margin-top: auto;
+}
+
+.sun, .moon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.sun {
+    background-color: rgb(254, 215, 102);
+    box-shadow: 0 0 14px 14px rgba(254, 215, 102, 0.2);
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+.moon {
+    background-color: #fff;
+    box-shadow: 0 0 7px 7px rgba(255, 255, 255, 0.0);
+    bottom: 0;
+    right: 50%;
+    transform: translate(50%, 0);
+    opacity: 1;
+    animation: orbit 24s linear infinite;
+}
+
+#sky__stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.6;
+}
+
+#sky__stars > div {
+    width: 3px;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 1;
+}
+
+@keyframes dawn {
+    0% { opacity: 1; }
+    25% { opacity: 0; }
+    50% { opacity: 0; }
+    75% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+@keyframes noon {
+    0% { opacity: 0; }
+    25% { opacity: 1; }
+    50% { opacity: 1; }
+    75% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+@keyframes dusk {
+    0% { opacity: 0; }
+    25% { opacity: 0; }
+    50% { opacity: 1; }
+    75% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+@keyframes midnight {
+    0% { opacity: 0; }
+    25% { opacity: 0; }
+    50% { opacity: 0; }
+    75% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+@keyframes orbit {
+    0% { transform: translate(-50%, -50%) rotate(-90deg); }
+    100% { transform: translate(-50%, -50%) rotate(270deg); }
+}

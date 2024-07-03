@@ -1,0 +1,31 @@
+@startuml
+title US10: As Product Owner, I want the system to have a type of sensor that measures temperature (C).
+'https://plantuml.com/class-diagram
+
+interface Sensor {
++getSensorName()
++getSensorType()
++getUnit()
++getCurrentMeasurement()
+}
+
+class TemperatureSensor {
+-sensorName: String
+-sensorType: SensorType
+-unit: String
+-currentMeasurement: double
++getSensorName()
++getSensorType()
++getUnit()
++getCurrentMeasurement()
+}
+
+enum SensorType {
+HUMIDITY
+TEMPERATURE
+}
+
+Sensor - TemperatureSensor
+TemperatureSensor - SensorType
+
+@enduml

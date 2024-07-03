@@ -1,0 +1,68 @@
+@startuml
+title UC01 - As an Administrator, I want to configure the location of the house. Main success scenario.
+
+autonumber
+
+!pragma teoz true
+
+box " <<SubSystem>>\n  <<Container>>\n     :Backend " #DarkGrey
+box " <<Component>>\n    :Server" #LightGrey
+participant ":ConfigureHouseLocationController" as US01Ctrl <<Component>>
+participant "locationDTO:LocationDTO" as LocationDTO
+participant "address:Address" as Address
+participant "gpsCode:GPSCode" as GPSCode
+participant ":HouseService" as HouseService <<Component>>
+participant ":HouseRepository" as HouseRepository <<Component>>
+participant "house:House" as House
+participant "location:Location" as Location
+participant "houseDTO:HouseDTO" as HouseDTO
+end box
+end box
+
+
+[o-> US01Ctrl: configureHouseLocation(LocationDTO locationDTO)
+activate US01Ctrl
+US01Ctrl -> LocationDTO: street
+activate LocationDTO
+LocationDTO --> US01Ctrl: String street
+US01Ctrl -> LocationDTO: doorNumber
+LocationDTO --> US01Ctrl: String doorNumber
+US01Ctrl -> LocationDTO: zipCode
+LocationDTO --> US01Ctrl: String zipCode
+US01Ctrl -> LocationDTO: city
+LocationDTO --> US01Ctrl: String city
+US01Ctrl -> LocationDTO: country
+LocationDTO --> US01Ctrl: String country
+US01Ctrl --> Address** : <<creates>>
+US01Ctrl -> LocationDTO: latitude
+LocationDTO --> US01Ctrl: double latitude
+US01Ctrl -> LocationDTO: longitude
+LocationDTO --> US01Ctrl: double longitude
+deactivate LocationDTO
+US01Ctrl --> GPSCode** : <<creates>>
+
+
+US01Ctrl -> HouseService: editLocation(houseID, address, gpsCode)
+activate HouseService
+HouseService -> HouseRepository: findEntityByID(houseID)
+activate HouseRepository
+HouseRepository --> HouseService: house
+deactivate HouseRepository
+HouseService --> House: editLocation(address, gpsCode)
+activate House
+House --> Location** : <<creates>>
+House --> HouseService: location
+deactivate House
+HouseService -> HouseRepository: update(house)
+activate HouseRepository
+HouseRepository --> HouseService: house
+deactivate HouseRepository
+HouseService --> US01Ctrl: location
+deactivate HouseService
+
+US01Ctrl --> HouseDTO** : <<creates>>
+[o<-- US01Ctrl: houseDTO
+deactivate US01Ctrl
+
+
+@enduml

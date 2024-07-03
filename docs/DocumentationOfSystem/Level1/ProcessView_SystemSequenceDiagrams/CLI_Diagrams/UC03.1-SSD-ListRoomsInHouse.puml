@@ -1,0 +1,14 @@
+@startuml
+
+Actor User
+autonumber
+title UC03.1 - List Rooms In House
+
+autonumber
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome: get list of rooms
+activate SmartHome
+User <-- SmartHome: list of rooms
+deactivate SmartHome
+@enduml

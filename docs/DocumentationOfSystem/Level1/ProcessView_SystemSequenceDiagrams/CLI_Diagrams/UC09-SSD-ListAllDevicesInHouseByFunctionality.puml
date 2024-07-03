@@ -1,0 +1,15 @@
+@startuml
+
+title UC09 - List All Devices In House By Functionality
+
+autonumber
+
+Actor User
+participant ":SmartHome" as smartHome <<System>>
+
+User -> smartHome: get list of devices by functionality
+activate smartHome
+User <-- smartHome: list of devices
+deactivate smartHome
+
+@enduml

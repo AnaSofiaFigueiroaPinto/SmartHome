@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+
+package roomAggregate {
+    class Room <root>{
+    }
+}
+
+package houseAggregate {
+    class House <root>{
+    }
+}
+
+package deviceAggregate{
+    class Device <root>{
+    }
+}
+
+package actuatorAggregate {
+    abstract class Actuator <root>{
+    }
+}
+
+package actuatorFunctionalityAggregate {
+    class ActuatorFunctionality <root> {
+    }
+}
+
+actuatorAggregate -up-> actuatorFunctionalityAggregate
+
+package sensorAggregate {
+    abstract class Sensor <root> {
+    }
+}
+
+package sensorFunctionalityAggregate {
+    class SensorFunctionality <root> {
+    }
+}
+
+sensorAggregate --> sensorFunctionalityAggregate
+
+package value{
+    package instantTimeValueAggregate{
+        class InstantTimeValue <root> {
+        }
+    }
+    package periodTimeValueAggregate{
+        class PeriodTimeValue <root> {
+        }
+    }
+    package instantTimeLocationValueAggregate{
+        class InstantValue <root> {
+        }
+    }
+}
+
+roomAggregate -up-> houseAggregate
+deviceAggregate -up-> roomAggregate
+actuatorAggregate -up-> deviceAggregate
+sensorAggregate -up-> deviceAggregate
+value -up-> sensorAggregate
+
+
+@enduml

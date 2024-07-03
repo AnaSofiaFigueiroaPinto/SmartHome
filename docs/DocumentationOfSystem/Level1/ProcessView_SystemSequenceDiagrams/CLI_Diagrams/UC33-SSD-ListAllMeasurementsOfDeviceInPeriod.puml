@@ -1,0 +1,14 @@
+@startuml
+
+title UC33 - List all measurements of device in a period
+autonumber
+
+Actor User
+participant ":SmartHome" as smartHome <<System>>
+
+User -> smartHome: list all measurements of device in period
+activate smartHome
+User <-- smartHome: measurements
+deactivate smartHome
+
+@enduml

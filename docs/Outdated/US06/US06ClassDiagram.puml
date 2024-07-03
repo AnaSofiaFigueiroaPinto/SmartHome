@@ -1,0 +1,71 @@
+@startuml
+title US06: As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+'https://plantuml.com/class-diagram
+
+class ListAllDevicesInRoomController {
+-house: House
++getRoomList(): RoomListDTO
++getDeviceList(roomNameDTO: String): DeviceListDTO
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-width: double
+-length: double
+-height: double
++getRoomName(): String
+}
+
+class DeviceDTO {
+-DeviceName: String
+
++getDeviceName(): String
+}
+
+class RoomMapper {
++roomToDTO(RoomList): Map<RoomDTO, Room>
++roomToDTO(Room): RoomDTO
+}
+
+class House {
+-roomList: RoomList
++getRoomList(): RoomList
++getDeviceByName(String deviceName): String
+}
+
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
+-validRoomArguments(): boolean
+}
+
+
+class DeviceMapper {
++deviceListToDTO(DeviceList): Map<DeviceDTO, Device>
++DeviceToDTO(Device): DeviceDTO
+}
+
+
+
+
+
+ListAllDevicesInRoomController -- RoomMapper
+
+ListAllDevicesInRoomController -- DeviceMapper
+
+ListAllDevicesInRoomController -- House
+
+ListAllDevicesInRoomController -- Room
+
+RoomMapper -- RoomDTO
+DeviceMapper -- DeviceDTO
+
+
+
+
+
+@enduml

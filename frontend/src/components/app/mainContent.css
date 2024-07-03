@@ -1,0 +1,23 @@
+/*mainContent.css*/
+.main-box {
+    flex-grow: 1;
+    height: 100vh;
+    overflow: auto;
+}
+
+.main-container {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.main-paper {
+    background-color: transparent !important; /* Define o fundo como transparente */
+    box-shadow: none !important; /* Remove a sombra */
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.copyright {
+    padding-top: 4rem;
+}

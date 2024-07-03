@@ -1,0 +1,93 @@
+@startuml
+title UC37.1 - Get list of Devices with Actuator Functionality by Room
+
+autonumber
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":ActuatorFunctionalityControllerWeb" as Controller <<Component>>
+participant "actuatorFunctionality:\nActuatorFunctionalityID" as functionality
+participant ":CloseBlindRollerService" as closeBlindRollerService <<Component>>
+participant ":ActuatorRepository" as actuatorRepo <<Component>>
+participant "returnMap:\nMap<DeviceID, RoomID>" as returnMap
+participant "listDevices:\nlist<Device>" as listDevices
+participant "actuator:\nActuator" as actuator
+participant ":DeviceRepository" as deviceRepo <<Component>>
+participant "device:\nDevice" as device
+participant ":DB Driver" as db <<Component>>
+end box
+
+[o-> Router: GET api/actuatorfunctionality/{id}
+activate Router
+
+Router -> Controller: GET getObjectByActuatorFunctionalityID \n(@PathVariable("id") String id, \n@RequestParam(value = "type", \nrequired = false) String type)
+activate Controller
+Controller -> Controller: type.equals("map"): true
+Controller -> Controller: getListOfDeviceIDAndRoomIDAccordingToFunctionality(id)
+activate Controller
+
+Controller --> functionality** : <<create>
+Controller -> closeBlindRollerService: getMapOfDeviceIDAndRoomIDAccordingToFunctionality \n(actuatorFunctionality)
+activate closeBlindRollerService
+closeBlindRollerService -> actuatorRepo: findByActuatorFunctionality \n(chosenFunctionality)
+activate actuatorRepo
+
+actuatorRepo --> closeBlindRollerService: Iterable<Actuator>
+deactivate actuatorRepo
+
+closeBlindRollerService --> returnMap** : <<create>
+closeBlindRollerService --> listDevices** : <<create>
+
+loop for each Actuator in List with the functionalityID
+closeBlindRollerService -> actuator** : getDeviceName()
+activate actuator
+actuator --> closeBlindRollerService: deviceID
+deactivate actuator
+closeBlindRollerService -> deviceRepo: findEntityByID(deviceID)
+activate deviceRepo
+
+deviceRepo -> db: findEntityByID(deviceID)
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> deviceRepo: DeviceDataModel:deviceDM
+deactivate db
+
+deviceRepo --> closeBlindRollerService: Optional<Device>
+deactivate deviceRepo
+closeBlindRollerService -> device: isActive()
+activate device
+device --> closeBlindRollerService: true
+deactivate device
+closeBlindRollerService -> listDevices: add(deviceOptional.get())
+activate listDevices
+deactivate listDevices
+
+loop for each Device in listDevices
+closeBlindRollerService -> device : getRoomID()
+activate device
+device --> closeBlindRollerService: roomID
+deactivate device
+closeBlindRollerService -> returnMap: put(deviceID, roomID)
+activate returnMap
+deactivate returnMap
+end loop
+
+end loop
+
+closeBlindRollerService --> Controller: deviceIDRoomIDMap:\nMap<DeviceID, RoomID>
+deactivate closeBlindRollerService
+deactivate Controller
+
+
+Router <-- Controller: CollectionModel.of(blindRollerDTOs), \nHTTPStatus.OK
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+
+@enduml

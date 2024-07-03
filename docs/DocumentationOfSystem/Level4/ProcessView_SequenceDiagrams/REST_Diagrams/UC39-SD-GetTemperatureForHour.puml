@@ -1,0 +1,69 @@
+@startuml
+title UC39 - As a User, I want to have current outside temperature on the front/main page of my Web App (updated every 15 minutes, starting at 00:00).
+!pragma teoz true
+
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as router <<Component>>
+participant ":HouseWebController" as controller <<Component>>
+participant ":WeatherAPIService" as service <<Component>>
+participant ":ConfigScraper" as scraper <<Component>>
+participant ":HouseRepository" as repository <<Component>>
+participant ":House" as house <<Component>>
+participant ":Location" as location <<Component>>
+participant ":GPSCode" as gps <<Component>>
+participant ":WeatherAPIGateway" as gateway <<Component>>
+participant ":WeatherServiceDriver" as driver <<Component>>
+
+end box
+note over router
+currentHour represents the current hour of the day
+end note
+[o-> router: GET \n/house/weather?hour=${currentHour}
+activate router
+router -> controller: getWeatherInfo (@RequestParam int hour)
+activate controller
+controller -> service: getTemperatureForHour\n(hour)
+activate service
+service -> service: defineGroupHouseLocation()
+activate service
+service -> scraper: loadGroupNumber()
+activate scraper
+scraper --> service: int groupNumber
+deactivate scraper
+service -> repository: findAllEntities()
+activate repository
+repository --> service: Iterable<House> houses
+deactivate repository
+service -> house**: houses.iterator().next()
+activate house
+house -> location**: getHouseLocation()
+deactivate house
+activate location
+location -> gps**: getGpsCode()
+deactivate location
+activate gps
+service -> gps: getLatitude()
+gps --> service: double latitude
+service -> gps: getLongitude()
+gps --> service: double longitude
+deactivate gps
+deactivate service
+service -> gateway: getInstantaneousTemperature\n(groupNumber, latitude, longitude, hour)
+activate gateway
+gateway -> driver: getForEntity\n(url, InstTemperatureDTO.class)
+activate driver
+driver ->o]: Request external Weather service
+driver <--o]: Response from external Weather service
+driver --> gateway: InstTemperatureDTO
+deactivate driver
+gateway --> service: InstTemperatureDTO
+deactivate gateway
+service --> controller: double temperature
+deactivate service
+controller --> router: temperature, HTTP Status OK
+deactivate controller
+[o<-- router: JSON temperature, HTTP Status OK
+deactivate router
+@enduml

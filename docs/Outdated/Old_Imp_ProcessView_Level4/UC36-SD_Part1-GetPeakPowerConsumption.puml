@@ -1,0 +1,108 @@
+@startuml
+title UC36 - Get Peak Power consumption of the House in a given period
+
+autonumber
+
+participant ":ValueController" as controller
+participant ":PeakPowerService" as service
+participant ":Config Scraper" as configScraper
+participant "gridPowerID:DeviceID" as gpdID
+participant "gridPowerFunc:SensorFunctionalityID" as gpF
+participant ":SensorRepository" as repoSensor
+participant ":PeriodTimeValueRepository" as periodRepo
+participant "powerSourceFunc:SensorFunctionalityID" as psF
+participant "mapOfPowerSourcesValues:\nMap<DeviceID,Map<Timestamp, InstantTimeValue>>" as mapOfPowerSourcesValues
+participant "powerSourceSensor:Sensor" as psSensor
+participant ":InstantTimeValueRepository" as instantRepo
+
+
+
+'SECTION 1: HTTP GET REQUEST TO GET PEAK POWER AND CONTROLLER CALLING SERVICE'
+[o-> controller : GET /peakPower/{start}/{end}
+activate controller
+controller -> service : getPeakPowerConsumption(\nTimestamp start,\n Timestamp end)
+activate service
+'END SECTION 1'
+
+'SECTION 2: SERVICE CALLS CONFIG SCRAPER CLASS TO RETRIEVE FROM CONFIG FILE THE ID OF THE POWER GRID DEVICE'
+'AND GET THE SENSOR FUNCTIONALITY OF THE SENSOR IN THE POWER GRID DEVICE'
+'CREATE DEVICE ID OBJECT BASED ON THAT STRING AND SENSOR FUNCTIONALITY ID BASED ON STRING'
+service -> configScraper : loadGridPowerMeterID()
+activate configScraper
+configScraper --> service : String devicePowerGridName
+service -> configScraper : loadGridPowerMeterSensorFunctionality()
+configScraper --> service : String devicePowerGridFunctionality
+service -> configScraper : loadPowerSourceSensorFunctionality()
+configScraper --> service : String powerSourceFunctionality
+deactivate configScraper
+
+service --> gpdID** : <<create>>
+service --> gpF** : <<create>>
+'END SECTION 2'
+
+'SECTION 3: CALL SENSOR REPOSITORY TO FIND SENSOR BY DEVICE ID AND SENSOR FUNCTIONALITY'
+'CALL PERIOD VALUE REPO TO RETRIEVE ALL VALUES FOR THIS SENSOR WITHIN THE GIVEN PERIOD'
+service -> repoSensor : findByDeviceIDAndSensorFunctionality\n(gridPowerID, gridPowerFunc)
+activate repoSensor
+repoSensor --> service : Sensor sensor
+deactivate repoSensor
+
+service -> periodRepo : findBySensorIdBetweenPeriodOfTime(sensor.identity(), start, end)
+activate periodRepo
+periodRepo --> service : List<Value> powerGridValues
+deactivate periodRepo
+'END SECTION 3'
+
+'SECTION 4: CREATE POWER SOURCE FUNCTIONALITY ID AND GO TO SENSOR REPO AND'
+'GRAB ALL SENSORS WITH THAT FUNCTIONALITY'
+service --> psF** : <<create>>
+service -> repoSensor : findBySensorFunctionality(powerSourceFunc)
+activate repoSensor
+repoSensor --> service : Iterable<Sensor> listOfSensorsFromPowerSources
+deactivate repoSensor
+'END SECTION 4'
+
+'SECTION 5: CREATE HOLDING MAP FOR DEVICEID, TIMESTAMP, INSTANTIMEVALUE'
+'LOOP THROUGH EACH SENSOR IN ITERABLE GIVEN IN SECTION 4 AND GRAB THEIR'
+'GRAB THEIR VALUES WITHIN PERIOD AND POPULATE MAP'
+
+service --> mapOfPowerSourcesValues**: <<create>>
+
+loop for each Sensor in listOfSensorsFromPowerSources
+    service -> psSensor : getDeviceID()
+    activate psSensor
+    psSensor --> service : DeviceID deviceIDOfPowerSource
+    deactivate psSensor
+
+    service -> instantRepo : findBySensorIDBetweenPeriodOfTime(sensor.identity(), start, end)
+    activate instantRepo
+    instantRepo --> service : List<Value> powerSourceValues
+    deactivate instantRepo
+
+    'SECTION 5.1: ITERATE THROUGH VALUES IN LIST AND POPULATE MAP'
+    service -> mapOfPowerSourcesValues: computeIfAbsent (deviceIDOfPowerSource, k -> new Hashmap<>())
+    activate mapOfPowerSourcesValues
+    loop for each Value in powerSourceValues
+        service -> mapOfPowerSourcesValues : put(deviceIDOfPowerSource,\n Value.getInstantTimeReading(), Value)
+        deactivate mapOfPowerSourcesValues
+    end
+    'END SECTION 5.1'
+end
+'END SECTION 5'
+
+'SECTION 6: CALCULATION OF PEAK POWER PLACED IN NEW DIAGRAM'
+service -> service : calculatePeakPowerConsumption\n(powerGridValues, mapOfPowerSourcesValues)
+activate service
+ref over service : UC36-SD_Part2-GetPeakPowerConsumption
+service --> service : double peakPowerConsumption
+deactivate service
+'END SECTION 6'
+
+'SECTION 7: RETURN PEAK POWER TO CONTROLLER'
+service --> controller: max
+deactivate service
+[o<-- controller : max, HTTP 200 OK
+deactivate controller
+'END SECTION 7'
+
+@enduml

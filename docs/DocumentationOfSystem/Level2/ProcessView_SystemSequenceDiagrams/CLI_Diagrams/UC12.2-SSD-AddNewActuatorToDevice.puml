@@ -1,0 +1,18 @@
+@startuml
+
+skinparam sequenceMessageAlign center
+autonumber
+
+title UC12.2 - Add an actuator to an existing device in a room.\n The actuator must be of a model of an existing type of actuator.
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+
+[o-> Backend : add actuator to device
+activate Backend
+[o<-- Backend : actuator added
+deactivate Backend
+
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+
+title UC34.2 List Temperature Sensors In Device
+autonumber
+
+Actor User
+participant ":SmartHome" as smarthome <<System>>
+
+User -> smarthome: get list of temperature sensors
+activate smarthome
+User <-- smarthome: list of temperature sensors
+deactivate smarthome
+
+@enduml

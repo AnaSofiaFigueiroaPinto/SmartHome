@@ -1,0 +1,67 @@
+ @startuml
+ skinparam linetype ortho
+
+title UC03.2 Edit Room
+
+package server #LightGray {
+
+class EditRoomController {
+-roomService: RoomService
++editSelectedRoomAndSaveInRepository(RoomDTO): RoomDTO
+}
+
+class RoomDTO {
++roomName: String
++floorNumber: int
++width: double
++length: double
++height: double
+}
+
+interface RoomRepository <repo> {
++findEntityByID(RoomID roomID): Optional<Room>
++save(Room): Room
+}
+
+class Room <root>{
+-houseID: HouseID
+-roomName: RoomID
+-floorNumber: RoomFloor
+-dimensions: RoomDimensions
++editRoom(RoomFloor, RoomDimensions): Room
++identity(): RoomID
+}
+
+class RoomID <VO>{
+-roomName: String
+}
+
+class RoomFloor<VO> {
+-floorNumber: int
+}
+
+class RoomDimensions<VO> {
+-length: double
+-width: double
+-height: double
+
+}
+
+class RoomService {
+-roomRepository: RoomRepository
+-factoryRoom: FactoryRoom
+-houseRepository: HouseRepository
++editRoomAndSave(RoomID roomID,RoomFloor roomFloor,\nRoomDimensions roomDimensions): RoomID
+}
+
+
+
+EditRoomController - RoomService
+EditRoomController -- RoomDTO
+EditRoomController .. RoomID : <<creates>>
+EditRoomController .. RoomFloor : <<creates>>
+EditRoomController .. RoomDimensions : <<creates>>
+RoomService -- RoomRepository
+RoomService -- Room
+
+@enduml

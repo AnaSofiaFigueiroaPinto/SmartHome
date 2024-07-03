@@ -1,0 +1,106 @@
+@startuml
+
+skinparam linetype ortho
+
+title UC33 - List All Measurements Of Device In Period
+
+package server #LightGray {
+
+class ListAllMeasurementsOfDeviceInPeriodController {
+    -listValuesForDeviceService: ListValuesForDeviceService
+    +listAllMeasurementsOfDeviceInPeriod(DeviceDTO deviceDTO, \nTimestamp startTime, Timestamp endTime): Map<SensorFunctionalityDTO, List<ReadingDTO>>
+    -convertToDTO(Map<SensorFunctionalityID, List<Reading>> readings):\n Map<SensorFunctionalityDTO, List<ReadingDTO>>
+}
+
+class ValueService {
+    -sensorRepository: SensorRepository
+    -SensorFunctionalityRepositoryMem: sensorFunctionalityRepositoryMem
+    -InstantTimeValueRepository: instantTimeValueRepository
+    -PeriodTimeValueRepository: periodTimeValueRepository
+    -LocationValueRepository: locationValueRepository
+    +getAllMeasurementsForDeviceBetweenPeriod(DeviceID deviceID, \nTimestamp startTime, Timestamp endTime): Map <SensorFunctionalityID, List<Reading>>
+    -getAllValuesForSensorID (String serviceMethodToCall, SensorID sensorID, \nTimestamp startInterval, Timestamp endInterval): List<Value>
+    -listInstantValuesForSensorID (SensorID sensorID, \nTimestamp startInterval, Timestamp endInterval): List<Value>
+    -listPeriodValuesForSensorID (SensorID sensorID, \nTimestamp startInterval, Timestamp endInterval): List<Value>
+    -listInstantLocationValuesForSensorID(SensorID sensorID, \nTimestamp startInterval, Timestamp endInterval): List<Value>
+    -convertValueIterableToReadingIterable (List<Value> values): List<Reading>
+
+}
+class DeviceDTO {
+    +deviceName: String
+}
+
+interface SensorRepository  {
+    +findByDeviceID(DeviceID deviceID): Iterable<Sensor>
+}
+
+class SensorRepositoryMem <Repo> implements SensorRepository {
+    -sensorData: Map<SensorID, Sensor>
+    +findByDeviceID(DeviceID deviceID): Iterable<Sensor>
+}
+
+class SensorRepositoryJPAImp <Repo> implements SensorRepository {
+    -factorySensor: FactorySensor
+    -sensorDataModelForUpdate: SensorDataModel
+    -entityManager: EntityManager
+    +findByDeviceID(DeviceID deviceID): Iterable<Sensor>
+}
+
+class RepositorySensorSpringDataImp <Repo> implements SensorRepository {
+    -repositorySensorSpringData: RepositorySensorSpringData
+    -factorySensor: FactorySensor
+    -sensorDataModelForUpdate: SensorDataModel
+    -entityManager: EntityManager
+    +findByDeviceID(DeviceID deviceID): Iterable<Sensor>
+}
+
+class Sensor <root> {
+    -sensorID: SensorID
+    -sensorFunctionalityID: SensorFunctionalityID
+    -deviceID: DeviceID
+    +getSensorFunctionalityID(): SensorFunctionalityID
+    +identity(): SensorID
+}
+class SensorFunctionalityRepository <Repo> {
+    -sensorFunctionalityIDServiceMethodCallMap: Map<SensorFunctionalityID, String>
+    +getServiceMethodToCallForSensorFunctionalityID\n(SensorFunctionalityID sensorFunctionalityID): String
+}
+
+class SensorFunctionalityMapperDTO {
+    +functionalityIDtoDTO(SensorFunctionalityID sensorFunctionalityID):\n SensorFunctionalityDTO
+}
+
+interface ValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+note "Continues in UC33ClassDiagramREF1" as NOTE2
+ValueRepository -up-> NOTE2
+
+interface Value {
+    +getReading(): Reading
+}
+
+note "Continues in UC33ClassDiagramREF2" as NOTE1
+Value -down-> NOTE1
+
+
+
+class DeviceID <VO> {
+    -deviceName: String
+    +equals(Object o): boolean
+    +hashCode(): int
+    +toString(): String
+}
+
+ListAllMeasurementsOfDeviceInPeriodController - ValueService
+ListAllMeasurementsOfDeviceInPeriodController  -- DeviceDTO
+ListAllMeasurementsOfDeviceInPeriodController ..> DeviceID: <<creates>>
+ValueService ---- SensorRepository
+ValueService --- Sensor
+ValueService --- SensorFunctionalityRepository
+ValueService - ValueRepository
+ValueService -- Value
+ListAllMeasurementsOfDeviceInPeriodController --- SensorFunctionalityMapperDTO
+}
+@enduml

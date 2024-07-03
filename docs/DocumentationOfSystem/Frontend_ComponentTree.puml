@@ -1,0 +1,51 @@
+@startmindmap
+'https://plantuml.com/mindmap-diagram
+
+top to bottom direction
+
+* <&globe>App
+** sidebar-menu
+*** MainPage
+**** DateTime
+**** Temperature
+**** Humidity
+**** Sunrise
+**** Sunset
+**** CopyRight
+**** Orbit
+*** Home
+*** Rooms
+**** RoomList
+***** RoomDevices
+****** AddNewSensor
+****** AddNewActuator
+****** DeviceMeasurements
+******* DateTimeRangeCalender
+******* Measurements
+***** AddNewDevice
+
+*** Devices
+**** HouseDevices
+***** BlindRollerDevices
+****** ManageBlindRoller
+***** DeviceMeasurements
+****** DateTimeRangeCalender
+****** Measurements
+***** AddNewSensor
+***** AddNewActuator
+** header
+** main-content-container
+*** MainPage
+**** DateTime
+**** Temperature
+**** Humidity
+**** Sunrise
+**** Sunset
+**** CopyRight
+**** Orbit
+
+
+
+
+
+@endmindmap

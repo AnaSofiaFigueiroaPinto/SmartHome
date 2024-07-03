@@ -1,0 +1,63 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title US34 - As a Room Owner [or Power User, or Administrator], I want to get the maximum instantaneous temperature difference between a device in the room and the outside, in a given period.
+
+autonumber
+!pragma teoz true
+box "<<SubSystem>>\n<<Container>>\n:Backend" #DarkGrey
+box " <<Component>>\n:Server" #LightGrey
+participant "MaxTempDifOutsideInsideController" as controller <<Component>>
+participant "sensorDTO:SensorDTO" as sensorDTO
+participant "insideSensorID:SensorID" as sensorID1
+participant "outsideSensorID:SensorID" as sensorID2
+participant "MaxTempDifOutsideInsideService" as service <<Component>>
+participant "ValueRepository" as valueRepo <<Component>>
+participant "value:Value" as value
+participant "reading:Reading" as reading
+end box
+end box
+
+note over controller: Get List<SensorDTO> of Temperature Type
+ref over controller
+[[docs/DocumentationOfSystem/UC34_2-ListTemperatureSensorsInDevice/UC34.2SequenceDiagram.svg]]
+end ref
+-> controller: getMaxTemperatureDifference(SensorDTO insideSensorDTO,\n SensorDTO outsideSensorDTO,Timestamp startTime, \nTimestamp  endTime)
+activate controller
+controller -> sensorDTO: sensorName
+activate sensorDTO
+sensorDTO --> controller: String sensorName
+deactivate sensorDTO
+controller --> sensorID1**: <<create>>
+controller --> sensorID2**: <<create>>
+controller -> service: getMaxTemperatureDifference(insideSensorID, outsideSensorID, \nTimestamp startTime, Timestamp  endTime)
+activate service
+service -> valueRepo: findBySensorId(insideSensorID)
+activate valueRepo
+valueRepo --> service: insideValues:List<Value>
+service -> valueRepo: findBySensorId(outsideSensorID)
+valueRepo --> service: outsideValues:List<Value>
+deactivate valueRepo
+loop for each Value in List
+    service -> value: getInstantTimeReading().getTime()
+    activate value
+    value --> service: insideTimestamp
+    deactivate value
+    alt if the insideTimestamp is within the given period
+    service -> service: continue
+    end
+    service -> value: getReading()
+    activate value
+    value -> reading: getValue();
+    activate reading
+    reading --> value: value
+    deactivate reading
+    value --> service: reading
+    deactivate value
+    service -> service: findClosestTemperature(outsideValues, insideTimestamp)
+end
+service -> service: maxDifference
+service --> controller: double maxDifference
+deactivate service
+<-- controller: double maxDifference
+deactivate controller
+@enduml

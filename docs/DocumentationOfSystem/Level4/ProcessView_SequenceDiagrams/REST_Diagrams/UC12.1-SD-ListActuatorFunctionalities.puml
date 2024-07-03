@@ -1,0 +1,69 @@
+@startuml
+
+autonumber
+
+title "UC12.1 List Actuator Functionalities."
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":ListActuatorFunctionalitiesController" as Controller <<Component>>
+participant "actuatorFunctionalityMapper\n:ActuatorFunctionalityMapperDTO" as FunctionalityMapperDTO
+participant ":ActuatorFunctionalityService" as FunctionalityService <<Component>>
+participant ":ActuatorFunctionalityRepository" as FunctionalityRepo <<Component>>
+participant "listOfActuatorFunctID\n:List<ActuatorFunctionalityID>" as ListID
+participant "actuatorFunctionality\n:ActuatorFunctionality" as ActuatorFunctionality
+participant "listOfActuatorFunctDTO\n:List<ActuatorFunctionalityDTO>" as ListDTO
+participant "actuatorFunctionalityDTO\n:ActuatorFunctionalityDTO" as FunctionalityDTO
+end box
+end box
+
+'SECTION FOR RETRIEVING AND EXTERNALIZING LIST OF FUNCTIONALITIES
+[o-> Router: GET api/actuatorfunctionality
+activate Router
+Router -> Controller: GET getListOfActuatorFunctionalities()
+activate Controller
+Controller --> FunctionalityMapperDTO**: <<create>>
+
+Controller -> FunctionalityService: getListOfActuatorFunctionalities()
+activate FunctionalityService
+FunctionalityService -> FunctionalityRepo: findAllEntities()
+activate FunctionalityRepo
+FunctionalityRepo --> FunctionalityService: Iterable<ActuatorFunctionality>
+deactivate FunctionalityRepo
+
+FunctionalityService -> ListID**: <<create>>
+loop for each Actuator Functionality in Iterable
+FunctionalityService -> ActuatorFunctionality: identity()
+activate ActuatorFunctionality
+ActuatorFunctionality --> FunctionalityService: actuatorFunctionalityID
+deactivate ActuatorFunctionality
+FunctionalityService -> ListID: add(actuatorFunctionalityID)
+activate ListID
+deactivate ListID
+end loop
+
+FunctionalityService --> Controller: listOfActuatorFunctID
+deactivate FunctionalityService
+Controller -> FunctionalityMapperDTO: actuatorFunctionalityToDTOList \n(listOfActuatorFunctID)
+activate FunctionalityMapperDTO
+FunctionalityMapperDTO --> ListDTO**: <<create>>
+loop for each ActuatorFunctionalityID in List
+
+FunctionalityMapperDTO -> FunctionalityMapperDTO: actuatorFunctionalityToDTO(actuatorFunctionalityID)
+FunctionalityMapperDTO --> FunctionalityDTO**: <<create>>
+FunctionalityMapperDTO -> ListDTO: add(actuatorFunctionalityDTO)
+activate ListDTO
+deactivate ListDTO
+end
+FunctionalityMapperDTO --> Controller: listOfActuatorFunctDTO
+deactivate FunctionalityMapperDTO
+
+Controller --> Router: collectionModel, HttpStatus.OK
+deactivate Controller
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+'END SECTION
+@enduml

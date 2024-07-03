@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC07.1 - Get List of Sensor Functionalities
+
+autonumber
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Get List of Sensor Functionalities
+activate server
+server->server: find all sensor functionalities
+[o<--server: List of sensor functionalities
+deactivate server
+@enduml

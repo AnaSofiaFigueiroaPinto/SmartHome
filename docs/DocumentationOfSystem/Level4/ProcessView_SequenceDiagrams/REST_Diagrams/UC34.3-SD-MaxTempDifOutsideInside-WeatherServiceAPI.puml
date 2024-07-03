@@ -1,0 +1,112 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title US34 - As a Room Owner [or Power User, or Administrator], I want to get the maximum instantaneous temperature difference between a device in the room and the outside, in a given period.
+
+
+!pragma teoz true
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+autonumber
+participant ":Router" as Router <<Component>>
+participant "HouseControllerWeb" as controller <<Component>>
+participant "insideSensorID:SensorID" as sensorID1
+participant "WeatherAPIService" as service <<Component>>
+participant "ValueRepository" as valueRepo <<Component>>
+participant ":ConfigScraper" as scraper <<Component>>
+participant ":HouseRepository" as repository <<Component>>
+participant ":House" as house <<Component>>
+participant ":Location" as location <<Component>>
+participant ":GPSCode" as gps <<Component>>
+participant ":WeatherAPIGateway" as gateway <<Component>>
+participant ":WeatherServiceDriver" as driver <<Component>>
+participant "Value" as value
+participant "Reading" as reading
+end box
+end box
+
+ref over controller
+[[docs/DocumentationOfSystem/UC34_2-ListTemperatureSensorsInDevice/UC34.2SequenceDiagram.svg]]
+end ref
+
+
+[o-> Router: GET /houses/{id}/rooms
+activate Router
+Router -> controller: maxTempDifOutsideInsideWeatherServiceAPI(@PathVariable String insideSensorIDString,\n@RequestParam LocalDateTime givenStart,\n@RequestParam LocalDateTime givenEnd)
+activate controller
+controller --> sensorID1**: <<create>>
+controller -> service: getMaxTemperatureDifference(insideSensorID,\nTimestamp startTime, Timestamp  endTime);
+activate service
+service -> valueRepo: findBySensorId(insideSensorID)
+activate valueRepo
+valueRepo --> service: insideValues:List<Value>
+
+deactivate valueRepo
+
+loop for each Value in List
+    service -> value**: getInstantTimeReading().getTime()
+    activate value
+    value --> service: insideTimestamp
+    deactivate value
+    alt if the insideTimestamp is within the given period
+    service -> service: continue
+    end
+    service -> service: insideTimestamp.toLocalDateTime().getHour();
+    service -> service: getTemperatureForHour\n(hour)
+    activate service
+    service -> service: defineGroupHouseLocation()
+    activate service
+    service -> scraper: loadGroupNumber()
+    activate scraper
+    scraper --> service: int groupNumber
+    deactivate scraper
+    service -> repository: findAllEntities()
+    activate repository
+    repository --> service: Iterable<House> houses
+    deactivate repository
+    service -> house**: houses.iterator().next()
+    activate house
+    house -> location**: getHouseLocation()
+    deactivate house
+    activate location
+    location -> gps**: getGpsCode()
+    deactivate location
+    activate gps
+    service -> gps: getLatitude()
+    gps --> service: double latitude
+    service -> gps: getLongitude()
+    gps --> service: double longitude
+    deactivate gps
+    deactivate service
+    service -> gateway: getInstantaneousTemperature\n(groupNumber, latitude, longitude, hour)
+    activate gateway
+    gateway -> driver: getForEntity\n(url, InstTemperatureDTO.class)
+    activate driver
+    driver ->o]: Request external Weather service
+    driver <--o]: Response from external Weather service
+    driver --> gateway: InstTemperatureDTO
+    deactivate driver
+    gateway --> service: InstTemperatureDTO
+    deactivate gateway
+    deactivate service
+    service -> value: getReading()
+    activate value
+    value -> reading**: getValue();
+    activate reading
+    reading --> value: value
+    deactivate reading
+    value --> service: reading
+    deactivate value
+    service -> service: InstTemperatureDTO.getMeasurement()
+    service -> service: Math.abs(insideTemperature - outsideTemperature);
+end
+
+service --> controller: double maxDifference
+deactivate service
+
+controller --> Router: maxDifference, HttpStatus.OK
+deactivate controller
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+@enduml

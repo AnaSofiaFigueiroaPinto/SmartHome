@@ -1,0 +1,70 @@
+@startuml
+title Use Case Diagram
+
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+
+skinparam  polyline
+
+:Power User: as PU
+
+UC03.1 as (UC03.1-ListRoomsInHouse)
+UC05 as (UC05-AddNewDeviceToRoom)
+UC06 as (UC06-ListAllDevicesInRoom)
+UC07.1 as (UC07.1-ListSensorFunctionalities)
+UC07.2 as (UC07.2-AddNewSensorToDevice)
+UC08 as (UC08-DeactivateDevice)
+UC09 as (UC09-ListAllDevicesInHouseByFunctionality)
+UC12.1 as (UC12.1-ListActuatorFunctionalities)
+UC12.2 as (UC12.2-AddNewActuatorToDevice)
+UC33 as (UC33-ListAllMeasurementsOfDeviceInPeriod)
+UC34.1 as (UC34.1-ListAllRoomsInsideOrOutsideOfHouse)
+UC34.2 as (UC34.2-ListTemperatureSensorsInDevice)
+UC34.3 as (UC34.3-MaxTempDifOutsideInside)
+UC36 as (UC36-GetPeakPowerConsumption)
+UC37.1 as (UC37.1-ListDevicesWithActuatorFunctByRoom)
+UC37.2 as (UC37.2-CloseBlindRollerDevice)
+
+
+
+PU --> UC05
+UC05 ..> UC03.1: <<includes>>
+
+
+PU --> UC06
+UC06 ..> UC03.1: <<includes>>
+
+PU --> UC07.2
+UC07.2 ..> UC06: <<includes>>
+UC07.2 ..> UC07.1: <<includes>>
+
+
+PU --> UC08
+UC08 ..> UC06: <<includes>>
+
+PU --> UC09
+
+UC06 ..> UC03.1: <<includes>>
+
+PU --> UC12.2
+UC12.2 ..> UC06: <<includes>>
+UC12.2 ..> UC12.1: <<includes>>
+
+
+PU --> UC33
+UC33 ..> UC03.1: <<includes>>
+UC33 ..> UC06: <<includes>>
+
+PU --> UC34.3
+UC34.1 ..> UC03.1: <<includes>>
+UC34.2 ..> UC06: <<includes>>
+UC34.2 ..> UC34.1: <<includes>>
+UC34.3 ..> UC34.2: <<includes>>
+
+PU --> UC36
+
+PU --> UC37.2
+UC37.2 ..> UC37.1: <<includes>>
+
+@enduml

@@ -1,0 +1,61 @@
+ @startuml
+title UC03.1 List Rooms of House
+
+skinparam linetype ortho
+package server #LightGray {
+
+class ListRoomsInHouseController {
+-roomService: RoomService
+-houseID: HouseID
++getListOfRoomsDTOInHouse(): List<RoomDTO>
+}
+
+class RoomMapperDTO {
++roomToDTO(RoomID roomID): RoomDTO
++roomIDsToDTOList(Iterable<RoomID> listOfRoomsIDs): List<RoomDTO>
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-width: double
+-length: double
+-height: double
+}
+
+interface RoomRepository <repo>{
++findAllEntities(): Iterable<Room>
+}
+
+class Room <root>{
+-roomName: RoomID
+-floorNumber: RoomFloor
+-dimensions: RoomDimensions
+-houseID: HouseID
+}
+
+class RoomService {
+-roomRepository: RoomRepository
+-factoryRoom: FactoryRoom
+-houseRepository: HouseRepository
++getListOfRoomsInHouse(HouseID houseID): List<RoomID>
+}
+
+class HouseID <VO>{
+-id: String
+}
+
+class HouseRepository <repo>{
++containsEntityByID(HouseID houseID): boolean
+}
+
+
+ListRoomsInHouseController -- RoomService
+RoomService ..> RoomMapperDTO: <<uses>>
+RoomRepository <. RoomService: <<uses>>
+RoomMapperDTO --  RoomDTO
+RoomRepository -- Room
+RoomService -- Room
+RoomService ..> HouseRepository: <<uses>>
+RoomService ..> HouseID: <<uses>>
+@enduml

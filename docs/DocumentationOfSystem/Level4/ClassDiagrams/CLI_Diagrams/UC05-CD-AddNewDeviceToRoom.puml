@@ -1,0 +1,72 @@
+@startuml
+title UC05 Add new device to room.
+skinparam linetype ortho
+
+package server #LightGray {
+class AddNewDeviceToRoomController {
+    - deviceService: DeviceService
+    + createDeviceAndSaveToRepository(RoomDTO roomDTO,\n String deviceName, String model) : DeviceDTO
+}
+class RoomDTO{
++roomName : String
+}
+class DeviceDTO{
++deviceName : String
+}
+class DeviceID <VO>{
+    - deviceName : String
+}
+class DeviceModel <VO>{
+    - model : String
+}
+class RoomID<VO>{
+    - deviceName : String
+}
+class DeviceService{
+-factoryDevice : FactoryDevice
+-roomRepository : RoomRepository
+-deviceRepository : DeviceRepository
++createDeviceAndSaveToRepository(DeviceID deviceID,\n DeviceModel deviceModel, RoomID roomID) : DeviceID
+}
+
+interface Repository{
++containsEntityByID(ID id) : boolean
+}
+
+interface DeviceRepository extends Repository {
++save(Device entity) : Device
+}
+
+interface RoomRepository extends Repository {
+}
+
+
+class Device <ROOT>{
+    - name : String
+    - deviceModel : DeviceModel
+    -deviceStatus : DeviceStatus
+    - roomId : RoomID
+}
+
+interface FactoryDevice {
+   +createDevice(DeviceID deviceID, DeviceModel  deviceModel,\n RoomID roomID) : Device
+}
+
+class ImpFactoryDevice implements FactoryDevice {
+    +createDevice(DeviceID deviceID, DeviceModel deviceModel,\n RoomID roomID) : Device
+
+}
+
+DeviceService -- AddNewDeviceToRoomController
+AddNewDeviceToRoomController ..> RoomDTO : <<uses>>
+AddNewDeviceToRoomController ..> DeviceDTO : <<creates>>
+AddNewDeviceToRoomController ..> DeviceID : <<creates>>
+AddNewDeviceToRoomController ..> DeviceModel : <<creates>>
+AddNewDeviceToRoomController ..> RoomID : <<creates>>
+DeviceService -- DeviceRepository
+DeviceService -- RoomRepository
+ImpFactoryDevice ..> Device : <<creates>>
+FactoryDevice -- DeviceService
+}
+@enduml
+

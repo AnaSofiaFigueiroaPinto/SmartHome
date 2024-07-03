@@ -1,0 +1,15 @@
+@startuml
+
+autonumber
+title UC07.1 - List Sensor Functionalities
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+[o-> Backend: get list of sensor functionalities
+activate Backend
+[o<--Backend: list of sensor functionalities
+deactivate Backend
+
+@enduml

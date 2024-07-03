@@ -1,0 +1,15 @@
+@startuml
+
+title UC01 - Configure House Location
+autonumber
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant ":Backend" as backend
+end box
+
+[o->backend: configure House Location
+activate backend
+[o<-- backend: House Location configured
+deactivate backend
+
+@enduml

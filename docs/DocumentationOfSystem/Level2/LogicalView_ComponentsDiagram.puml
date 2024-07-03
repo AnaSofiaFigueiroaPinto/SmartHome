@@ -1,0 +1,39 @@
+@startuml
+skinparam linetype ortho
+
+component :SmartHome <<System>> {
+
+    component ":Backend" <<Subsystem>> as BE {
+    }
+
+    component ":Frontend" <<Subsystem>> as FE {
+    }
+
+    port " " as P1
+    port " " as P2
+    port " " as P3
+    port " " as P4
+
+    P1 -[bold]- BE
+    P2 -[bold]- FE
+    P3 -[bold]- BE
+    P4 -[bold]- BE
+
+    BE -0)- FE
+}
+
+rectangle "WEB UI" as WEB
+rectangle "CLI" as CLI
+rectangle "REST API" as REST
+rectangle "Weather Service API" as WS
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #FFFFFF
+}
+
+P2 -[bold]up-0 WEB
+P1 -[bold]up-0 CLI
+P3 -[bold]up-( WS
+P4 -[bold]up-0 REST
+@enduml

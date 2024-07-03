@@ -1,0 +1,94 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US06 - As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+
+autonumber
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":ListRoomsInHouseController" as roomctrl <<Component>>
+participant ":ListAllDevicesInRoomController" as devicectrl <<Component>>
+participant "roomDTO:RoomDTO" as RoomDTO
+participant "roomID:RoomID" as RoomID
+participant ":DeviceService" as service <<Component>>
+participant ":RoomRepository" as RoomRepo <<Component>>
+participant ":DeviceRepository" as DeviceRepo <<Component>>
+participant "listOfDevicesInRoom \n:List<DeviceID>" as listOfDevicesInRoom
+participant "device:Device" as Device
+participant ":DeviceMapperDTO" as DeviceMapperDTO
+participant "listOfDevicesDTOInRoom \n:List<DeviceDTO>" as listOfDevicesDTOInRoom
+participant ":DeviceDTO" as DeviceDTO
+
+'SECTION 1: Get list of rooms in house'
+[o-> roomctrl: getListOfRoomsDTOInHouse()
+activate roomctrl
+ref over roomctrl
+[[docs/DocumentationOfSystem/UC03_1-ListRoomsOfHouse/UC03.1SequenceDiagram.puml]]
+end ref
+[o<-- roomctrl: List<RoomDTO>
+deactivate roomctrl
+
+'SECTION 2: Get list of devices in the selected room'
+'in controller'
+[o-> devicectrl: getListOfDevicesInRoom(roomDTO)
+activate devicectrl
+
+devicectrl -> RoomDTO: roomName
+activate RoomDTO
+RoomDTO --> devicectrl: String roomName
+deactivate RoomDTO
+
+devicectrl --> RoomID**: <<creates>>
+
+'in services'
+devicectrl -> service: getListOfDevicesInRoom(roomID)
+activate service
+
+service -> RoomRepo: containsEntityByID(roomID)
+activate RoomRepo
+RoomRepo --> service: true
+deactivate RoomRepo
+
+service -> DeviceRepo: findByRoomID(roomID)
+activate DeviceRepo
+DeviceRepo --> service: Iterable<Device>
+deactivate DeviceRepo
+
+service --> listOfDevicesInRoom**: <<creates>>
+
+loop for each Device in Iterable
+    service -> Device: identity()
+    activate Device
+    Device --> service: deviceID()
+    deactivate Device
+    service -> listOfDevicesInRoom: add(deviceID)
+end loop
+
+service --> devicectrl: listOfDevicesInRoom
+deactivate service
+
+'SECTION 2: Conversion to DTO'
+devicectrl -> DeviceMapperDTO: deviceIDsToDTOList(listOfDevicesInRoom)
+activate DeviceMapperDTO
+
+'in Mapper'
+DeviceMapperDTO --> listOfDevicesDTOInRoom**: <<creates>>
+
+loop for each DeviceID in listOfDevicesInRoom
+    DeviceMapperDTO -> DeviceMapperDTO: deviceIDsToDTO(deviceID)
+    DeviceMapperDTO --> DeviceDTO**: <<creates>>
+    DeviceMapperDTO -> listOfDevicesDTOInRoom: add(deviceDTO)
+    activate listOfDevicesDTOInRoom
+    deactivate listOfDevicesDTOInRoom
+end loop
+
+DeviceMapperDTO --> devicectrl: listOfDevicesDTOInRoom
+deactivate DeviceMapperDTO
+
+[o<-- devicectrl: listOfDevicesDTOInRoom
+deactivate devicectrl
+'END SECTION
+
+@enduml

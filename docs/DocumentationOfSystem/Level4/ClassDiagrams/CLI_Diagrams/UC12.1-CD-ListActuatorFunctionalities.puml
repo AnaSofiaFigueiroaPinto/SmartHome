@@ -1,0 +1,44 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam linetype ortho
+
+title "UC12.1 List Actuator Functionalities."
+
+package server #LightGray {
+class ListActuatorFunctionalitiesController {
+    -actuatorFunctionalityService: ActuatorFunctionalityService
+    +getListOfActuatorFunctionalities()
+}
+
+class ActuatorFunctionalityService {
+    -actuatorFunctionalityRepository: ActuatorFunctionalityRepository
+    +getListOfActuatorFunctionalities(): List<SensorFunctionalityID>
+}
+
+class ActuatorFunctionality <root> {
+    -actuatorFunctionalityID: ActuatorFunctionalityID
+    +identity(): ActuatorFunctionalityID
+}
+
+class ActuatorFunctionalityRepository <repo> {
+    +findAllEntities(): Iterable<ActuatorFunctionality>
+}
+
+class ActuatorFunctionalityMapperDTO {
+    +actuatorFunctionalityToDTO(ActuatorFunctionalityID actuatorFunctionalityID): \n ActuatorFunctionalityDTO
+    +actuatorFunctionalityToDTOList (List<ActuatorFunctionalityID> actuatorFunctionalitiesIDs): \n List<ActuatorFunctionalityDTO>
+}
+
+class ActuatorFunctionalityDTO{
+    +actuatorFunctionalityName : String
+ }
+}
+
+ListActuatorFunctionalitiesController -- ActuatorFunctionalityService
+ListActuatorFunctionalitiesController ..> ActuatorFunctionalityMapperDTO  : <<creates>>
+ActuatorFunctionalityService -- ActuatorFunctionalityRepository
+ActuatorFunctionalityService ..> ActuatorFunctionality : <<use>>
+ActuatorFunctionalityMapperDTO ..> ActuatorFunctionalityDTO  : <<creates>>
+
+@enduml

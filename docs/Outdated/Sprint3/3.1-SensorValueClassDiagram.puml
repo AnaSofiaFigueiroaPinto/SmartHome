@@ -1,0 +1,242 @@
+@startuml
+package sensors {
+    class BinaryStatusSensor {
+    -sensorName: String
+    -sensorFunctionality: \nSensorFunctionality
+    -value: Value
+    -factoryValue: FactoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n timestamp):String
+    }
+    BinaryStatusSensor -- FactoryValue
+
+    class DewPointCelsiusSensor {
+    -sensorName: String
+    -sensorFunctionality: SensorFunctionality
+    -value: Value
+    -factoryValue: FactoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(\nTimestamp dateAndTime,\n GPSCode gpsCode):String
+    }
+    DewPointCelsiusSensor -- FactoryValue
+
+    class ElectricEnergyConsumptionSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForPeriodOfTime(\nTimestamp startDate,\n Timestamp endDate):String
+    }
+    ElectricEnergyConsumptionSensor -- FactoryValue
+
+    class HumidityPercentageSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n specificTime):String
+    }
+    HumidityPercentageSensor -- FactoryValue
+
+    class PowerAverageSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForPeriodOfTime(\nTimestamp startDate,\n Timestamp endDate):String
+    }
+    PowerAverageSensor -- FactoryValue
+
+    class ScaleSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n date):String
+    }
+    ScaleSensor -- FactoryValue
+
+    class SolarIrradianceSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueAtSpecificTimeAndLocation(Timestamp\n dateAndTime, GPSCode gpsCode):String
+    }
+    SolarIrradianceSensor -- FactoryValue
+
+    class SpecificTimePowerConsumptionSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n specificTime):String
+    }
+    SpecificTimePowerConsumptionSensor -- FactoryValue
+
+    class SunriseSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueAtSpecificTimeAndLocation(Timestamp timestamp,\n GPSCode gpsCode):String
+    }
+    SunriseSensor -- FactoryValue
+
+    class SunsetSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp timestamp,\n GPSCode gpsCode):String
+    }
+    SunsetSensor -- FactoryValue
+
+    class TemperatureCelsiusSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n specificTime):String
+    }
+    TemperatureCelsiusSensor -- FactoryValue
+
+    class WindSpeedAndDirectionSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n specificTime):String
+    }
+    WindSpeedAndDirectionSensor -- FactoryValue
+
+
+
+    class FactoryValue {
+    +createValueSpecificTime (String className,\n Timestamp specificTime): Value
+    +createValuePeriodTime (String className,\n Timestamp start, Timestamp end): Value
+    +createValueTimeAndLocation (String className,\n Timestamp specificTime, GPSCode gpsCode): Value
+    }
+
+    interface Value  {
+    +getValueWithUnit():String
+    }
+
+    FactoryValue ..> Value:<<creates classes\n that implment>>
+
+
+
+
+    class BinaryStatusSensorValue implements Value {
+    -Timestamp timestamp
+    -String unit
+    +getValueWithUnit():String
+    }
+    BinaryStatusSensor -- BinaryStatusSensorValue: has
+
+    class DewPointCelsiusSensorValue implements Value {
+    -Timestamp dateAndTime
+    -GPSCode gpsCode
+    -String unit
+    +getValueWithUnit():String
+    }
+    DewPointCelsiusSensor -- DewPointCelsiusSensorValue: has
+
+    class ElectricEnergyConsumptionSensorValue implements Value {
+    -Timestamp startDate
+    -Timestamp endDate
+    -String unit
+    +getValueWithUnit():String
+    }
+    ElectricEnergyConsumptionSensor -- ElectricEnergyConsumptionSensorValue: has
+
+    class HumidityPercentageSensorValue implements Value {
+    -Timestamp readingInstant
+    -String unit
+    +getValueWithUnit():String
+    }
+    HumidityPercentageSensor -- HumidityPercentageSensorValue: has
+
+    class PowerAverageSensorValue implements Value {
+    -Timestamp startDate
+    -Timestamp endDate
+    -String unit
+    +getValueWithUnit():String
+    }
+    PowerAverageSensor -- PowerAverageSensorValue: has
+
+    class ScaleSensorValue implements Value {
+    -Timestamp date
+    -String unit
+    +getValueWithUnit():String
+    }
+    ScaleSensor -- ScaleSensorValue : has
+
+    class SolarIrradianceSensorValue implements Value {
+    -Timestamp dateAndTime
+    -GPSCode gpsCode
+    -String unit
+    +getValueWithUnit():String
+    }
+    SolarIrradianceSensor -- SolarIrradianceSensorValue: has
+
+    class SpecificTimePowerConsumptionSensorValue implements Value {
+    -Timestamp date
+    -String unit
+    +getValueWithUnit():String
+    }
+    SpecificTimePowerConsumptionSensor -- SpecificTimePowerConsumptionSensorValue: has
+
+    class SunriseSensorValue implements Value {
+    -Timestamp timestamp
+    -GPSCode gpsCode
+    -String unit
+    +getValueWithUnit():String
+    }
+    SunriseSensor -- SunriseSensorValue: has
+
+    class SunsetSensorValue implements Value {
+    -Timestamp timestamp
+    -GPSCode gpsCode
+    -String unit
+    +getValueWithUnit():String
+    }
+    SunsetSensor -- SunsetSensorValue: has
+
+    class WindSpeedAndDirectionSensorValue implements Value {
+    -Timestamp readingInstant
+    -String unit
+    +getValueWithUnit():String
+    }
+    WindSpeedAndDirectionSensor -- WindSpeedAndDirectionSensorValue: has
+
+    class TemperatureCelsiusSensorValue implements Value {
+        -Timestamp readingInstant
+        -String unit
+        +getValueWithUnit():String
+        }
+        TemperatureCelsiusSensor -- TemperatureCelsiusSensorValue : has
+}
+@enduml

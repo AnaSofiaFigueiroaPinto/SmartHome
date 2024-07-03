@@ -1,0 +1,17 @@
+@startuml
+
+skinparam sequenceMessageAlign center
+autonumber
+
+title UC07.2 - Add a sensor to an existing device in a room. \nThe sensor must be of a model of an existing type of sensor.
+
+box "  <<System>>\n:SmartHome" #LightGrey
+  participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+[o-> Backend : add sensor to device
+activate Backend
+[o<-- Backend : sensor added
+deactivate Backend
+
+@enduml

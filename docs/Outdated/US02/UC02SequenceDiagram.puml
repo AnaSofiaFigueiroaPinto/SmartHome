@@ -1,0 +1,53 @@
+@startuml
+
+title US02 - As an Administrator, I want to add a new room to the house, in order to configure it (name, house floor and dimensions).
+
+autonumber
+
+participant ":AddNewRoomToHouseController" as Controller
+participant ":House" as House
+participant ":RoomList" as RoomList
+participant ":Room" as Room
+participant ":Dimensions" as Dimensions
+
+-> Controller: createAndAddNewRoomToHouse(RoomDTO)
+activate Controller
+Controller -> House: createAndAddRoomToHouse(String RoomDTO.getRoomName, int RoomDTO.getFloorNumber, \n double RoomDTO.getLength, double RoomDTO.getWidth, double Room.getHeight)
+activate House
+House -> RoomList: createAndAddNewRoomToHouse(String roomName,\n int floorNumber, double length, double width, double height)
+activate RoomList
+RoomList -> RoomList: isRoomNameInRoomList(String roomName)
+alt Room is in RoomList
+    RoomList --> House: return false
+    House --> Controller: return false
+    <-- Controller: return false
+else Room is not in RoomList
+    RoomList --> Room**: request creation
+    activate Room
+    Room -> Room: validRoomArguments(String roomName): boolean
+    alt Room attributes are invalid
+        RoomList --> House: return false
+        House --> Controller: return false
+        <-- Controller: return false
+    else Room attributes are valid
+        Room --> Dimensions**: request creation
+        activate Dimensions
+        Dimensions -> Dimensions: validDimensionsArguments(double length, double width, double height): boolean
+        else Dimensions are invalid
+            RoomList --> House: return false
+            House --> Controller: return false
+            <-- Controller: return false
+        else Room attributes and Dimensions are valid
+            RoomList --> House: return true
+            House --> Controller: return true
+            <-- Controller: return true
+            deactivate Dimensions
+            deactivate Room
+            deactivate RoomList
+            deactivate House
+            deactivate Controller
+    end
+end
+
+
+@enduml

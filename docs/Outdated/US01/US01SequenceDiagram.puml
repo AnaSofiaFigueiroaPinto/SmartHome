@@ -1,0 +1,40 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US01 - As an Administrator, I want to configure the location of the house.
+
+autonumber
+
+participant ":ConfigureHouseLocationController" as US01Ctrl
+participant ":House" as House
+participant ":GPSCode" as GPSCode
+participant ":Location" as Location
+
+-> US01Ctrl: configureHouseLocation(LocationDTO locationDTO)
+activate US01Ctrl
+US01Ctrl -> House:  editLocation(String locationDTO.getStreet(), String locationDTO.getDoorNumber(), \n String locationDTO.getZipCode(), String locationDTO.getCity, String locationDTO.getCountry(), \n double locationDTO.getLatitude(), double locationDTO.getLongitude())
+
+
+activate House
+alt GPSCode attributes are invalid
+House --> GPSCode **: request creation
+House --> US01Ctrl: return false
+<-- US01Ctrl: return false
+
+else Location attributes are invalid
+
+House --> Location **: request creation
+House --> US01Ctrl: return false
+<-- US01Ctrl: return false
+
+else GPSCode and Location attributes are valid
+deactivate Location
+House --> US01Ctrl: return true
+
+
+<-- US01Ctrl: return true
+deactivate House
+end
+
+
+@enduml

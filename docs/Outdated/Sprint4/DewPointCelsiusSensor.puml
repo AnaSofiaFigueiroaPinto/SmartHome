@@ -1,0 +1,92 @@
+@startuml
+skinparam linetype ortho
+package repositories {
+}
+
+package domain {
+    package sensor {
+        class FactorySensor {
+            - FactoryValue factoryValue
+            + createSensor(sensorID, sensorFunctionalityID, deviceID): Sensor
+        }
+        interface Sensor {
+            + getSensorName(): String
+            + getSensorFunctionality(): SensorFunctionalityID
+            + getDeviceName(): DeviceID
+        }
+        interface Value {
+            + getValueWithUnit(): String
+        }
+        interface SensorSpecificTimeLocation extends Sensor {
+            + getValueForSpecificTime(Timestamp specificTime,\n GPSCode gpsCode): String
+        }
+        package DewPointCelsiusSensorAggregate {
+            class DewPointCelsiusSensor <Root> {
+                - SensorID sensorID
+                - SensorFunctionalityID sensorFunctionalityID
+                - DeviceID deviceID
+                - FactoryValue factoryValue
+                + getSensorName(): String
+                + getSensorFunctionality(): SensorFunctionalityID
+                + isSameAs(Object object): boolean
+                + getDeviceName(): DeviceID
+                + getValueAtSpecificTimeAndLocation(Timestamp specificTime,\n GPSCode gpsCode): String
+            }
+            DewPointCelsiusSensor ..|> SensorSpecificTimeLocation
+        }
+        FactorySensor ..> DewPointCelsiusSensor
+        class FactoryValue {
+            # createValueSpecificTime(String className, Timestamp specificTime, GPSCode gpsCode): Value
+        }
+        DewPointCelsiusSensor --> FactoryValue
+    }
+    package valueobjects {
+        class SensorID <VO> {
+            - sensorName: String
+            + getSensorName(): String
+            + equals(Object object): boolean
+        }
+        DewPointCelsiusSensor --> SensorID
+        class SensorFunctionalityID <VO> {
+            - sensorFunctionality: String
+            + equals(Object o): boolean
+            + toString(): String
+        }
+        DewPointCelsiusSensor --> SensorFunctionalityID
+        class DeviceID <VO> {
+            - deviceName: String
+            + equals(Object o): boolean
+            + hashCode(): int
+            + toString(): String
+            + getDeviceName(): String
+        }
+        DewPointCelsiusSensor --> DeviceID
+        package sensorvalues {
+            class DewPointCelsiusSensorValue <VO> {
+                - unit: String
+                - readingInstant: Timestamp
+                - gpsCode: GPSCode
+                + getValueWithUnit(): String
+                + equals(Object o): boolean
+                + toString(): String
+            }
+            FactoryValue ..> DewPointCelsiusSensorValue: <<creates>>
+            DewPointCelsiusSensorValue ..|> Value
+        }
+    }
+}
+
+
+package repositories {
+    class SensorRepository <repo> {
+        - Map<SensorID, Sensor> dataMap
+        + updateOrSave(Sensor entity): Sensor
+        + findAllEntities(): Iterable<Sensor>
+        + findEntityById(SensorID id): Optional<Sensor>
+        + containsEntityByID(SensorID id): boolean
+    }
+    SensorRepository ..> SensorID
+    SensorRepository ..> DewPointCelsiusSensor
+}
+
+@enduml

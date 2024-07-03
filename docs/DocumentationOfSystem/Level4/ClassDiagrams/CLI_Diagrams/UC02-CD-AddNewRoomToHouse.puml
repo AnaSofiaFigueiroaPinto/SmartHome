@@ -1,0 +1,86 @@
+@startuml
+title UC02: Add a new room to the house
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package server #LightGray {
+class AddNewRoomToHouseController {
+    -roomService: RoomService
+    -houseID: HouseID
+    +createRoomAndSaveInRepository(RoomDTO roomDTO): RoomDTO
+}
+
+class HouseID <VO>{
+    -houseIdentifier: String
+}
+
+class RoomDTO{
+    +roomName: String
+    +floorNumber: int
+    +length: double
+    +width: double
+    +height: double
+}
+
+interface RoomRepository <repo>{
+    +containsEntityByID (RoomID id): boolean
+    +save (Room room): Room
+}
+
+class Room <root>{
+    -houseID: HouseID
+    -roomID: RoomID
+    -roomFloor: RoomFloor
+    -roomDimensions: RoomDimensions
+    +identity(): RoomID
+}
+
+class RoomDimensions <VO>{
+    -length: double
+    -width: double
+    -height: double
+    +getLength(): double
+    +getWidth(): double
+    +getHeight(): double
+}
+
+class RoomID <VO>{
+    -roomName: String
+    +getRoomName(): String
+}
+
+class RoomFloor <VO>{
+    -floorNumber: int
+    +getFloorNumber(): int
+}
+
+class RoomService {
+-roomRepository: RoomRepository
+-factoryRoom: FactoryRoom
+-houseRepository: HouseRepository
++createRoomAndSave(RoomID roomID, RoomFloor roomFloor, \n RoomDimensions roomDimensions, HouseID houseID): RoomID
+}
+
+
+interface FactoryRoom <factory>{
+    +createRoom(RoomID roomID, RoomFloor floorNumber,\n RoomDimensions roomDimensions, HouseID houseID): Room
+}
+
+interface HouseRepository <repo>{
+    +containsEntityByID(HouseID houseID): boolean
+}
+
+}
+
+AddNewRoomToHouseController ..> HouseID: <<creates>>
+AddNewRoomToHouseController ..> RoomID: <<creates>>
+AddNewRoomToHouseController ..> RoomFloor: <<creates>>
+AddNewRoomToHouseController ..> RoomDimensions: <<creates>>
+AddNewRoomToHouseController ..> RoomDTO: <<creates>>
+AddNewRoomToHouseController --- RoomService
+RoomService -- RoomRepository
+RoomService -- HouseRepository
+RoomService -- FactoryRoom
+FactoryRoom ..> Room: <<creates>>
+
+@enduml

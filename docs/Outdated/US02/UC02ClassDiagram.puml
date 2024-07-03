@@ -1,0 +1,57 @@
+@startuml
+title US02: As an Administrator, I want to add a new room to the house, in order to configure it (name, house floor and dimensions).
+'https://plantuml.com/class-diagram
+
+class AddNewRoomToHouseController {
+-house: House
++addRoomToHouse(RoomDTO roomDTO): boolean
+}
+
+class RoomDTO {
+-roomName: String
+-floor: int
+-length: double
+-width: double
+-height: double
++getName(): String
++getFloor(): int
++getLength(): double
++getWidth(): double
++getHeight(): double
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++createAndAddRoomToHouse(String roomName, int floorNumber, double width, double length, double height): boolean
+}
+
+class RoomList {
+-roomList: List<Room>
++createAndAddRoomToHouse(String roomName, int floorNumber, double width, double length, double height): boolean
++isRoomNameInRoomList(String roomName): boolean
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
+-validRoomArguments(): boolean
+}
+
+class Dimensions {
+-length: double
+-width: double
+-height: double
+-validDimensionsArguments(): boolean
+}
+
+AddNewRoomToHouseController -- House
+AddNewRoomToHouseController -- RoomDTO
+House "1" *-- "1" RoomList
+RoomList "1" *-- "0..*" Room
+Room "1" *-- "1" Dimensions
+
+
+@enduml

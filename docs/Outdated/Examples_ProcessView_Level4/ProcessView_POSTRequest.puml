@@ -1,0 +1,44 @@
+@startuml
+title POST Request
+autonumber
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+
+box "<<Container>>\n:Server"
+participant ":Controller" as controller <<Component>>
+participant "dto:DTO" as dto
+participant "vo:ValueObject" as vo
+participant ":Service" as service <<Component>>
+participant "domain:Domain" as domain <<Component>>
+participant ":Repository" as repo <<Component>>
+end box
+autonumber
+[o-> controller : POST /Request
+activate controller
+controller->vo** : create VOs from Request
+controller->service : addNewObjectToOtherObject(VOs)
+activate service
+service-> domain** : createObjectAndSaveToRepository(VOs)
+service->repo : save(Object)
+activate repo
+repo-->service : ObjectID
+deactivate repo
+service-->controller : return ObjectID
+deactivate service
+controller -> dto** : convert ObjectID to DTO
+[o<--controller : return ObjectDTO
+
+legend bottom
+  **This request can be included in:**
+  |= Request POST |= Response |
+  |= api/rooms (UC02) |= RoomDTO |
+  |= api/devices (UC05) |= DeviceDTO|
+  |= api/sensors (UC07.2) |= SensorDTO|
+  |= api/actuators (UC12.2) |= ActuatorDTO|
+end legend
+@endum

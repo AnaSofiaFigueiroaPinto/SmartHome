@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC07.2 - Add New Sensor To Device
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+
+end box
+
+[o->server: Add new Sensor to Device
+activate server
+server->server: check if sensor exists
+
+server->server: save sensor
+
+[o<--server: New sensor added
+deactivate server
+@enduml

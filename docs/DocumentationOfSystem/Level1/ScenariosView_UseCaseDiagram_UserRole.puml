@@ -1,0 +1,16 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+
+skinparam  polyline
+
+:User: as U
+
+UC38 as (UC38-ListSunHours)
+UC39 as (UC39-GetCurrentOutsideTemperature)
+
+U--> UC38
+U--> UC39
+
+@enduml

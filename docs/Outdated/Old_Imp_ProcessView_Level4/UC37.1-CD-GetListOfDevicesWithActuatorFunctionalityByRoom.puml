@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+title UC37.1: Get list of Devices with Actuator Functionality by Room
+
+class DeviceControllerWeb{
+    -closeBlindRollerService: CloseBlindRollerService
+    -roomMapper: RoomMapper
+    -deviceMapper: DeviceMapper
+    +getMapOfDeviceIDAndRoomIDAccordingToFunctionality(String actuatorFunctionalityID): Map<DeviceDTO, RoomDTO>
+    -convertToDTO(Map<DeviceID, RoomID> mapOfDeviceIDAndRoomID): Map<DeviceDTO, RoomDTO>
+}
+
+class ActuatorFunctionalityID <VO> {
+    -actuatorFunctionalityID: String
+}
+
+class CloseBlindRollerService{
+    - deviceRepository: DeviceRepository´
+    - actuatorRepository: ActuatorRepository
+    +getMapOfDeviceIDAndRoomIDAccordingToFunctionality\n(ActuatorFunctionalityID actuatorFunctionalityID): Map<DeviceID, RoomID>
+}
+
+class DeviceID <VO> {
+    -deviceID: String
+}
+
+class RoomID <VO> {
+    -roomID: String
+}
+
+interface ActuatorRepository{
+    +findByActuatorFunctionality(ActuatorFunctionalityID actuatorFunctionalityID): Iterable<Actuator>
+}
+
+class Actuator {
+     -actuatorID: ActuatorID
+     -actuatorProperties: ActuatorProperties
+     -deviceName: DeviceID
+     -actuatorFunctionalityID: ActuatorFunctionalityID
+     +getDeviceName(): DeviceID
+    }
+
+interface DeviceRepository{
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+class Device {
+    -deviceID: DeviceID
+    -deviceModel: DeviceModel
+    -deviceStatus: DeviceStatus
+    -roomID: RoomID
+    +identity(): DeviceID
+    +getRoomID(): RoomID
+}
+
+
+DeviceControllerWeb --> ActuatorFunctionalityID: <<creates>>
+DeviceControllerWeb -- CloseBlindRollerService
+CloseBlindRollerService -- ActuatorRepository
+CloseBlindRollerService -- DeviceRepository
+CloseBlindRollerService --> RoomID: <<uses>>
+CloseBlindRollerService --> DeviceID: <<uses>>
+ActuatorRepository -- Actuator
+DeviceRepository -- Device
+@enduml

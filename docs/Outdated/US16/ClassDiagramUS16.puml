@@ -1,0 +1,52 @@
+ClassDiagramUS16.puml@startuml
+title US16: As Product Owner, I want the system to have a type of actuator that sets a decimal value in the range defined by [lower limit, upper limit] and predefined precision.
+'https://plantuml.com/class-diagram
+
+interface Actuator {
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
+}
+
+interface ActuatorSpecificDecimal extends Actuator {
++ setDecimalValue(double value): boolean
+}
+
+class DecimalSetterActuator implements ActuatorSpecificDecimal {
+-actuatorName: String
+-actuatorFunctionality: ActuatorFunctionality
+-actuatorProperties: ActuatorProperties
+-targetValue: double
+-validConstructorArguments(String actuatorName, ActuatorProperties actuatorProperties): boolean
++getTargetValue(): double
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
++setDecimalValue(double newValue): boolean
+}
+
+class ActuatorProperties{
+-upperLimitInt: int
+-lowerLimitInt: int
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+-validConstructorArguments(int upperLimitInt, int lowerLimitInt): boolean
+-validConstructorsArgumentsDecimal(double upperLimitDecimal, double lowerLimitDecimal, int precision): boolean
++getUpperLimitInt(): int
++getLowerLimitInt(): int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+enum ActuatorFunctionality {
+    BINARY_SWITCH,
+    PERCENTAGE_SETTER,
+    INTEGER_SETTER,
+    DECIMAL_SETTER
+    }
+
+DecimalSetterActuator - ActuatorFunctionality: has
+DecimalSetterActuator -- ActuatorProperties: has
+
+
+@enduml

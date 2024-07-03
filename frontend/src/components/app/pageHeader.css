@@ -1,0 +1,29 @@
+/* pageHeader.css */
+.AppBar {
+    background-color: transparent;
+}
+
+.toolbar {
+    padding-right: 24px;
+}
+
+.menu-icon {
+    margin-right: 36px;
+    color: inherit; /* Cor do ícone */
+}
+
+.title {
+    flex-grow: 1;
+}
+
+.notification-icon {
+    margin-left: auto;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: transparent;
+    padding: 8px;
+}

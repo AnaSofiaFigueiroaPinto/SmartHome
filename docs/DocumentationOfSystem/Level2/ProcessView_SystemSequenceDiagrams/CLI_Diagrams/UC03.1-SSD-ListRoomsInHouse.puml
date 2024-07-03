@@ -1,0 +1,15 @@
+@startuml
+
+autonumber
+title UC03.1 - List Rooms In House
+
+box "  <<System>>\nSmartHome " #LightGrey
+participant ":Backend" as Backend
+end box
+
+[o-> Backend: get list of rooms
+activate Backend
+[o<-- Backend:  list of rooms
+deactivate Backend
+
+@enduml

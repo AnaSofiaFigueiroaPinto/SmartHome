@@ -1,0 +1,58 @@
+@startuml
+title US05v2: As a Power User [or Administrator], I want to add a new device to a room, in order to configure it.
+'https://plantuml.com/class-diagram
+
+class AddNewDeviceToRoomController {
+-house: House
++createNewDeviceAndAddToRoom(RoomDTO roomDTO, String deviceName): boolean
+}
+class RoomMapper{
++Map<RoomDTO, Room> roomToDTO(RoomList roomlist): RoomsDTOAndRooms
++roomToDTO(Room room): RoomDTO
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-width: double
+-length: double
+-height: double
++RoomDTO(Room room)
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++getRoomList(): RoomList
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
++createDeviceAndAddToRoom(String deviceName): Device
+}
+
+class DeviceList {
+-deviceList: List<Device>
++createDeviceAndAddToDeviceList(String deviceName): Device
++isDeviceNameInDeviceList(String deviceName): boolean
+}
+
+class Device {
+-deviceName: String
+-sensorList: List<Sensor>
+-status: Status
+-validDeviceArguments(): boolean
+}
+
+AddNewDeviceToRoomController - RoomMapper
+RoomMapper - RoomDTO
+AddNewDeviceToRoomController -- House
+AddNewDeviceToRoomController -- Room
+
+Room "1" *- "1" DeviceList
+DeviceList "1" *-- "0..*"Device
+
+@enduml

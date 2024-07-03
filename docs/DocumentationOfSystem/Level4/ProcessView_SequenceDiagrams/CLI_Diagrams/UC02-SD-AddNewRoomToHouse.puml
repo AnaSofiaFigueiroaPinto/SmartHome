@@ -1,0 +1,78 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+!pragma teoz true
+
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+participant ":AddNewRoomToHouseController" as controller <<Component>>
+participant "roomDTO:RoomDTO" as roomDTO
+participant "houseID:HouseID" as houseID
+participant "roomID:RoomID" as roomID
+participant "roomFloor:RoomFloor" as roomFloor
+participant "roomDimensions:RoomDimensions" as roomDimensions
+participant ":RoomService" as RoomService <<Component>>
+participant ":HouseRepository" as HouseRepository <<Component>>
+participant ":FactoryRoom" as FactoryRoom <<Component>>
+participant ":RoomRepository" as RoomRepository <<Component>>
+participant "room:Room" as Room
+participant "newRomDTO:RoomDTO" as roomDTO2
+end box
+end box
+
+[o-> controller: createRoomAndSaveInRepository\n(RoomDTO roomDTO)
+activate controller
+controller -> roomDTO: roomName
+activate roomDTO
+roomDTO --> controller: String roomName
+controller --> roomID** : <<create>>
+controller -> roomDTO: floorNumber
+roomDTO --> controller: int floorNumber
+controller --> roomFloor**: <<create>>
+controller -> roomDTO: roomLength
+roomDTO --> controller: double roomLength
+controller -> roomDTO: roomWidth
+roomDTO --> controller: double roomWidth
+controller -> roomDTO: roomHeight
+roomDTO --> controller: double roomHeight
+deactivate roomDTO
+controller --> roomDimensions**: <<create>>
+
+controller -> RoomService: createRoomAndSave(roomID, roomFloor, roomDimensions, houseID)
+activate RoomService
+RoomService -> HouseRepository: containsEntityByID(houseID)
+activate HouseRepository
+HouseRepository --> RoomService: true
+deactivate HouseRepository
+
+RoomService --> FactoryRoom: createRoom(roomID, roomFloor, roomDimensions, houseID)
+activate FactoryRoom
+FactoryRoom --> RoomService: room
+deactivate FactoryRoom
+
+RoomService -> RoomRepository: containsEntityByID(roomID)
+activate RoomRepository
+RoomRepository --> RoomService: false
+deactivate RoomRepository
+
+RoomService -> RoomRepository: save(room)
+activate RoomRepository
+RoomRepository --> RoomService: room saved
+deactivate RoomRepository
+
+RoomService --> Room: identity()
+activate Room
+Room --> RoomService: roomID
+deactivate Room
+
+RoomService --> controller: roomID
+deactivate RoomService
+
+controller --> roomDTO2**: <<create>>
+[o<-- controller: roomDTO2
+deactivate controller
+
+
+
+@enduml

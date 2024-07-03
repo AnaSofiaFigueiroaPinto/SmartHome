@@ -1,0 +1,88 @@
+@startuml
+title UC37.2 - Close Blind Roller Device
+
+autonumber
+
+participant ":DeviceControllerWeb" as deviceCTRL
+participant "chosenDevice:DeviceID" as device
+participant "chosenSensorFunctionality:\nSensorFunctionalityID" as functionality
+participant ":DeviceService" as deviceService
+participant ":CloseBlindRollerService" as closeBlindRollerService
+participant ":DeviceRepository" as deviceRepo
+participant "blindRollerDevice:\nDevice" as deviceObject
+participant ":SensorRepository" as sensorRepo
+participant "listOfSensorsOfDevice:Iterable<Sensor>" as iterable
+participant ":InstantTimeValueRepository" as valueRepo
+participant "lastValue:\nValue" as value
+participant "lastReading:\nReading" as reading
+participant ":ActuatorRepo" as actuatorRepo
+participant ":Actuator" as actuator
+participant "chosenActuator:\nBlindSetterActuator" as chosenActuator
+
+-> deviceCTRL: closeBlindRollerDevice\n(@PathVariable("id") String deviceID,\n@RequestParam String sensorFunctionalityID, \n@RequestParam int closePercentage )
+activate deviceCTRL
+deviceCTRL -> device** : <<create>
+deviceCTRL -> functionality** : <<create>
+deviceCTRL -> deviceService: checkIfDeviceIsActive(chosenDevice)
+activate deviceService
+deviceService -> deviceRepo : findEntityByID(chosenDevice)
+activate deviceRepo
+deviceRepo --> deviceService : blindRollerDevice:Optional<Device>
+deactivate deviceRepo
+deviceService -> deviceObject** : getDeviceStatus()
+activate deviceObject
+deviceObject --> deviceService : ACTIVE : boolean
+deactivate deviceObject
+deviceService --> deviceCTRL : true
+deactivate deviceService
+
+deviceCTRL -> closeBlindRollerService : getBlindSetterActuatorFromDeviceAndChangeStatus (chosenDevice, chosenSensorFunctionality\n, closePercentage)
+activate closeBlindRollerService
+closeBlindRollerService -> sensorRepo: findByDeviceIDAndSensorFunctionality\n(chosenDevice, chosenSensorFunctionality)
+activate sensorRepo
+sensorRepo --> closeBlindRollerService: listOfSensorsOfDevice:Iterable<Sensor>
+deactivate sensorRepo
+closeBlindRollerService -> iterable** : iterator().next().identity()
+activate iterable
+iterable --> closeBlindRollerService: scaleSensorID:sensorID
+deactivate iterable
+closeBlindRollerService -> valueRepo: findLastValueRecorded(scaleSensorID)
+activate valueRepo
+valueRepo -> closeBlindRollerService: lastValue: Value
+deactivate valueRepo
+closeBlindRollerService -> value** : getReading()
+activate value
+value --> closeBlindRollerService : lastReading:Reading
+deactivate value
+closeBlindRollerService -> reading**: getMeasurement()
+activate reading
+reading --> closeBlindRollerService: measurement:String
+deactivate reading
+closeBlindRollerService -> closeBlindRollerService: parseInt(measurement) < closePercentage: boolean
+deactivate closeBlindRollerService
+closeBlindRollerService -> closeBlindRollerService: getBlindSetterActuatorFromDevice(chosenDevice)
+activate closeBlindRollerService
+closeBlindRollerService -> actuatorRepo: findByDeviceID(chosenDevice)
+activate actuatorRepo
+actuatorRepo --> closeBlindRollerService: actuatorOfDevice:Iterable<Actuator>
+deactivate actuatorRepo
+loop For each actuator
+closeBlindRollerService -> actuator** : getActuatorFunctionality()
+activate actuator
+actuator --> closeBlindRollerService: ActuatorFunctionalityID
+deactivate actuator
+closeBlindRollerService -> chosenActuator** : ActuatorFunctionalityID.equals("BlindSetter"): BlindSetterActuator
+
+end loop
+closeBlindRollerService -> chosenActuator: setActuatorSpecificValue(closePercentage)
+activate chosenActuator
+chosenActuator --> closeBlindRollerService: boolean true
+deactivate chosenActuator
+
+closeBlindRollerService --> deviceCTRL: boolean true
+deactivate closeBlindRollerService
+<-- deviceCTRL: boolean true, ResponseEntity.OK
+deactivate deviceCTRL
+
+
+@enduml

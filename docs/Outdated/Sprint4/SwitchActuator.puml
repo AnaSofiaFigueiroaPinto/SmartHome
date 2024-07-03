@@ -1,0 +1,91 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+package domain{
+package actuator {
+interface Actuator
+
+class ActuatorFactory{
++createActuator(): Actuator
+}
+
+interface Actuator{
++getActuatorFunctionality(): ActuatorFunctionality
++getDeviceName(): DeviceID
+
+}
+interface ActuatorSpecificInteger extends Actuator{
++setActuatorSpecificValue (int specificInteger) : boolean
+}
+package SwitchActuatorAggregate{
+class SwitchActuator {
+-actuatorName : ActuatorID
+-actuatorProperties: ActuatorProperties
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-status: SwitchActuatorStatus
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++getDeviceName(): DeviceID
++setActuatorSpecificValue(int specificValue): boolean
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+}
+ActuatorFactory --> Actuator: <<creates>>
+
+}
+package valueobject{
+class ActuatorID <VO>{
+-actuatorName: String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
+
+}
+class ActuatorProperties<VO>{
+}
+Enum SwitchActuatorStatus <VO>{
+    ON,
+    OFF
+}
+
+class ActuatorFunctionalityID <VO>{
+-actuatorFunctionalityName : String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
+ }
+
+class DeviceID <VO> {
+- deviceName: String
++ equals(Object o): boolean
++ hashCode(): int
++ toString(): String
++ getDeviceName(): String
+}
+}
+
+SwitchActuator  -->  ActuatorProperties
+SwitchActuator  --> ActuatorID
+SwitchActuator  --> DeviceID
+SwitchActuator  -->  SwitchActuatorStatus
+SwitchActuator  -->  ActuatorFunctionalityID
+SwitchActuator  ..|> ActuatorSpecificInteger
+}
+package repositories{
+
+class ActuatorRepository {
+-HashMap: Map<ActuatorID, Actuator>
++addAndSaveActuator(Actuator entity): Actuator
++findAllActuators(): Iterable<Actuator>
++findActuatorById(ActuatorID id): Optional<Actuator>
++containsActuatorById(ActuatorID id): boolean
+}
+ActuatorRepository ..> ActuatorID
+ActuatorRepository ..> SwitchActuatorAggregate
+}
+@enduml
+
+
+

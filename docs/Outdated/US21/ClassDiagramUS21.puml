@@ -1,0 +1,57 @@
+@startuml
+title US21: As Product Owner, I want the system to have a type of sensor that gives the sunset instant for a given calendar date.
+'https://plantuml.com/class-diagram
+
+interface Sensor {
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
+}
+
+interface SensorSpecificTimeLocation extends Sensor{
++getValueAtSpecificTimeAndLocation\n(Timestamp dateAndTime, GPSCode gpsCode): String
+}
+
+class SunsetSensor implements SensorSpecificTimeLocation{
+-sensorName: String
+-sensorFunctionality: SensorFunctionality
+-factoryValue: FactoryValue
+-value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueAtSpecificTimeAndLocation\n(Timestamp dateAndTime, GPSCode gpsCode): String
+}
+
+class FactoryValue {
++createValueTimeAndLocation(): Value
+}
+
+enum SensorFunctionality {
+    TEMPERATURE,
+    HUMIDITY,
+    BINARY_STATUS,
+    SCALE_POSITION,
+    WIND,
+    SUNRISE,
+    SUNSET,
+    DEW_POINT,
+    SOLAR_RADIATION,
+    POWER,
+    ENERGY
+    }
+
+class SunsetSensorValue implements Value{
+-unit: String
+-timestamp: Timestamp
+-gpsCode: GPSCode
++getValueWithUnit(): String
+}
+
+interface Value {
++getValueWithUnit(): String
+}
+
+FactoryValue - SunsetSensor: has
+FactoryValue ..> SunsetSensorValue: <<creates>>
+SunsetSensor - SensorFunctionality: has
+SunsetSensor -- SunsetSensorValue: has
+@enduml

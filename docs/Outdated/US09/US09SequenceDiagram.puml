@@ -1,0 +1,104 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US09 - As a Power User [or Administrator], I want to get a list of all devices in a house, \n grouped by device functionality types. It must include device location.
+
+autonumber
+
+participant ":ListAllDevicesInRoomByFunctionalityController" as US09Controller
+participant ":House" as House
+participant ":Room" as Room
+participant ":Device" as Device
+participant ":Sensor" as Sensor
+participant ":SensorTypeMapper" as sensorTypeMapper
+participant ":DeviceMapper" as deviceMapper
+participant ":RoomMapper" as roomMapper
+participant ":SensorTypeDTO" as sensorTypeDTO
+participant ":DeviceDTO" as deviceDTO
+participant ":RoomDTO" as roomDTO
+
+ -> US09Controller: getListOfAllDevicesInHouseByFunctionality()
+activate US09Controller
+
+
+US09Controller -> House: getListOfAllDevicesInHouseGroupedByFunctionality()
+loop for each sensorType
+loop for each room
+activate House
+
+
+
+House -> Room: getListOfDevicesOfSpecificFunctionality(sensorType)
+activate Room
+loop for each device
+Room -> Device: doesDeviceHaveSensorsOfSpecificSensorType(sensorType)
+activate Device
+
+alt if sensorList is empty
+Room <-- Device: return false
+loop for each sensor
+Device -> Sensor: getSensorType()
+activate Sensor
+Device <-- Sensor: sensorType
+deactivate Sensor
+alt if sensor is of specific sensorType
+
+
+Room <-- Device: return true
+Room -> Room: add Device to list
+
+end loop
+else device does not have sensors of specific sensorType
+Room <-- Device: return false
+end alt
+
+deactivate Device
+
+end loop
+
+House <-- Room: listOfDevicesOfSpecificFunctionality
+deactivate Room
+
+House -> House: Add to map (Device, Room)
+
+
+end loop
+end loop
+
+US09Controller <-- House: Map<SensorType, Map<Device, Room>>
+deactivate House
+
+loop for each Entry in <SensorType, Map<Device, Room>>
+US09Controller -> sensorTypeMapper: sensorTypeToDTO(sensorType)
+activate sensorTypeMapper
+sensorTypeMapper -> sensorTypeDTO: sensorType
+activate sensorTypeDTO
+sensorTypeDTO --> sensorTypeMapper: SensorTypeDTO
+deactivate sensorTypeDTO
+sensorTypeMapper --> US09Controller: SensorTypeDTO
+deactivate sensorTypeMapper
+
+loop for each Entry in <Device, Room>
+US09Controller -> deviceMapper: deviceToDTO(device)
+activate deviceMapper
+deviceMapper -> deviceDTO: device
+activate deviceDTO
+deviceDTO --> deviceMapper: deviceDTO
+deactivate deviceDTO
+deviceMapper --> US09Controller: DeviceDTO
+deactivate deviceMapper
+US09Controller -> roomMapper: roomToDTO(room)
+activate roomMapper
+roomMapper -> roomDTO: room
+activate roomDTO
+roomDTO --> roomMapper: roomDTO
+deactivate roomDTO
+roomMapper --> US09Controller: RoomDTO
+deactivate roomMapper
+end loop
+end loop
+
+ <-- US09Controller: Map<SensorTypeDTO, Map<DeviceDTO, RoomDTO>>
+ deactivate US09Controller
+
+@enduml

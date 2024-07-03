@@ -1,0 +1,99 @@
+@startuml
+title UC09 - Get a list of all devices in a house, grouped by device functionality types. It must include device location.
+
+autonumber
+
+!pragma teoz true
+
+box " <<SubSystem>>\n  <<Container>>\n    :Backend " #DarkGrey
+box " <<Component>>\n    :Server" #LightGrey
+
+participant ":HouseControllerWeb" as US09Ctrl <<Component>>
+participant ":ListAllDevicesInHouseByFunctionalityService" as HouseService <<Component>>
+participant "mainActuatorMap:\nMap<ActuatorFuntionalityID, \nMap<RoomID, DeviceID>>" as mainActuatorMap
+participant ":ActuatorRepository" as ActuatorRepository <<Component>>
+participant ":MapperActuatorDataModel" as MapperActuatorDataModel <<Component>>
+participant "actuator:Actuator" as Actuator
+participant ":DeviceRepository" as DeviceRepository <<Component>>
+participant ":MapperDeviceDataModel" as MapperDeviceDataModel <<Component>>
+participant "device:Device" as Device
+participant "mainMap:Map<Object, \nMap<RoomID, DeviceID>>" as mainMap
+participant ":DB Driver" as DBDriver <<Component>>
+end box
+end box
+
+activate US09Ctrl
+activate HouseService
+ref over HouseService
+     UC09-SD-ListAllDevicesInHouseByFunctionality-1
+     end ref
+
+'SECTION 1: ITERATE THROUGH ACTUATORS AND GROUP SENSORS BY FUNCTIONALITY'
+HouseService -> HouseService: actuatorFunctionalityMap()
+    activate HouseService
+    HouseService --> mainActuatorMap**: <<creates>>
+    HouseService -> ActuatorRepository: findAllEntities()
+    activate ActuatorRepository
+    ActuatorRepository -> DBDriver: findAll()
+            activate DBDriver
+            DBDriver ->o]: DATABASE QUERY
+            DBDriver <--o]: QUERY RESPONSE
+            DBDriver --> ActuatorRepository: Iterable<ActuatorDataModel> actuatorListDataModel
+            deactivate DBDriver
+            ActuatorRepository -> MapperActuatorDataModel: toDomainList(factoryActuator, actuatorListDataModel)
+            activate MapperActuatorDataModel
+            MapperActuatorDataModel --> ActuatorRepository: Iterable<Actuator> actuatorList
+            deactivate MapperActuatorDataModel
+    ActuatorRepository --> HouseService: Iterable<Actuator> actuatorList
+    deactivate ActuatorRepository
+    'SECTION 3.1: LOOPING THROUGH EACH ACTUATOR'
+    loop for each Actuator in actuators
+        HouseService -> Actuator: getActuatorFunctionalityID()
+        activate Actuator
+        Actuator --> HouseService: ActuatorFunctionalityID actuatorFunctionalityID
+        HouseService -> Actuator: getDeviceID()
+        Actuator --> HouseService: DeviceID deviceID
+        deactivate Actuator
+        HouseService -> DeviceRepository: findEntityByID(deviceID)
+        activate DeviceRepository
+        DeviceRepository -> DBDriver: findByID(deviceID)
+                activate DBDriver
+                DBDriver ->o]: DATABASE QUERY
+                DBDriver <--o]: QUERY RESPONSE
+                DBDriver --> DeviceRepository: DeviceDataModel deviceDataModel
+                deactivate DBDriver
+                DeviceRepository -> MapperDeviceDataModel: toDomain(factoryDevice, deviceDataModel)
+                activate MapperDeviceDataModel
+                MapperDeviceDataModel --> DeviceRepository: device
+                deactivate MapperDeviceDataModel
+        DeviceRepository --> HouseService: device
+        deactivate DeviceRepository
+        HouseService -> Device: getRoomID()
+        activate Device
+        Device --> HouseService: RoomID roomID
+        deactivate Device
+        note over HouseService: On Step <b>25</b> make sure not to overwrite\n Map key and value if they already exist.
+        HouseService -> mainActuatorMap: add (actuatorFunctionalityID, roomID, deviceID)
+        activate mainActuatorMap
+        deactivate mainActuatorMap
+    end
+HouseService --> HouseService: mainActuatorMap
+deactivate HouseService
+'END SECTION'
+
+'SECTION 4: MERGE SENSOR AND ACTUATOR MAPS AND PUT ALL DATA INTO MAIN MAP'
+HouseService --> mainMap**: <<creates>>
+    HouseService -> mainMap: putAll(mainSensorMap)
+    activate mainMap
+
+    HouseService -> mainMap: putAll(mainActuatorMap
+    deactivate mainMap
+HouseService --> US09Ctrl: mainMap
+deactivate HouseService
+deactivate US09Ctrl
+ref over US09Ctrl
+     UC09-SD-ListAllDevicesInHouseByFunctionality-3
+     end ref
+'END SECTION
+
+@enduml

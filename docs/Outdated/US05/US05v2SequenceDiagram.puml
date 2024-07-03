@@ -1,0 +1,57 @@
+     @startuml
+      'https://plantuml.com/sequence-diagram
+
+  title US05v2 - As a Power User [or Administrator], I want to add a new device to a room, in order to configure it.
+      autonumber
+
+      participant ":AddNewDeviceToRoomController" as US05v2Controller
+      participant ":Room" as Room
+      participant ":DeviceList" as DeviceList
+      participant ":Device" as Device
+
+      -> US05v2Controller: getRoomList()
+   activate US05v2Controller
+   ref over US05v2Controller
+   US03.1SequenceDiagram
+   end ref
+  <-- US05v2Controller: List<RoomDTO>
+
+      -> US05v2Controller: createDeviceAndAddToRoom\n(RoomDTO roomDTO, String deviceName)
+US05v2Controller -> US05v2Controller: get.(RoomDTO roomDTO)
+    US05v2Controller -> Room: createDeviceAndAddToRoom\n(String deviceName)
+    activate Room
+      Room -> DeviceList: createDeviceAndAddToDeviceList\n(String deviceName)
+  activate DeviceList
+      DeviceList -> DeviceList: isDeviceNameInDeviceList(deviceName)
+      alt device name already in list
+                 DeviceList --> Room: return null
+
+
+                 Room --> US05v2Controller: return null
+
+
+                 <--US05v2Controller : return false
+
+ else device attributes are invalid
+           DeviceList --> Device **: <<creates>>
+
+
+          DeviceList --> Room: return null
+
+          Room --> US05v2Controller: return null
+
+          <--US05v2Controller : return false
+
+      else device attributes are valid
+
+
+
+
+             DeviceList --> Room: return Device
+             deactivate DeviceList
+             Room --> US05v2Controller : return Device
+             <--US05v2Controller : return true
+             deactivate US05v2Controller
+      end
+
+      @enduml

@@ -1,0 +1,99 @@
+@startuml
+
+title US36 - As a Power User or Administrator, I want to get the peak power \n consumption of the house, in a given period. The house has a device acting as the grid \n power meter and may have several devices metering power sources (e.g. solar panel array).
+skinparam linetype ortho
+package server #LightGray {
+interface ValueRepository {
+    +findBySensorIdBetweenPeriodOfTime(sensorID: SensorID, start: Timestamp, end: Timestamp): List<Value>
+}
+
+interface InstantTimeValueRepository extends ValueRepository {
+}
+
+interface PeriodTimeValueRepository extends ValueRepository {
+}
+
+class InstantValueRepositoryMem implements InstantTimeValueRepository {
+    - Map<ValueID, Value> valueMap
+    +findBySensorIdBetweenPeriodOfTime(sensorID: SensorID, start: Timestamp, end: Timestamp): List<Value>
+}
+
+class PeriodTimeValueRepositoryMem implements PeriodTimeValueRepository {
+    - Map<ValueID, Value> valueMap
+    +findBySensorIdBetweenPeriodOfTime(sensorID: SensorID, start: Timestamp, end: Timestamp): List<Value>
+}
+
+class HouseControllerWeb {
+ -houseService: HouseService
+  -houseID: HouseID
+  -roomService: RoomService
+  -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+  -roomMapperDTO: RoomMapperDTO
+  -deviceMapperDTO: DeviceMapperDTO
+  -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+  -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+  -valueService: ValueService
+  +GET getPeakPower(start: Timestamp, end: Timestamp): ResponseEntity<Double>
+}
+
+class ValueService {
+SensorRepository sensorRepository,
+   -sensorFunctionalityRepository : SensorFunctionalityRepository
+   -instantTimeValueRepository : InstantTimeValueRepository
+   -periodTimeValueRepository : PeriodTimeValueRepository
+   -instantTimeLocationValueRepository :  InstantTimeLocationValueRepository
+   -configScraper : ConfigScraper
+   -CONFIG_PROPERTIES : String
+   + getPeakPowerConsumption(startPeriod: Timestamp, endPeriod: Timestamp): ResponseEntity<>(double, HttpStatus.OK);
+   - calculatePeakPowerConsumption(listOfPowerGridValues: List<Value>, mapOfPowerSourcesValues: Map<DeviceID, Map<Timestamp, InstantTimeValue>>): double
+}
+
+class SensorRepository {
+    + findByDeviceID(deviceID: DeviceID): List<Sensor>
+    + findBySensorFunctionality(sensorFunctionalityID: SensorFunctionalityID): List<Sensor>
+}
+
+class ValueID {
+    - id: ValueID
+    - sensorID: SensorID
+    - timestamp: Timestamp
+    - value: double
+    + getReading(): Reading
+}
+
+class Sensor {
+    - id: SensorID
+    - deviceID: DeviceID
+    - sensorFunctionalityID: SensorFunctionalityID
+}
+
+class ConfigScraper {
+    + loadGridPowerMeterID(): String
+}
+
+class SensorFunctionalityID {
+    - id: String
+    + getId(): String
+}
+
+class DeviceID {
+    - id: String
+    + getId(): String
+}
+}
+
+HouseControllerWeb -- ValueService
+ValueService ..> SensorRepository : <<uses>>
+ValueService ..> PeriodTimeValueRepository : <<uses>>
+ValueService ..> InstantTimeValueRepository : <<uses>>
+ValueService ..> ConfigScraper : <<uses>>
+ValueService ..> DeviceID : <<uses>>
+ValueService ..> SensorFunctionalityID : <<uses>>
+
+ValueID --> Sensor
+
+Sensor -- DeviceID
+Sensor -- SensorFunctionalityID
+
+@enduml
+

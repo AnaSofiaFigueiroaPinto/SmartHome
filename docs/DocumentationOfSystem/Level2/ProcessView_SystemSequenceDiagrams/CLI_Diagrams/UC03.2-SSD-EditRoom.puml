@@ -1,0 +1,16 @@
+@startuml
+
+title UC03.2 - Edit Room
+
+autonumber
+
+box "  <<System>>\n:SmartHome"
+participant "<<Subsystem>>\n:Backend" as backend
+end box
+
+[o-> backend : edit Room
+activate backend
+[o<--backend: room edited
+deactivate backend
+
+@enduml

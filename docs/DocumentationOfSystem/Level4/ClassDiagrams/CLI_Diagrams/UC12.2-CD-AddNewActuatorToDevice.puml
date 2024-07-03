@@ -1,0 +1,116 @@
+@startuml
+skinparam linetype ortho
+
+title UC12.2 - Add new Actuator to Device
+
+package server #LightGray {
+
+interface DeviceRepository <repo>{
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+class AddNewActuatorToDeviceController {
+    -actuatorService: ActuatorService
+    +createActuatorAndSaveToRepository\n (ActuatorDTO actuatorDTO): ActuatorDTO
+}
+
+class ActuatorDTO {
+    +actuatorName: String
+    +actuatorFunctionalityName: String
+    +deviceName: String
+    +upperLimitInt: int
+    +lowerLimitInt: int
+    +upperLimitDecimal: double
+    +lowerLimitDecimal: double
+    +precision: int
+}
+
+ class AssemblerActuatorProperties {
+     +createActuatorPropertiesFromActuatorDTO(ActuatorDTO actuatorDTO): \n ActuatorProperties
+  }
+
+class ActuatorService {
+    -factoryActuator: FactoryActuator
+    -actuatorRepository: ActuatorRepository
+    -deviceRepository: DeviceRepo
+    -actuatorFunctionalityRepository: ActuatorFunctionalityRepository
+    +createActuatorAndSave \n(ActuatorFunctionalityID actuatorFunctionalityID, \n ActuatorID actuatorID, \n ActuatorProperties actuatorProperties, \n DeviceID deviceID): ActuatorID
+}
+
+class FactoryActuator <factory>{
+    +createActuator(ActuatorFunctionalityID actuatorFunctionalityID, \n ActuatorID actuatorID, ActuatorProperties actuatorProperties, \n DeviceID deviceID, String actuatorClass): Actuator
+}
+
+abstract class Actuator <root>{
+-actuatorName: ActuatorID
+-actuatorFunctionalityID: ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-deviceName: DeviceID
+}
+
+interface ActuatorRepository <repo>{
+    +containsEntityByID(ActuatorID actuatorID): boolean
+    +save(Actuator actuator): Actuator
+}
+
+interface ActuatorFunctionalityRepository <repo>{
+    +getClassNameForActuatorFunctionalityID \n(ActuatorFunctionalityID actuatorFunctionalityID): \nString class
+}
+
+class ActuatorID <VO>{
+    -actuatorID : String
+}
+
+class DeviceID <VO>{
+    -deviceID : String
+}
+
+class ActuatorFunctionalityID <VO>{
+    - actuatorFunctionalityID : String
+}
+
+class ActuatorProperties <VO>{
+    -rangeInt: RangeInt
+    -rangeDecimal: RangeDecimal
+    +getRangeInt(): RangeInt
+    +getRangeDecimal(): RangeDecimal
+}
+
+class RangeInt <VO>{
+    -upperLimitInt: int
+    -lowerLimitInt: int
+}
+
+class RangeDecimal  <VO>{
+    -upperLimitDecimal: double
+    -lowerLimitDecimal: double
+    -precision: int
+}
+
+AddNewActuatorToDeviceController ..> ActuatorID: <<creates>>
+AddNewActuatorToDeviceController ..> ActuatorFunctionalityID: <<creates>>
+AddNewActuatorToDeviceController ..> DeviceID: <<creates>>
+AddNewActuatorToDeviceController ..> ActuatorDTO: <<uses/creates>>
+
+AddNewActuatorToDeviceController ..> AssemblerActuatorProperties: <<uses>>
+AddNewActuatorToDeviceController - ActuatorService
+
+AssemblerActuatorProperties ..> ActuatorProperties: <<creates>>
+
+ActuatorService -- FactoryActuator
+ActuatorService -- ActuatorRepository
+ActuatorService - DeviceRepository
+ActuatorService -- ActuatorFunctionalityRepository
+
+FactoryActuator ..> Actuator: <<creates>>
+
+Actuator -- ActuatorID
+Actuator - ActuatorFunctionalityID
+Actuator -- DeviceID
+
+ActuatorProperties --> RangeInt
+ActuatorProperties --> RangeDecimal
+
+Actuator  --  ActuatorProperties
+
+@enduml

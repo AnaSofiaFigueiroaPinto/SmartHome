@@ -1,0 +1,21 @@
+@startuml
+title Sprint 1 Use Cases
+
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+
+:Administrator: as Admin
+
+UC01 as (Configure location)
+UC02 as (Add and configure Room)
+UC03.1 as (Access list of rooms)
+UC03.2 as (Edit Room)
+
+Admin --> UC01
+Admin --> UC02
+Admin --> UC03.1
+Admin --> UC03.2
+UC03.2 ..> UC03.1: <<includes>>
+
+@enduml

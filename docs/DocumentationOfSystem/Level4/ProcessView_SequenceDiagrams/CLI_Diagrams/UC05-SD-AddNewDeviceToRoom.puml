@@ -1,0 +1,75 @@
+@startuml
+
+autonumber
+title UC05 Add new device to room.
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":AddNewDeviceToRoomController" as Controller <<Component>>
+participant "deviceDTO:DeviceDTO" as deviceDTO
+participant "deviceID:DeviceID" as deviceID
+participant "deviceModel:DeviceModel" as deviceModel <<Component>>
+participant "roomDTO:RoomDTO" as roomDTO
+participant "roomID:RoomID" as roomID
+participant ":DeviceService" as DeviceService <<Component>>
+participant ":RoomRepository" as RoomRepository <<Component>>
+participant ":DeviceRepository" as DeviceRepository <<Component>>
+participant ":FactoryDevice" as Factory <<Component>>
+participant "device:Device" as Device
+
+'SECTION FOR GETTING THE LIST OF ROOMS IN A HOUSE
+[o-> Controller: getListOfRoomsDTO()
+activate Controller
+ref over Controller
+[[docs/DocumentationOfSystem/UC03_1-ListRoomsOfHouse/UC03.1SequenceDiagram.puml]]
+end ref
+[o<-- Controller: List<RoomDTO>
+'END SECTION
+
+'SECTION FOR CREATING A DEVICE
+== Create Device object for a given Room ==
+[o-> Controller: createDeviceAndSaveToRepository(roomDTO, \n deviceName, model)
+Controller --> deviceID** : <<create>>
+Controller --> deviceModel** : <<create>>
+Controller -> roomDTO : roomName
+activate roomDTO
+roomDTO --> Controller: String roomName
+deactivate roomDTO
+Controller --> roomID** : <<create>>
+Controller -> DeviceService: createDeviceAndSaveToRepository(roomID, \n deviceID, deviceModel)
+activate DeviceService
+
+DeviceService -> RoomRepository: containsEntityByID(roomID)
+activate RoomRepository
+RoomRepository --> DeviceService: true
+deactivate RoomRepository
+DeviceService -> DeviceRepository: containsEntityByID(deviceID)
+activate DeviceRepository
+DeviceRepository --> DeviceService: false
+deactivate DeviceRepository
+DeviceService -> Factory: createDevice(deviceID, deviceModel, roomID)
+activate Factory
+Factory -> Device**: <<creates>>
+
+Factory --> DeviceService: Device
+deactivate Factory
+DeviceService -> DeviceRepository: save(device)
+activate DeviceRepository
+DeviceRepository --> DeviceService: Device
+deactivate DeviceRepository
+DeviceService -> Device: identity()
+activate Device
+Device --> DeviceService: DeviceID
+deactivate Device
+
+
+DeviceService --> Controller: DeviceID
+deactivate DeviceService
+Controller --> deviceDTO** : <<create>>
+[o<-- Controller: DeviceDTO
+deactivate Controller
+
+'END SECTION
+@enduml

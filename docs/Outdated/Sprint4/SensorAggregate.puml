@@ -1,0 +1,88 @@
+@startuml
+skinparam linetype polyline
+package ddd {
+    interface ValueObject {
+    }
+
+    interface DomainEntity extends DomainID {
+        + identity():ID
+        + isSameAs(Object object):boolean
+    }
+
+    interface AggreagateRoot extends DomainEntity{
+    }
+
+    interface DomainID  extends ValueObject {
+    }
+
+    interface Repository extends AggreagateRoot {
+
+    }
+    interface RepositoryReadWrite extends Repository {
+        + updateOrSave(T entity): T
+        + findAllEntities(): Iterable<T>
+        + findEntityByID(ID id): Optional<T>
+        + containsEntityByID(ID id): boolean
+    }
+}
+
+
+
+package domain {
+
+    package valueobjects {
+        class SensorID <VO> {
+            - sensorName: String
+            + getSensorName(): String
+            + equals(Object object): boolean
+        }
+
+        SensorID ....|> DomainID
+    }
+
+    package sensor {
+    note "Sensor is an instance\n of the classes that\n implement the interfaces\n extended by this interface.\n\ne.g: SunsetSensor can be\n created by SensorFactory as\n a Sensor object." as NOTE1
+
+        class FactorySensor {
+            +createSensor(String className,\n String sensorName): Sensor
+        }
+
+        interface Sensor {
+            +getSensorID(): SensorID
+            +getSensorFunctionality():\nSensorFunctionality
+        }
+        AggreagateRoot <|-----right- Sensor
+
+        object SensorAggregateCont  {
+        Diagram continues in file
+        }
+        Sensor <.> SensorAggregateCont
+
+
+
+        FactorySensor ..> Sensor : <<creates classes\n that implement>>
+
+        Sensor -left- NOTE1
+
+
+    }
+
+
+}
+
+package repositories {
+    class SensorRepository <repo> {
+        - dataMap: Map<SensorID, Sensor>
+        + updateOrSave(Sensor entity): Sensor
+        + findAllEntities(): Iterable<Sensor>
+        + findEntityByID(SensorID id): Optional<Sensor>
+        + containsEntityByID(SensorID id): boolean
+    }
+    RepositoryReadWrite <|.right. SensorRepository
+    SensorRepository .left.> SensorID
+    SensorRepository .left.> Sensor
+
+}
+
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml
+
+autonumber
+title UC03.2 Edit Room
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":EditRoomController" as controller <<Component>>
+participant "roomDTO:RoomDTO" as roomDTO1
+participant "roomID:RoomID" as roomID
+participant "roomFloor:RoomFloor" as roomFloor
+participant "roomDimensions:RoomDimensions" as roomDimensions
+participant ":RoomService" as services <<Component>>
+participant ":RoomRepository" as repository <<Component>>
+participant "room:Room" as room
+participant "roomDTO:RoomDTO" as roomDTO2
+
+
+
+[o-> controller: editSelectedRoomAndSaveInRepository\n(RoomDTO roomDTO)
+activate controller
+controller -> roomDTO1: roomName
+activate roomDTO1
+roomDTO1 --> controller: String roomName
+controller --> roomID**: <<create>>
+controller -> roomDTO1: floorNumber
+roomDTO1 --> controller: int floorNumber
+controller --> roomFloor**: <<create>>
+controller -> roomDTO1: length
+roomDTO1 --> controller: double length
+controller -> roomDTO1: width
+roomDTO1 --> controller: double width
+controller -> roomDTO1: height
+roomDTO1 --> controller: double height
+deactivate roomDTO1
+controller --> roomDimensions**: <<create>>
+
+controller -> services: editRoomAndSave\n(roomID, roomFloor, roomDimensions)
+activate services
+services -> repository: findEntityByID(roomID);
+activate repository
+repository --> services: roomToEdit
+deactivate repository
+alt if all parameters are valid
+services -> room: editRoom(roomFloor, roomDimensions)
+activate room
+room --> services: roomToEdit
+deactivate room
+services -> repository: save(roomToEdit)
+activate repository
+repository --> services: roomToEdit
+deactivate repository
+services -> room: identity()
+activate room
+room --> services: roomToEditID
+deactivate room
+end
+services --> controller: roomToEditID
+deactivate services
+controller -> roomDTO1: roomEditedID
+activate roomDTO1
+roomDTO1 --> controller: String roomEditedID
+controller -> roomDTO1: floorNumber
+roomDTO1 --> controller: int floorNumber
+controller -> roomDTO1: length
+roomDTO1 --> controller: double length
+controller -> roomDTO1: width
+roomDTO1 --> controller: double width
+controller -> roomDTO1: height
+roomDTO1 --> controller: double height
+deactivate roomDTO1
+controller --> roomDTO2**: <<creates>>
+deactivate services
+[o<- controller: roomDTO
+deactivate controller
+@enduml

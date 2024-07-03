@@ -1,0 +1,15 @@
+@startuml
+
+title UC02 - Add a new room to the house
+autonumber
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant ":Backend" as Backend
+end box
+
+[o-> Backend: add a new room to the house
+activate Backend
+[o<-- Backend: room added to the house
+deactivate Backend
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+title UC36 - Get Peak Power consumption of the House in a given period
+
+autonumber
+
+participant "PeakPowerService" as service
+participant "mapOfPowerSourcesValues:\nMap<DeviceID,Map<Timestamp, InstantTimeValue>>" as mapOfPowerSourcesValues
+
+ref over service : UC36-SD_Part1-GetPeakPowerConsumption
+-> service : calculatePeakPowerConsumption\n(powerGridValues, mapOfPowerSourcesValues)
+activate service
+
+
+note over service: For each PowerGrid Value, find PowerSource Values\n that are within the end Time of the PowerGrid Value\n and the defined cadence.\n The peakPowerConsumption Value is tracked in the \n peakPowerConsumption variable.
+
+loop for each Value in powerGridValues
+    service -> mapOfPowerSourcesValues : values()
+    activate mapOfPowerSourcesValues
+    mapOfPowerSourcesValues --> service : Map<Timestamp, InstantTimeValue>\n mapOfValuesPerDevice
+    deactivate mapOfPowerSourcesValues
+
+    service -> service : totalConsumption = Value.getReading().getMeasurement())
+
+    loop for each mapOfValuesPerDevice.values()
+        loop for each Entry in mapOfValuesPerDevice.values()
+        note over service: If PowerSource Value is within the end Time of the PowerGrid Value\n and the defined cadence,\n add the consumption to the totalConsumption
+            opt if Timestamp NOT before startTime && NOT after endTime
+                service -> service : totalConsumption += Double.parseDouble(Entry.getValue().getReading().getMeasurement())
+            end
+        end
+    end
+
+    service -> service : peakPowerConsumption = Math.max(peakPowerConsumption, totalConsumption)
+
+end
+
+<-- service : peakPowerConsumption
+deactivate service
+ref over service : UC36-SD_Part1-GetPeakPowerConsumption
+@enduml

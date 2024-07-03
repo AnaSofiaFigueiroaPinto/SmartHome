@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title "As a Power User [or Administrator], I want to add an actuator to an existing device in a room. \nThe actuator must be of a model of an existing type of actuator."
+participant ":AddNewActuatorToDeviceController" as US12Controller
+participant ":Device" as Device
+participant ":ActuatorCatalogue" as Catalogue
+participant "actuator:Actuator" as Actuator
+
+-> US12Controller: addActuatorToDevice(...)
+activate US12Controller
+US12Controller -> Device: createActuatorAndAddToDevice(...)
+activate Device
+Device -> Catalogue: createActuatorFromCatalogue(...)
+activate Catalogue
+Catalogue --> Actuator**: <<creates>>
+
+Catalogue --> Device: Actuator
+deactivate Catalogue
+Device --> US12Controller: Actuator
+deactivate Device
+<-- US12Controller: true
+deactivate US12Controller
+
+
+@enduml

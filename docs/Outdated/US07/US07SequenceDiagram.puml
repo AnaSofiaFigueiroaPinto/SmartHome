@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title "As a Power User [or Administrator], I want to add a sensor to an existing device in a room. The sensor must be of a model of an existing type of sensor."
+
+participant ":AddNewSensorToDeviceController" as US07Controller
+participant ":SensorCatalogue" as Catalogue
+participant ":RoomMapper" as RoomMapper
+participant ":Device" as Device
+participant "<<interface>>:Sensor" as Sensor
+
+
+
+-> US07Controller: getRoomList()
+activate US07Controller
+ref over US07Controller
+US06SequenceDiagram
+end ref
+<-- US07Controller: deviceListDTO
+
+-> US07Controller: getCatalogueOfAvailableSensorClasses()
+US07Controller -> Catalogue: getSensorClasses()
+activate Catalogue
+Catalogue --> US07Controller: List<String>
+deactivate Catalogue
+<-- US07Controller: List<String>
+
+
+-> US07Controller: addSensorToDevice(DeviceDTO deviceDTO, String sensorClass, String sensorName)
+US07Controller -> US07Controller: get.(DeviceDTO deviceDTO)
+
+
+US07Controller -> Device: createSensorAndAddToDevice(String sensorName, SensorCatalogue sensorClass, String sensorClass)
+activate Device
+Device --> Sensor**: <<create>>
+alt Sensor is added
+Device --> US07Controller: true
+<-- US07Controller: true
+else Sensor is not added
+Device --> US07Controller: false
+<-- US07Controller: false
+end
+
+
+@enduml

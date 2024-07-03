@@ -1,0 +1,60 @@
+ @startuml
+title US03: As an Administrator, I want to have a list of existing rooms, so that I can choose one to edit it.
+'https://plantuml.com/class-diagram
+
+class ListAndEditRoomController {
+-house: House
+-roomsDTOandRooms: Map<RoomDTO, Room>
++getRoomListDTO: List<RoomDTO>
++editRoom(String currentRoomName, RoomDTO roomDTO): boolean
+}
+
+class RoomMapper {
++roomToDTO(Room): RoomDTO
++roomToDTO(RoomList): Map<RoomDTO, Room>
+}
+
+class RoomDTO {
+-getRoomName: String
+-getFloorNumber: int
+-getWidth: double
+-getLength: double
+-getHeight: double
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++getRoomList(): RoomList
+}
+
+class RoomList {
+-roomList: List<Room>
++getRoomByName(String roomName): Room
++isRoomNameInRoomList(String roomName): boolean
++editRoomConfiguration: Room
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
+-validRoomArguments(): boolean
+}
+
+class Dimensions {
+-width: double
+-length: double
+-height: double
+-validDimensionsArguments(): boolean
+}
+
+ListAndEditRoomController -- House
+ListAndEditRoomController -- RoomMapper
+House "1" *-- "1" RoomList
+RoomMapper --  RoomDTO
+RoomList "1" *-- "0..*" Room
+Room "1" *-- "1" Dimensions
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml
+skinparam linetype ortho
+
+title UC7.2 - Add new Sensor to Device
+
+package server #LightGray {
+
+interface DeviceRepository <repo>{
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+class DeviceDTO {
+ +deviceName : String
+ +model : String
+ +deviceStatus : String
+ +roomName : String
+}
+
+class SensorDTO {
+ +sensorName: String
+ +deviceID: String
+ +functionalityID: String
+}
+
+class AddNewSensorToDeviceController {
+    -sensorService : SensorService
+    +createSensorAndSaveToRepository(DeviceDTO deviceDTO, \nString sensorName, String sensorFunctionality): SensorDTO
+}
+
+interface SensorFunctionalityRepository <repo>{
+    +getClassNameForSensorFunctionalityID \n(sensorFunctionalityID): String
+}
+
+class SensorService {
+    -sensorFactory : SensorFactory
+    -sensorRepository : SensorRepository
+    -deviceRepository : DeviceRepository
+    -sensorFunctionalityRepository : SensorFunctionalityRepository
+    +createSensorAndSave(DeviceID deviceID, \nSensorFunctionalityID sensorFunctionalityID, SensorID sensorID)
+}
+
+class FactorySensor <factory>{
+    +createSensor(SensorID sensorID, DeviceID deviceID, \nSensorFunctionalityID sensorFunctionalityID, String sensorClass): Sensor
+}
+
+abstract class Sensor <root>{
+-sensorID : SensorID
+-deviceID : DeviceID
+-sensorFunctionalityID : SensorFunctionalityID
++identity(): SensorID
+}
+
+Sensor -- SensorFunctionalityID
+Sensor -- DeviceID
+Sensor -- SensorID
+
+interface SensorRepository <repo>{
+    +containsEntityByID(SensorID sensorID): boolean
+    +save(Sensor sensor): Sensor
+}
+
+class SensorID <VO>{
+    -sensorID : String
+}
+
+class DeviceID <VO>{
+- deviceID : String
+}
+
+class SensorFunctionalityID <VO>{
+- sensorFunctionalityID : String
+}
+
+
+AddNewSensorToDeviceController ..> DeviceDTO  : <<uses>>
+AddNewSensorToDeviceController ..> SensorDTO  : <<creates>>
+AddNewSensorToDeviceController ..> SensorID  : <<creates>>
+AddNewSensorToDeviceController ..> SensorFunctionalityID  : <<creates>>
+AddNewSensorToDeviceController ..> DeviceID  : <<creates>>
+AddNewSensorToDeviceController - SensorService
+SensorService - DeviceRepository
+SensorService -- SensorFunctionalityRepository
+SensorService -- FactorySensor
+SensorService -- SensorRepository
+FactorySensor ..> Sensor: <<creates>>
+}
+@enduml

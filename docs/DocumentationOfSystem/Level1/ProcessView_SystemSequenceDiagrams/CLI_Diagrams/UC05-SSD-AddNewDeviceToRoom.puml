@@ -1,0 +1,14 @@
+@startuml
+
+autonumber
+title UC05 - Add a new device to a room
+
+Actor User
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome : create device and save to repository
+activate SmartHome
+User <--SmartHome:  device created
+deactivate SmartHome
+
+@enduml

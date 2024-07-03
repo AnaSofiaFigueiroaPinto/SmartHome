@@ -1,0 +1,48 @@
+@startuml
+title US13: As Product Owner, I want the system to have a type of actuator that switches a load ON/OFF.
+'https://plantuml.com/class-diagram
+
+interface Actuator {
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
+}
+
+interface ActuatorSpecificInteger extends Actuator{
++setActuatorSpecificValue(int specificInteger) : boolean
+}
+
+class SwitchActuator implements ActuatorSpecificInteger {
+-actuatorName: String
+-actuatorType: ActuatorFunctionality
+-status: Status
+-actuatorProperties: ActuatorProperties
++getActuatorName() : String
++getActuatorFunctionality() : ActuatorFunctionality
++setActuatorSpecificValue(int specificInteger) : boolean
+}
+
+enum ActuatorFunctionality {
+  BINARY_SWITCH,
+  PERCENTAGE_SETTER,
+  INTEGER_SETTER,
+  DECIMAL_SETTER
+}
+
+class ActuatorProperties{
+-upperLimitInt: int
+-lowerLimitInt: int
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+-validConstructorArguments(int upperLimitInt, int lowerLimitInt): boolean
+-validConstructorsArgumentsDecimal(double upperLimitDecimal, double lowerLimitDecimal, int precision): boolean
++getUpperLimitInt(): int
++getLowerLimitInt(): int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+ActuatorFunctionality - SwitchActuator: has
+SwitchActuator -- ActuatorProperties
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+title Get list of Objects
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+
+box "<<Container>>\n:Server"
+participant ":Controller" as controller <<Component>>
+participant "vo:ValueObject" as vo
+participant ":MapperDTO" as mapperDTO <<Component>>
+participant "dto:DTO" as dto
+participant ":Service" as service <<Component>>
+participant ":Repository" as repo <<Component>>
+autonumber
+[o-> controller : Get list of Objects
+activate controller
+controller->vo** : create VO
+controller->service : getListOfObjects(id)
+activate service
+service->repo : getListOfObjects(id)
+activate repo
+repo-->service : List<Object>
+deactivate repo
+service-->controller : List<Object>
+deactivate service
+controller -> mapperDTO: mapListToDTO(List<Object>)
+activate mapperDTO
+mapperDTO -> dto** : create ObjectDTO
+mapperDTO-->controller : List<ObjectDTO>
+deactivate mapperDTO
+
+[o<--controller : List<ObjectDTO>
+
+legend bottom
+ **This request can be included in:**
+|= Request List |= Response |
+|= ListRoomsInHouse (UC03.1) |= List<RoomDTO> |
+|= ListAllDevicesInRoom (UC06) |= List<DeviceDTO> |
+|= ListSensorFunctionalities (UC07.1) |= List<SensorFunctionalityDTO> |
+|= ListAllDevicesInHouseByFunctionality (UC09) |= Map<Object, Map<RoomDTO, DeviceDTO>>|
+|= ListActuatorFunctionalities (UC12.1) |= List<ActuatorFunctionalityDTO> |
+|= ListAllMeasurementsOfDeviceInPeriod (UC33) |= Map<SensorFunctionalityDTO, List<ReadingDTO>>|
+|= ListAllRoomsInsideOrOutsideOfHouse (UC34.1) |= List <RoomDTO>|
+|= ListTemperatureSensorsInDevice (UC34.2) |= List<SensorsDTO>|
+end legend
+
+@enduml

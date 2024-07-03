@@ -1,0 +1,15 @@
+@startuml
+
+title UC08 - Deactivate Device
+autonumber
+
+Actor User
+participant ":SmartHome" as smarthome <<System>>
+
+User -> smarthome: deactivate device
+activate smarthome
+
+User <-- smarthome: device deactivated
+deactivate smarthome
+
+@enduml

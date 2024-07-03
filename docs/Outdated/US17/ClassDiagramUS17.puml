@@ -1,0 +1,58 @@
+@startuml
+title US17: As Product Owner, I want the system to have a type of sensor that gives the status of a binary switch (ON/OFF).
+'https://plantuml.com/class-diagram
+
+
+class BinaryStatusSensor implements SensorSpecificTime{
+-sensorName: String
+-functionality: SensorFunctionality
+-factoryValue: FactoryValue
+-value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueForSpecificTime(): String
+}
+
+class FactoryValue {
++createValueSpecificTime()
+}
+
+enum SensorFunctionality {
+TEMPERATURE,
+HUMIDITY,
+BINARY_STATUS,
+SCALE_POSITION,
+WIND,
+SUNRISE,
+SUNSET,
+DEW_POINT,
+SOLAR_RADIATION,
+POWER,
+ENERGY
+}
+
+class BinaryStatusValue implements Value{
+-date: Timestamp
+-unit: String
++getValueWithUnit(): String
+}
+
+interface Sensor {
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
+}
+
+interface SensorSpecificTime extends Sensor{
++getValueForSpecificTime(): String
+}
+
+interface Value {
++getValueWithUnit(): String
+}
+
+FactoryValue ..> BinaryStatusValue: <<creates>>
+BinaryStatusSensor -- FactoryValue: has
+BinaryStatusSensor - SensorFunctionality: has
+BinaryStatusValue - BinaryStatusSensor : has
+
+@enduml

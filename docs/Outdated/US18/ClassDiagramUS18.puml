@@ -1,0 +1,57 @@
+@startuml
+title US18: As Product Owner, I want the system to have a type of sensor that gives the current value/position in a scale (%).
+'https://plantuml.com/class-diagram
+
+class ScaleSensor implements SensorSpecificTime{
+-sensorName: String
+-functionality: SensorFunctionality
+-factoryValue: FactoryValue
+ -value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueForSpecificTime(): String
+}
+
+class FactoryValue {
++createValueSpecificTime(): Value
+}
+
+enum SensorFunctionality {
+TEMPERATURE,
+HUMIDITY,
+BINARY_STATUS,
+SCALE_POSITION,
+WIND,
+SUNRISE,
+SUNSET,
+DEW_POINT,
+SOLAR_RADIATION,
+POWER,
+ENERGY
+}
+
+class ScaleSensorValue implements Value {
+-date: Timestamp
+-unit: String
++getValueWithUnit(): String
+}
+
+interface Sensor {
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
+}
+
+interface SensorSpecificTime extends Sensor {
++getValueForSpecificTime(): String
+}
+
+interface Value {
++getValueWithUnit(): String
+}
+
+FactoryValue ..> ScaleSensorValue: <<creates>>
+ScaleSensor -- FactoryValue: has
+ScaleSensor - SensorFunctionality: has
+ScaleSensorValue - ScaleSensor: has
+
+@enduml

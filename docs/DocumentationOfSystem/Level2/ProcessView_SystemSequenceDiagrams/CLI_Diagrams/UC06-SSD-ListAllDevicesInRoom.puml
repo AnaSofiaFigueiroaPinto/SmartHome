@@ -1,0 +1,15 @@
+@startuml
+
+autonumber
+title UC06 - As a Room Owner [or Power User, or Administrator],\n I want to get a list of all devices in a room, so that I can configure them.
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+[o-> Backend : get list of devices in room
+activate Backend
+[o<--Backend: list of devices
+deactivate Backend
+
+@enduml

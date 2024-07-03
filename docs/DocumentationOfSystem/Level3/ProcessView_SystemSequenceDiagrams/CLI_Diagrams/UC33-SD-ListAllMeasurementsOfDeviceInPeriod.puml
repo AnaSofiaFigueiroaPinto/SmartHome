@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC33 - List All Measurements of a Device in a Period of Time
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n<<Container>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Component>>
+end box
+
+[o->server: get List of all measurements of\n a Device in a Period of Time
+activate server
+server->server: find all measurements\n of a device in a period of time
+
+[o<--server: List of all measurements of\n a Device in a Period of Time
+deactivate server
+@enduml

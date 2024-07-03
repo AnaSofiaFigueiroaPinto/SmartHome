@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC03.1 - Get List of Rooms
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Get List of Rooms
+activate server
+server->server: Find all Rooms
+[o<--server: List of Rooms
+deactivate server
+@enduml

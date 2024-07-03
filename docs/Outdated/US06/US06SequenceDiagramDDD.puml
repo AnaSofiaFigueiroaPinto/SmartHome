@@ -1,0 +1,71 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US06 - As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+
+autonumber
+
+participant ":ListAllDevicesInRoomController" as ctrl
+participant ":DeviceService" as service
+participant ":RoomDTO" as RoomDTO
+participant ":RoomID" as RoomID
+participant ":RoomRepository" as RoomRepo
+participant ":DeviceRepository" as DeviceRepo
+participant ":Device" as Device
+participant ":DeviceMapper" as DeviceMapper
+participant ":DeviceDTO" as DeviceDTO
+participant ":deviceDTOToDeviceMap" as deviceDTOToDeviceMap
+
+-> ctrl: getListOfRoomsDTO()
+activate ctrl
+ref over ctrl
+US03.1SequenceDiagram
+end ref
+<-- ctrl: List<RoomDTO>
+
+-> ctrl: getListOfDevicesDTOInRoom(RoomDTO roomDTO)
+ctrl -> service: getListOfDevicesinRoom(RoomDTO roomDTO)
+activate service
+
+service -> Room: identity()
+activate Room
+Room --> service: RoomID
+deactivate Room
+
+service -> RoomID **: <<creates>>
+
+service -> DeviceRepo: findAllEntities()
+activate DeviceRepo
+DeviceRepo --> service: Iterable<Device>
+deactivate DeviceRepo
+
+service -> DeviceMapper: deviceToDTO(deviceInRepository)
+activate DeviceMapper
+DeviceMapper -> DeviceDTO **: <<creates>>
+DeviceMapper --> service: deviceDTO
+deactivate DeviceMapper
+
+loop for each entry in Iterable<Device>
+
+activate deviceDTOToDeviceMap
+service -> deviceDTOToDeviceMap: getValue()
+deviceDTOToDeviceMap -> service: Device
+deactivate deviceDTOToDeviceMap
+
+service -> Device: getRoomID()
+activate Device
+Device --> service: roomID
+deactivate Device
+
+alt roomID equals RoomID
+        service -> deviceDTOToDeviceOfRoomMap: put(entry.getKey(), device)
+    end
+
+end
+
+service --> ctrl: List<DeviceDTO>
+deactivate service
+<-- ctrl: List<DeviceDTO>
+
+deactivate ctrl
+@enduml

@@ -1,0 +1,86 @@
+@startuml
+title UC34.1 List of Rooms Inside or Outside of House
+
+skinparam linetype ortho
+
+package server #LightGray {
+
+class HouseControllerWeb <controller> {
+  -houseService: HouseService
+  -roomService: RoomService
+  - deviceService: DeviceService
+  -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+  -maxTempDifOutsideInsideService: MaxTempDifOutsideInsideService
+  -roomMapperDTO: RoomMapperDTO
+  -deviceMapperDTO: DeviceMapperDTO
+  -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+  -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+  -valueService: ValueService
+  -weatherAPIService: WeatherAPIService
+
+ +GET getListOfRoomsInHouse(@PathVariable("id") String houseIDstr,@RequestParam(required = false)\n Boolean areRoomsInside): ResponseEntity<Object> roomDTOList, HttpStatus.OK
+ - getListOfRoomsInsideOrOutsideHouse(String houseIDstr, boolean areRoomsInside): List<RoomDTO>
+ }
+
+interface Repository <repo>{
+  +containsEntityByID(ID id): boolean
+}
+  interface HouseRepository <repo> extends Repository{
+
+  }
+
+  class RoomService <service> {
+  -houseRepository: HouseRepository
+  -roomRepository: RoomRepository
+  -factory: RoomFactory
+  +getListOfRoomsInsideOrOutsideHouse(HouseID houseID,\n boolean areRoomsInside): List<RoomID>
+  }
+
+  interface RoomRepository <repo> {
+  +findByHouseID(HouseID houseID): Iterable<Room>
+  }
+
+ class RoomMapperDTO {
+ +roomIDsToDTOList(Iterable<RoomID> listOfRoomsIDs): List<RoomDTO>
+ }
+
+ class RoomDTO {
+ +roomName: String
+ +floorNumber: int
+ +width: double
+ +length: double
+ +height: double
+ }
+
+ class Room <root> {
+ -roomName: RoomID
+ -floorNumber: RoomFloor
+ -dimensions: RoomDimensions
+ -houseID: HouseID
+ +identity(): RoomID
+ +getRoomDimensions(): RoomDimensions
+ }
+
+ class RoomDimensions <VO> {
+    -width: double
+    -length: double
+    -height: double
+    +getHeight(): double
+}
+
+class RoomID <VO>{
+    -id: String
+}
+}
+
+
+RoomService -- HouseRepository
+HouseControllerWeb -- RoomService
+RoomService -- RoomRepository
+RoomService ..> Room : <<uses>>
+Room "1"--*"1" RoomDimensions
+HouseControllerWeb ..> RoomMapperDTO: <<uses>>
+RoomMapperDTO ..> RoomDTO: <<creates>>
+Room "1"--*"1" RoomID
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title US08 - As a Power User [or Administrator], I want to deactivate a device, so that it is no longer used. Nevertheless, it should be possible to access its configuration and activity log.
+autonumber
+
+participant ":DeactivateDeviceController" as Controller
+
+participant ":Device" as Device
+
+
+-> Controller: getRoomListDTO()
+activate Controller
+ref over Controller
+US06SequenceDiagram
+end ref
+<-- Controller: List<DeviceDTO>
+
+-> Controller: deactivateDevice(DeviceDTO deviceDTO)
+Controller -> Controller: get.(DeviceDTO deviceDTO)
+
+Controller -> Device: deactivateDevice()
+activate Device
+alt if Device is successfully deactivated
+Device --> Controller: return true
+<-- Controller: return true
+else if Device is already deactivated
+Device --> Controller: return false
+deactivate Device
+<-- Controller: return false
+end
+
+@enduml

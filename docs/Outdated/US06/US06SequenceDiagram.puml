@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US06 - As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+
+autonumber
+
+participant ":ListAllDevicesInRoomController" as US06Controller
+participant ":DeviceMapper" as DeviceMapper
+participant ":DeviceDTO" as DeviceDTO
+participant ":Room" as Room
+
+-> US06Controller: getRoomList()
+activate US06Controller
+ref over US06Controller
+US03.1SequenceDiagram
+end ref
+<-- US06Controller: List<RoomDTO>
+
+-> US06Controller: getDeviceList(RoomDTO roomDTO)
+US06Controller -> US06Controller: get.(RoomDTO roomDTO)
+
+US06Controller -> Room: getDeviceList()
+activate Room
+Room --> DeviceMapper: DeviceList
+deactivate Room
+DeviceMapper --> US06Controller: DeviceList
+
+US06Controller -> DeviceMapper: domainToDTO(DeviceList)
+activate DeviceMapper
+loop as many times as the number of rooms in RoomList
+DeviceMapper --> DeviceDTO**: <<creates>>
+end
+US06Controller <-- DeviceMapper: Map<DeviceDTO, Device>
+deactivate DeviceMapper
+<-- US06Controller: List<DeviceDTO>
+deactivate US06Controller
+@enduml

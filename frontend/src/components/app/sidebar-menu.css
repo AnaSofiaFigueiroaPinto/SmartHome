@@ -1,0 +1,23 @@
+/* sidebar-menu.css */
+.MuiDrawer-paper {
+    position: relative;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+    .MuiDrawer-paper {
+        width: 240px;
+    }
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px;
+}
+
+.menu-icon {
+    margin-right: 8px;
+}

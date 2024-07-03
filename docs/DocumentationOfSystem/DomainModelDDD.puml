@@ -1,0 +1,181 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package houseAggregate {
+    class House <root>{
+    }
+    class Location <VO>{
+    }
+    class Address <VO>{
+    }
+    class GPSCode <VO>{
+    }
+
+    Location --> Address
+    Location --> GPSCode
+    House  -->  Location
+}
+
+package roomAggregate {
+    class Room <root>{
+    }
+    class FloorNumber <VO>{
+    }
+    class Dimensions <VO>{
+    }
+
+    Room ---> Dimensions
+    Room ---> FloorNumber
+}
+
+House <-up- Room
+
+package deviceAggregate{
+    class Device <root>{
+    }
+    class Model <VO>{
+    }
+    enum DeviceStatus <VO>{
+    }
+
+    Device --> Model
+    Device --> DeviceStatus
+}
+
+Device --down> Room
+
+package actuatorAggregate{
+    abstract class Actuator <root>{
+    }
+
+    class BlindSetterActuator extends Actuator{
+    }
+
+    class DecimalSetterActuator extends Actuator{
+    }
+
+    class IntegerSetterActuator extends Actuator{
+    }
+
+    class SwitchActuator extends Actuator{
+    }
+
+    class ActuatorProperties <VO>{
+    }
+
+    class RangeInt <VO>{
+    }
+
+    class RangeDecimal <VO>{
+    }
+
+    enum SwitchActuatorStatus <VO>{
+    }
+
+    class ActuatorTarget <VO>{
+    }
+
+    ActuatorProperties --> RangeInt
+    ActuatorProperties --> RangeDecimal
+
+    SwitchActuator --> SwitchActuatorStatus
+    DecimalSetterActuator --> ActuatorTarget
+
+    Actuator -down-> Device
+    Actuator --> ActuatorProperties
+}
+
+package actuatorFunctionalityAggregate {
+    class ActuatorFunctionality <root> {
+    }
+}
+
+Actuator -up-> ActuatorFunctionality
+
+package sensorAggregate {
+    abstract class Sensor <root>{
+    }
+
+    class BinaryStatusSensor extends Sensor{
+    }
+
+    class DewPointSensor extends Sensor{
+    }
+
+    class ElectricEnergyConsumptionSensor extends Sensor{
+    }
+
+    class HumidityPercentageSensor extends Sensor{
+    }
+
+    class PowerAverageSensor extends Sensor{
+    }
+
+    class ScaleSensor extends Sensor{
+    }
+
+    class SolarIrradianceSensor extends Sensor{
+    }
+
+    class SpecificTimePowerConsumptionSensor extends Sensor{
+    }
+
+    class SunriseSensor extends Sensor{
+    }
+
+    class SunsetSensor extends Sensor{
+    }
+
+    class TemperatureCelsiusSensor extends Sensor{
+    }
+
+    class WindSpeedAndDirectionSensor extends Sensor{
+    }
+
+    Sensor --> Device
+}
+
+package sensorFunctionalityAggregate {
+    class SensorFunctionality <root> {
+    }
+}
+
+Sensor -up-> SensorFunctionality
+
+package value{
+    package InstantTimeValue{
+        class InstantTimeValue <root>{
+        }
+    }
+    package PeriodTimeValue{
+        class PeriodTimeValue <root>{
+        }
+    }
+    package InstantTimeLocationValue{
+        class InstantTimeLocationValue <root>{
+        }
+    }
+
+    class Reading <VO>{
+    }
+
+    InstantTimeValue -[#red]-> Reading
+    TemperatureCelsiusSensor -[#red]-> InstantTimeValue
+    HumidityPercentageSensor -[#red]-> InstantTimeValue
+    ScaleSensor -[#red]-> InstantTimeValue
+    SpecificTimePowerConsumptionSensor -[#red]-> InstantTimeValue
+    WindSpeedAndDirectionSensor -[#red]-> InstantTimeValue
+
+    PeriodTimeValue -[#green]-> Reading
+    PowerAverageSensor -[#green]-> PeriodTimeValue
+    ElectricEnergyConsumptionSensor -[#green]-> PeriodTimeValue
+
+    InstantTimeLocationValue -[#blue]-> Reading
+    SunsetSensor -[#blue]-> InstantTimeLocationValue
+    SunriseSensor -[#blue]-> InstantTimeLocationValue
+    DewPointSensor -[#blue]-> InstantTimeLocationValue
+    SolarIrradianceSensor -[#blue]-> InstantTimeLocationValue
+}
+
+@enduml

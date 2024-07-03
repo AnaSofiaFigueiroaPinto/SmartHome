@@ -1,0 +1,121 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package server #LightGray {
+
+title UC34: As a Room Owner [or Power User, or Administrator], I want to get the maximum instantaneous \n temperature difference between a device in the room and the outside, in a given period.
+
+class HouseControllerWeb {
+     -houseService: HouseService
+     -houseID: HouseID
+     -roomService: RoomService
+     -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+     -roomMapperDTO: RoomMapperDTO
+     -deviceMapperDTO: DeviceMapperDTO
+     -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+     -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+    +GET handleHouseQuery(@PathVariable String insideSensorIDString, @RequestParam LocalDateTime givenStart,\n@RequestParam LocalDateTime givenEnd): ResponseEntity<>(maxTempDif, HttpStatus.OK)
+    -maxTempDifOutsideInsideWeatherServiceAPI(String insideSensorIDString, \nLocalDateTime givenStar, LocalDateTime givenEnd)
+}
+
+class WeatherAPIService {
+- weatherAPIGateway: WeatherAPIGateway
+- configScrapper: ConfigScrapper
+- houseRepository: HouseRepository
+- valueRepository: InstantTimeValueRepository
+- latitude: double
+- longitude: double
+- defineGroupHouseLocation(): int
++ getSunriseSunsetHour(String option): double
+}
+
+interface HouseRepository <repo> {
+findAllEntities(): Iterable<House>
+}
+
+class House <root>{
+  -houseID: HouseID houseID
+  -location: Location
+}
+
+class Location <VO>{
+  -gpsCode: GPSCode
+  -address: Address
+}
+
+class GPSCode <VO>{
+  -latitude: double
+  -longitude: double
+}
+
+class SensorID <VO> {
+    -sensorName: String
+}
+
+interface InstantTimeValueRepository <repo> extends ValueRepository  {
+    +findBySensorId (SensorID sensorID): List<Value>
+    +findAllEntities(): Iterable<Value>
+}
+
+interface ValueRepository <repo> {
+}
+
+interface Value <root> {
+    +getReading(): Reading
+}
+
+class InstantTimeValue <root> implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -instantTimeReading: Timestamp
+    +getInstantTimeReading(): Timestamp
+}
+
+class Reading <VO> {
+    -value: String
+    -unit: String
+    +getValue(): String
+}
+
+class ConfigScraper{
+    -filePath: String
+    -openingMainBlockTag: String
+    -closingMainBlockTag: String
+    -propertySplitter: String
+    -functionalityProperty: String
+    +loadTolerance(): String
+    +loadGroupNumber(): String
+}
+
+interface WeatherAPIGateway {
++ getInstantaneousTemperature(int groupNumber, double latitude, double longitude, int hour): InstTemperatureDTO
+}
+
+class WeatherAPIGatewayHttpImpl extends WeatherAPIGateway {
+- BASE_URL: String
+- restTemplate: RestTemplate
++ getInstantaneousTemperature(int groupNumber, double latitude, double longitude, int hour): InstTemperatureDTO
+}
+
+class InstTemperatureDTO {
++ measurement: double
++ unit: String
++ info: String
+}
+
+HouseControllerWeb -- WeatherAPIService
+HouseControllerWeb --> SensorID: <<creates>>
+WeatherAPIService ..> InstantTimeValue: <<uses>>
+WeatherAPIService ..> InstantTimeValueRepository
+WeatherAPIService -- ConfigScraper
+WeatherAPIService -- WeatherAPIGatewayHttpImpl
+WeatherAPIService - HouseRepository
+WeatherAPIService -- House: <<uses>>
+House -- Location
+Location - GPSCode
+WeatherAPIGatewayHttpImpl -- InstTemperatureDTO: <<creates>>
+InstantTimeValue -- Reading
+
+@enduml

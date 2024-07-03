@@ -1,0 +1,63 @@
+@startuml
+package sensors {
+
+
+
+    class ElectricEnergyConsumptionSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForPeriodOfTime(\nTimestamp startDate,\n Timestamp endDate):String
+    }
+    ElectricEnergyConsumptionSensor -- FactoryValue
+
+
+    class SpecificTimePowerConsumptionSensor {
+    -String sensorName
+    -SensorFunctionality\n sensorFunctionality
+    -Value value
+    -FactoryValue factoryValue
+    +getSensorName():String
+    +getSensorFunctionality():\nSensorFunctionality
+    +getValueForSpecificTime(Timestamp\n specificTime):String
+    }
+    SpecificTimePowerConsumptionSensor -- FactoryValue
+
+
+
+    class FactoryValue {
+    +createValueSpecificTime (String className,\n Timestamp specificTime): Value
+    +createValuePeriodTime (String className,\n Timestamp start, Timestamp end): Value
+    +createValueTimeAndLocation (String className,\n Timestamp specificTime, GPSCode gpsCode): Value
+    }
+
+    interface Value  {
+    +getValueWithUnit():String
+    }
+
+    FactoryValue ..> Value:<<creates classes\n that implment>>
+
+
+    class ElectricEnergyConsumptionSensorValue implements Value {
+    -Timestamp startDate
+    -Timestamp endDate
+    -String unit
+    +getValueWithUnit():String
+    }
+    ElectricEnergyConsumptionSensor -- ElectricEnergyConsumptionSensorValue: has
+
+    class SpecificTimePowerConsumptionSensorValue implements Value {
+    -Timestamp date
+    -String unit
+    +getValueWithUnit():String
+    }
+    SpecificTimePowerConsumptionSensor -- SpecificTimePowerConsumptionSensorValue: has
+
+
+
+
+}
+@enduml

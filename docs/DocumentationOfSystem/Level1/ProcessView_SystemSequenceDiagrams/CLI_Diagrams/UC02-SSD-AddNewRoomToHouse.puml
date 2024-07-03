@@ -1,0 +1,14 @@
+@startuml
+
+actor User
+autonumber
+title UC02 - Add a new room to the house
+
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome: add a new room to the house
+activate SmartHome
+User <--SmartHome: room added to the house
+deactivate SmartHome
+
+@enduml

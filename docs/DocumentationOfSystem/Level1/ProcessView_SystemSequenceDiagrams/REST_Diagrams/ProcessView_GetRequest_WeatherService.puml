@@ -1,0 +1,30 @@
+@startuml
+title GET Request with Weather Service
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+actor User
+participant "<<System>>\n:SmartHome" as system
+autonumber
+User -> system : Request to get Objects
+activate system
+system ->o] : Request to get Object
+system <--o] : response
+User<-- system : response
+deactivate system
+
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= /house/{id} (UC34.3) |= Double of maximum temperature difference between outside and inside|
+|= /actuatorfunctionality/{id} (UC37.1) |= List of Devices with Actuator Functionality and Room location|
+|= /house/weather (UC38) |= Today's Sunrise/Sunset hours|
+|= /house/weather (UC39) |= Temperature for selected hour|
+end legend
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+skinparam linetype polyline
+
+component :SmartHome <<System>> {
+    port " " as P1
+    port " " as P2
+    port " " as P3
+}
+
+rectangle "Web UI" as WEB
+rectangle "CLI" as CLI
+rectangle "Weather Service API" as WS
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #FFFFFF
+}
+
+P1 -up-0 WEB
+P2 -up-0 CLI
+P3 -up-( WS
+@enduml

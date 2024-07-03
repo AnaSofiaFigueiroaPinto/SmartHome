@@ -1,0 +1,61 @@
+@startuml
+skinparam linetype ortho
+
+package server #LightGray {
+
+note "Continues in UC33ClassDiagram" as NOTE1
+ValueRepository -up-> NOTE1
+
+interface ValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+interface InstantValueRepository extends ValueRepository {
+}
+
+class InstantValueRepositoryMem <Repo> implements InstantValueRepository {
+    -Map<ValueID, Value> valueMap
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class InstantValueRepositoryJPAImp <Repo> implements InstantValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class InstantValueRepositorySpringData <Repo> implements InstantValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+interface PeriodTimeValueRepository extends ValueRepository {
+}
+
+class PeriodTimeValueRepositoryMem <Repo> implements PeriodTimeValueRepository {
+    -Map<ValueID, Value> valueMap
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class PeriodTimeValueRepositoryJPAImp <Repo> implements PeriodTimeValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class PeriodTimeValueRepositorySpringData <Repo> implements PeriodTimeValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+interface InstantTimeLocationValueRepository extends ValueRepository {
+}
+
+class InstantTimeLocationValueRepositoryMem <Repo> implements InstantTimeLocationValueRepository {
+    -Map<ValueID, Value> valueMap
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class InstantTimeLocationValueRepositoryJPAImp <Repo> implements InstantTimeLocationValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+
+class InstantTimeLocationValueRepositorySpringData <Repo> implements InstantTimeLocationValueRepository {
+    +findBySensorIdBetweenPeriodOfTime\n(SensorID sensorID, Timestamp start, Timestamp end): List<Value>
+}
+}
+@enduml

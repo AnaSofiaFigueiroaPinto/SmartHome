@@ -1,0 +1,46 @@
+@startuml
+title UC - GET Request with Weather Service
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+autonumber
+!pragma teoz true
+
+box " <<System>>\n:SmartHome" #DarkGrey
+    box "<<Subsystem>>\n :Frontend" #LightGrey
+    participant "<<Container>>\n  :UI" as frontend
+    end box
+    box "<<Subsystem>>\n :Backend" #LightGrey
+    participant ":Server" as server <<Container>>
+    participant ":Database" as database <<Container>>
+    end box
+end box
+
+[o-> frontend: Request to get Objects
+activate frontend
+frontend -> server: GET Objects Request
+activate server
+server->database : findAll
+activate database
+database-->server : requested
+deactivate database
+server ->o] : GET Objects Request
+server <--o]: Objects requested JSON
+server -> frontend : Objects requested JSON
+deactivate server
+[o<--frontend: Objects requested
+deactivate frontend
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= /houses/{id} (UC34.3) |= double maxTempDifOutsideInside|
+|= /house/weather (UC38) |= double sunHour|
+|= /house/weather (UC39) |= double temperature|
+end legend
+@enduml

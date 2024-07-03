@@ -1,0 +1,46 @@
+@startuml
+title Sprint 2 Use Cases
+
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+
+:Administrator: as Admin
+:Power User: as PU
+:Room Owner: as RO
+
+UC3.1 as (Access list of rooms)
+UC5.1V2 as (Add new device to room)
+UC6.1 as (Get list of devices in room)
+UC6.2 as (Configure device)
+UC7 as (Add sensor to device)
+UC8 as (Deactivate device)
+UC9 as (Get list of devices in house by functionality)
+
+Admin --> UC5.1V2
+UC5.1V2 ..> UC3.1: <<includes>>
+
+Admin --> UC6.1
+UC6.1 ..> UC3.1: <<includes>>
+Admin --> UC6.2
+UC6.2 ..> UC6.1: <<includes>>
+
+Admin --> UC7
+UC7 ..> UC6.1: <<includes>>
+
+Admin --> UC9
+UC9 ..> UC6.1: <<includes>>
+
+PU --> UC5.1V2
+
+PU --> UC7
+
+PU --> UC8
+UC8 ..> UC6.1: <<includes>>
+
+PU --> UC9
+
+UC6.1 <-- RO
+UC6.2 <--  RO
+
+@enduml

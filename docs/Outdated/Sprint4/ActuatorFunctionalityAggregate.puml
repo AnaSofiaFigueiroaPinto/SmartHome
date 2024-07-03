@@ -1,0 +1,67 @@
+@startuml
+skinparam linetype ortho
+package ddd {
+interface ValueObject{
+}
+interface DomainID extends ValueObject{
+}
+interface DomainEntity extends DomainID {
++identity(): ID
++isSameAs(Object object): boolean
+}
+interface AggregateRoot extends DomainEntity {
+}
+
+interface Repository extends AggregateRoot{
++updateOrSave(T entity): T
++findAllEntities(): Iterable<T>
++findEntityById(ID id): Optional<T>
++containsEntityById(ID id): boolean
+}
+}
+
+package domain {
+    package valueobjects {
+        class ActuatorFunctionalityID <VO> {
+            - actuatorFunctionalityName: String
+            + equals(Object object): boolean
+            + hashCode(): int
+            + toString(): String
+        }
+        DomainID <|.. ActuatorFunctionalityID
+    }
+    package actuatorfunctionality {
+        interface FactoryActuatorFunctionality {
+            + actuatorFunctionalities (String id): ActuatorFunctionality
+        }
+        class ImpFactoryActuatorFunctionality implements FactoryActuatorFunctionality {
+            + actuatorFunctionalities (String id): ActuatorFunctionality
+        }
+
+        ImpFactoryActuatorFunctionality ..> ActuatorFunctionality: <<creates>>
+
+        class ActuatorFunctionality <root> {
+            - actuatorFunctionalityID: ActuatorFunctionalityID
+            + identity(): ActuatorFunctionalityID
+            + isSameAs(Object object): boolean
+
+        }
+        AggregateRoot <|.. ActuatorFunctionality
+        ActuatorFunctionality --> ActuatorFunctionalityID
+    }
+
+}
+
+package repository {
+    class ActuatorFunctionalityRepository <repo> {
+        - FactoryActuatorFunctionality factory
+        - Map <ActuatorFunctionalityID, ActuatorFunctionality> actuatorFunctionalityMap
+        - loadfile():
+        + updateOrSave(ActuatorFunctionality entity): ActuatorFunctionality
+        + findAllEntities(): Iterable<ActuatorFunctionality>
+        + findEntityByID(ActuatorFunctionalityID id): Optional<ActuatorFunctionality>
+        + containsEntityByID(ActuatorFunctionalityID id): boolean
+    }
+    Repository <|.. ActuatorFunctionalityRepository
+}
+@enduml

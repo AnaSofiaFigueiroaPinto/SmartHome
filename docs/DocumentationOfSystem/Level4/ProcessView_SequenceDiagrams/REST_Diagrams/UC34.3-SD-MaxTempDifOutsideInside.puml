@@ -1,0 +1,71 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title US34 - As a Room Owner [or Power User, or Administrator], I want to get the maximum instantaneous temperature difference between a device in the room and the outside, in a given period.
+
+
+!pragma teoz true
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+autonumber
+participant ":Router" as Router <<Component>>
+participant "HouseControllerWeb" as controller <<Component>>
+participant "insideSensorID:SensorID" as sensorID1
+participant "outsideSensorID:SensorID" as sensorID2
+participant "MaxTempDifOutsideInsideService" as service <<Component>>
+
+participant "ValueRepository" as valueRepo <<Component>>
+participant "Value" as value
+participant "Reading" as reading
+end box
+participant "<<Container>>\n  :Database"
+end box
+
+ref over controller
+[[docs/DocumentationOfSystem/UC34_2-ListTemperatureSensorsInDevice/UC34.2SequenceDiagram.svg]]
+end ref
+
+
+[o-> Router: GET /houses/{id}/rooms
+activate Router
+Router -> controller: maxTempDifOutsideInside(@PathVariable String insideSensorIDString,\n@PathVariable String outsideSensorIDString,\n@RequestParam LocalDateTime givenStart,\n@RequestParam LocalDateTime givenEnd)
+activate controller
+controller --> sensorID1**: <<create>>
+controller --> sensorID2**: <<create>>
+controller -> service: getMaxTemperatureDifference(insideSensorID, outsideSensorID,\nTimestamp startTime, Timestamp  endTime);
+activate service
+service -> valueRepo: findBySensorId(insideSensorID)
+activate valueRepo
+valueRepo --> service: insideValues:List<Value>
+service -> valueRepo: findBySensorId(outsideSensorID)
+valueRepo --> service: outsideValues:List<Value>
+deactivate valueRepo
+
+loop for each Value in List
+    service -> value: getInstantTimeReading().getTime()
+    activate value
+    value --> service: insideTimestamp
+    deactivate value
+    alt if the insideTimestamp is within the given period
+    service -> service: continue
+    end
+    service -> value: getReading()
+    activate value
+    value -> reading: getValue();
+    activate reading
+    reading --> value: value
+    deactivate reading
+    value --> service: reading
+    deactivate value
+    service -> service: findClosestTemperature(outsideValues, insideTimestamp)
+end
+service -> service: maxDifference
+service --> controller: double maxDifference
+deactivate service
+
+controller --> Router: maxDifference, HttpStatus.OK
+deactivate controller
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+@enduml

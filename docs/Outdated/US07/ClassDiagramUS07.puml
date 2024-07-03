@@ -1,0 +1,143 @@
+@startuml
+title US07: As a Power User [or Administrator], I want to add a sensor to an existing device in a room. The sensor must be of a model of an existing type of sensor.
+'https://plantuml.com/class-diagram
+
+class AddNewSensorToDeviceController {
+-house: House
+-sensorCatalogue: SensorCatalogue
+-roomsDTOAndRooms: Map<RoomDTO, Room>
+-devicesDTOAndDevices: Map<DeviceDTO, Device>
++getRoomListDTO(): List<RoomDTO>
++getDeviceListDTO(RoomDTO roomDTO): List<DeviceDTO>
++getCatalogueOfAvailableSensorClasses(): List<String>
++addSensorToDevice(DeviceDTO deviceDTO, \n String sensorClass, String sensorName): boolean
+}
+
+class DeviceDTO {
+-deviceName: String
++getDeviceName(): String
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++getRoomList(): RoomList
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
+-factoryDimensions: FactoryDimensions
+-factoryDeviceList: FactoryDeviceList
++getDeviceList(): DeviceList
+}
+
+
+class Device {
+-deviceName: String
+-deviceModel: String
+-status: Status
+-sensorList: List<Sensor>
+-actuatorList: List<Actuator>
++createSensorAndAddToDevice(String sensorName,\n SensorCatalogue sensorCatalogue, String sensorClass): Sensor
+-isSensorInList(String sensorName): boolean
+}
+
+interface Sensor {
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
+}
+
+interface SensorSpecificTime extends Sensor {
++getValueForSpecificTime(Timestamp specificTime): String
+}
+
+class HumidityPercentageSensor implements SensorSpecificTime{
+-sensorName: String
+-sensorFunctionality: SensorFunctionality
+-factoryValue: FactoryValue
+-value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueForSpecificTime(Timestamp specificTime): String
+}
+
+interface Value {
++getValueWithUnit():String
+}
+
+class HumidityPercentageSensorValue implements Value{
+-unit: String
+-readingInstant: Timestamp
++getValueWithUnit(): String
+}
+
+
+class TemperatureCelsiusSensor implements SensorSpecificTime{
+-sensorName: String
+-functionality: SensorFunctionality
+-factoryValue: FactoryValue
+-value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueForSpecificTime(Timestamp specificTime): String
+}
+
+class TemperatureCelsiusSensorValue implements Value{
+-unit: String
+-readingInstant: Timestamp
++getValueWithUnit(): String
+}
+
+enum SensorFunctionality {
+TEMPERATURE
+HUMIDITY
+}
+
+class SensorCatalogue {
+-sensorClasses: List<String>
+-factoryValue: FactoryValue
++getSensorClasses(): List<String>
++createSensorFromCatalogue\n(String sensorClass, String sensorName): Sensor
+-loadConfig(String filePath): void
+-isSensorInList(String sensorName): boolean
+}
+
+class DeviceMapper {
++deviceToDTO(Device device): DeviceDTO
++deviceDTOList(DeviceList deviceList): Map<DeviceDTO, Device>
+}
+
+class RoomMapper {
+  +roomToDTO(Room room): RoomDTO
+  +roomToDTO(Roomlist roomlist):\n Map<RoomDTO, Room>
+
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-roomLength: double
+-roomWidth: double
+-roomHeight: double
++getRoomName(): String
+}
+
+AddNewSensorToDeviceController -- House
+AddNewSensorToDeviceController ..> Room: uses
+AddNewSensorToDeviceController ..> DeviceMapper: uses
+DeviceMapper ..> DeviceDTO: uses
+AddNewSensorToDeviceController ..> RoomMapper: uses
+RoomMapper ..> RoomDTO: uses
+AddNewSensorToDeviceController  --  SensorCatalogue
+Device "1" -- "0..*" Sensor
+Device ..> SensorCatalogue: uses
+HumidityPercentageSensor -- HumidityPercentageSensorValue: has
+HumidityPercentageSensor -- SensorFunctionality: has
+TemperatureCelsiusSensor -- TemperatureCelsiusSensorValue: has
+TemperatureCelsiusSensor --- SensorFunctionality: has
+Device -- AddNewSensorToDeviceController
+
+@enduml

@@ -1,0 +1,170 @@
+@startuml
+title US12: As a Power User [or Administrator], I want to add an actuator to an existing device in a room. The sensor must be of a model of an existing type of actuator.
+'https://plantuml.com/class-diagram
+
+class AddNewActuatorToDeviceController {
+-house: House
+-actuatorCatalogue: ActuatorCatalogue
+-Map<RoomDTO, Room> roomsDTOAndRooms;
+-Map<DeviceDTO, Device> devicesDTOAndDevices;
++getRoomListDTO(): List<RoomDTO>
++getDeviceListDTO(RoomDTO roomDTO): List<DeviceDTO>
++getCatalogueOfAvailableSensorClasses(): List<String>
++addActuatorToDevice(DeviceDTO deviceDTO,String actuatorClass,\n String actuatorName, ActuatorProperties actuatorProperties): boolean
+}
+
+class DeviceDTO {
+-deviceName: String
++getDeviceName(): String
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++getRoomList(): RoomList
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
++getDeviceList(): DeviceList
+}
+
+class Device {
+-deviceName: String
+-deviceModel: String
+-sensorList: List<Sensor>
+-actuatorList: List<Actuator>
+-status: Status
++getActuatorList(): List<Actuator>
++createActuatorAndAddToDevice(String actuatorName, \nActuatorCatalogue actuatorCatalogue, \nActuatorProperties actuatorProperties): Actuator
+-isActuatorInList(String actuatorName): boolean
+}
+
+interface Actuator {
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
+}
+
+enum ActuatorFunctionality {
+    BINARY_SWITCH,
+    PERCENTAGE_SETTER,
+    INTEGER_SETTER,
+    DECIMAL_SETTER
+}
+
+class ActuatorCatalogue {
+-actuatorClasses: List<String>
+-loadConfig(String filePath): void
++createActuatorFromCatalogue(String actuatorClass, \nString actuatorName, ActuatorProperties actuatorProperties): Actuator
+-isActuatorInList(String actuatorName): boolean
++getActuatorClasses(): List<String>
+}
+
+class DeviceMapper {
++deviceToDTO(Device device): DeviceDTO
++deviceDTOList(DeviceList deviceList): \nMap<DeviceDTO, Device>
+}
+
+class RoomMapper {
+  +roomToDTO(Room room): RoomDTO
+  +roomToDTO(Roomlist roomlist): \nMap<RoomDTO, Room>
+}
+
+class RoomDTO {
+  -roomName: String
+  -floor: int
+  -length: double
+  -width: double
+  -height: double
+  +getName(): String
+}
+
+interface ActuatorSpecificInteger extends Actuator{
++setActuatorSpecificValue(int specificInteger): boolean
+}
+
+interface ActuatorSpecificDecimal extends Actuator {
++ setDecimalValue(double value): boolean
+}
+
+class SwitchActuator implements ActuatorSpecificInteger {
+-actuatorName: String
+-actuatorType: ActuatorFunctionality
+-status: Status
+-actuatorProperties: ActuatorProperties
++getActuatorName() : String
++getActuatorFunctionality() : ActuatorFunctionality
++setActuatorSpecificValue(int specificInteger) : boolean
+}
+
+class BlindSetterActuator implements ActuatorSpecificInteger{
+-actuatorName: String
+-actuatorFunctionality: actuatorFunctionality
+-specificValue: int
+-actuatorProperties: ActuatorProperties
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorType
++setActuatorSpecificInteger (int specificValue): boolean
+}
+
+class IntegerSetterActuator implements ActuatorSpecificInteger {
+-actuatorName: String
+-actuatorFunctionality: ActuatorFunctionality
+-actuatorProperties: ActuatorProperties
+-validConstructorArguments(String actuatorName, \nActuatorProperties actuatorProperties): boolean
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
++setActuatorSpecificValue(int specificInteger): boolean
+}
+
+class DecimalSetterActuator implements ActuatorSpecificDecimal {
+-actuatorName: String
+-actuatorFunctionality: ActuatorFunctionality
+-actuatorProperties: ActuatorProperties
+-targetValue: double
+-validConstructorArguments(String actuatorName, \nActuatorProperties actuatorProperties): boolean
++getTargetValue(): double
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
++setDecimalValue(double newValue): boolean
+}
+
+class ActuatorProperties {
+-upperLimitInt: int
+-lowerLimitInt: int
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+-validConstructorArguments(int upperLimitInt, \nint lowerLimitInt): boolean
+-validConstructorsArgumentsDecimal(double upperLimitDecimal, \ndouble lowerLimitDecimal, int precision): boolean
++getUpperLimitInt(): int
++getLowerLimitInt(): int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+
+AddNewActuatorToDeviceController -- House
+AddNewActuatorToDeviceController -- Room
+AddNewActuatorToDeviceController - Device
+AddNewActuatorToDeviceController ..> DeviceMapper: <<uses>>
+DeviceMapper ..> DeviceDTO: <<uses>>
+AddNewActuatorToDeviceController ..> RoomMapper: <<uses>>
+RoomMapper ..> RoomDTO: <<uses>>
+AddNewActuatorToDeviceController - ActuatorCatalogue
+Device "1" -- "0..*" Actuator: has classes that implements
+Device ..> ActuatorCatalogue: <<uses>>
+SwitchActuator -- ActuatorFunctionality: has
+BlindSetterActuator --- ActuatorFunctionality: has
+IntegerSetterActuator --- ActuatorFunctionality: has
+DecimalSetterActuator --- ActuatorFunctionality: has
+SwitchActuator -- ActuatorProperties: has
+BlindSetterActuator -- ActuatorProperties: has
+IntegerSetterActuator -- ActuatorProperties: has
+DecimalSetterActuator -- ActuatorProperties: has
+
+@enduml

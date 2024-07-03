@@ -1,0 +1,69 @@
+@startuml
+skinparam linetype polyline
+package ddd {
+    interface ValueObject {
+    }
+
+    interface DomainEntity extends DomainID {
+        + identity():ID
+        + sameAs(Object object):boolean
+    }
+
+    interface AggreagateRoot extends DomainEntity{
+    }
+
+    interface DomainID  extends ValueObject {
+    }
+
+    interface Repository extends AggreagateRoot {
+    }
+
+    interface RepositoryReadOnly extends Repository {
+        + findAllEntities(): Iterable<T>
+        + findEntityByID(ID id): Optional<T>
+        + containsEntityByID(ID id): boolean
+    }
+}
+package domain {
+    package valueobjects {
+        class SensorFunctionalityID <VO> {
+            - sensorfunctionalityID: String
+            + equals(Object o): boolean
+            + toString(): String
+        }
+        DomainID <|.. SensorFunctionalityID
+    }
+    package sensorfunctionality {
+        interface FactorySensorFunctionality {
+            + createSensorFunctionality (String sensorFunctionality): SensorFunctionality
+        }
+        class IMPFactorySensorFunctionality implements FactorySensorFunctionality {
+            + createSensorFunctionality(String sensorFunctionality): SensorFunctionality
+        }
+
+        IMPFactorySensorFunctionality ..> SensorFunctionality: <<creates>>
+
+        class SensorFunctionality <root> {
+            - SensorFunctionalityID id
+            + identity(): SensorFunctionalityID
+            + isSameAs(Object object): boolean
+
+        }
+        AggreagateRoot <|.. SensorFunctionality
+        SensorFunctionality --> SensorFunctionalityID
+    }
+
+}
+
+package repository {
+    class SensorFunctionalityRepository <repo> {
+        - FactorySensorFunctionality factory
+        - Map <SensorFunctionalityID, SensorFunctionality> sensorFunctionalityMap
+        - loadfile():
+        + findAllEntities(): Iterable<SensorFunctionality>
+        + findEntityByID(SensorFunctionalityID id): Optional<SensorFunctionality>
+        + containsEntityByID(SensorFunctionalityID id): boolean
+    }
+    RepositoryReadOnly <|.. SensorFunctionalityRepository
+}
+@enduml

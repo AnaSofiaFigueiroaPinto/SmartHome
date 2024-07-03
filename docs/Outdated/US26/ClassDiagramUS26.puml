@@ -1,0 +1,62 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title "US26: As Product Owner, I want the system to have a type of sensor that gives the electric energy consumption over a period (Wh)."
+
+
+interface Sensor {
+    +getSensorName(): String
+    +getSensorFunctionality(): SensorFunctionality
+}
+
+interface SensorPeriodOfTime extends Sensor {
+    +getValueForPeriodOfTime(Timestamp start, Timestamp end): String
+}
+
+class ElectricEnergyConsumptionSensor implements SensorPeriodOfTime{
+    -sensorName: String
+    -functionality: SensorFunctionality
+    -factoryValue: FactoryValue
+    -value: Value
+
+    +getSensorName(): String
+    +getSensorFunctionality(): SensorFunctionality
+    +getValueForPeriodOfTime(Timestamp start, Timestamp end): String
+}
+
+interface Value {
+    +getValueWithUnit(): String
+}
+
+class FactoryValue {
++createValuePeriodTime(): Value
+}
+
+class ElectricEnergyConsumptionSensorValue implements Value {
+    -unit: String
+    -startDate: Timestamp
+    -endDate: Timestamp
+
+    +getValueWithUnit(): String
+}
+
+enum SensorFunctionality {
+    TEMPERATURE,
+    HUMIDITY,
+    BINARY_STATUS,
+    SCALE_POSITION,
+    WIND,
+    SUNRISE,
+    SUNSET,
+    DEW_POINT,
+    SOLAR_RADIATION,
+    POWER,
+    ENERGY
+    }
+
+FactoryValue - ElectricEnergyConsumptionSensor: has
+FactoryValue ..> ElectricEnergyConsumptionSensorValue: <<creates>>
+ElectricEnergyConsumptionSensor - SensorFunctionality: has
+ElectricEnergyConsumptionSensor -- ElectricEnergyConsumptionSensorValue: has
+
+@enduml

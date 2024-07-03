@@ -1,0 +1,90 @@
+@startuml
+'skinparam linetype ortho
+
+title UC39 - As a User, I want to have current outside temperature on the \nfront/main page of my Web App (updated every 15 minutes, starting at 00:00).
+
+
+package server #LightGray {
+
+class HouseControllerWeb {
+-houseService: HouseService
+  -houseID: HouseID
+  -roomService: RoomService
+  -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+  -roomMapperDTO: RoomMapperDTO
+  -deviceMapperDTO: DeviceMapperDTO
+  -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+  -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+  -valueService: ValueService
+- weatherAPIService: WeatherAPIService
++ GET getWeatherInfo(@RequestParam Integer hour): ResponseEntity<Double>
+}
+
+class WeatherAPIService {
+- weatherAPIGateway: WeatherAPIGateway
+- configScrapper: ConfigScrapper
+- houseRepository: HouseRepository
+- valueRepository: InstantTimeValueRepository
+- latitude: double
+- longitude: double
+- defineGroupHouseLocation(): int
++ getTemperatureForHour(int hour): double
+}
+
+interface HouseRepository <repo> {
+findAllEntities(): Iterable<House>
+}
+
+class House <root>{
+  -houseID: HouseID houseID
+  -location: Location
+}
+
+class Location <VO>{
+  -gpsCode: GPSCode
+  -address: Address
+}
+
+class GPSCode <VO>{
+  -latitude: double
+  -longitude: double
+}
+
+class ConfigScraper{
+    -filePath: String
+    -openingMainBlockTag: String
+    -closingMainBlockTag: String
+    -propertySplitter: String
+    -functionalityProperty: String
+    +loadTolerance(): String
+        +loadGroupNumber(): String
+}
+
+interface WeatherAPIGateway {
++ getInstantaneousTemperature(int groupNumber, double latitude, double longitude, int hour): InstTemperatureDTO
+}
+
+class WeatherAPIGatewayHttpImpl {
+- BASE_URL: String
+- restTemplate: RestTemplate
++ getInstantaneousTemperature(int groupNumber, double latitude, double longitude, int hour): InstTemperatureDTO
+}
+
+class InstTemperatureDTO {
++ measurement: double
++ unit: String
++ info: String
+}
+
+HouseControllerWeb -- WeatherAPIService
+WeatherAPIService - WeatherAPIGatewayHttpImpl
+WeatherAPIGatewayHttpImpl -- WeatherAPIGateway
+WeatherAPIService -- ConfigScraper
+WeatherAPIService -- HouseRepository
+WeatherAPIService -- House: <<uses>>
+House -- Location
+Location - GPSCode
+WeatherAPIGatewayHttpImpl - InstTemperatureDTO: <<creates>>
+}
+
+@enduml

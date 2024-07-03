@@ -1,0 +1,21 @@
+@startuml
+
+autonumber
+
+title UC12.2 - Add new Actuator to Device
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Add new Actuator to Device
+activate server
+
+server->server: Create Actuator
+
+[o<--server: New actuator added
+deactivate server
+
+@enduml

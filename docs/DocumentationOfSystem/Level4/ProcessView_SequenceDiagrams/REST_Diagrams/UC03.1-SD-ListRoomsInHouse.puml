@@ -1,0 +1,88 @@
+@startuml
+title UC03.1 List Rooms of House
+
+autonumber
+!pragma teoz true
+
+ box " <<SubSystem>>\n    :Backend " #DarkGrey
+ box " <<Container>>\n    :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":HouseControllerWeb" as controller <<Component>>
+participant "houseID:HouseID" as houseID
+participant ":RoomService" as RoomService <<Component>>
+participant ":HouseRepository" as HouseRepository <<Component>>
+participant ":RoomRepository" as roomRepo <<Component>>
+participant "room:Room" as room
+participant ":List<RoomID>" as list
+participant ":RoomMapperDTO" as mapper <<Component>>
+participant "roomDTO:RoomDTO" as roomDTO
+participant ":DB Driver" as DBDriver <<Component>>
+end box
+end box
+
+
+[o<- Router: GET api/house/{id}/rooms
+activate Router
+Router -> controller: GET getListOfRoomsDTOInHouse\n(@PathVariable("id") String houseIDstr,\n@RequestParam(required = false)\nBoolean areRoomsInside)
+activate controller
+controller -> controller: getListOfRoomsInHouse(String houseID)
+activate controller
+controller -> houseID**: <<create>>
+
+controller -> RoomService: getListOfRoomsInHouse(houseID: HouseID)
+activate RoomService
+
+RoomService -> HouseRepository: containsEntityByID(houseID)
+activate HouseRepository
+HouseRepository -> DBDriver: existsById(houseID.toString())
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> HouseRepository: true
+deactivate DBDriver
+
+RoomService -> roomRepo: findByHouseID(houseID)
+activate roomRepo
+
+roomRepo -> DBDriver: findByHouseID(houseID.toString())
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> roomRepo: RoomDataModel:roomDM
+deactivate DBDriver
+
+roomRepo --> RoomService: Iterable<Room>
+deactivate roomRepo
+RoomService --> list**: <<create>>
+
+loop for each Room in List
+RoomService -> room: identity()
+activate room
+room --> RoomService: roomID
+deactivate room
+
+RoomService -> list: add(roomID)
+activate list
+list --> RoomService: List<RoomID>
+deactivate list
+end
+
+
+RoomService --> controller : List<RoomID>
+deactivate RoomService
+
+
+controller -> mapper: roomIDsToDTOList(List<RoomID> listOfRoomsIDs)
+activate mapper
+mapper --> roomDTO**: <<create>>
+mapper --> controller: List<RoomDTO>
+deactivate mapper
+deactivate controller
+
+controller --> Router: roomDTOList, HttpStatus.OK
+deactivate controller
+[o<- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+
+@enduml

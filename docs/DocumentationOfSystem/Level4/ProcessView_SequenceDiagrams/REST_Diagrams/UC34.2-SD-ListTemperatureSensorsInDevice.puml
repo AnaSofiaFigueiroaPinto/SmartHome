@@ -1,0 +1,97 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title UC34.2 - List temperature sensors in device.
+
+
+!pragma teoz true
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+autonumber
+participant ":Router" as Router <<Component>>
+participant ":DeviceControllerWeb" as controller  <<Component>>
+participant "deviceID:DeviceID" as deviceID
+participant "sensorFunctionalityID:\n SensorFunctionalityID" as sensorFunctionalityID
+participant ":SensorService" as sensorService <<Component>>
+participant ":SensorRepository" as sensorRepo <<Component>>
+participant ":MapperSensorDataModel" as sensorMapperDataModel <<Component>>
+participant "listOfSensorIDs\n:List<SensorID>" as listOfSensorIDs
+participant "sensor:Sensor" as sensor
+participant ":SensorMapperDTO" as sMapper
+participant "listOfSensorsDTO\n:List<SensorDTO>" as listOfSensorsDTO
+participant ":SensorDTO" as sensorDTO
+participant ":DB Driver" as dbDriver <<Component>>
+end box
+end box
+
+'SECTION 1: Get list of devices in a room'
+
+ref over Router
+[[docs/DocumentationOfSystem/UC06-ListAllDevicesInRoom/UC06SequenceDiagram.puml]]
+end ref
+
+[o-> Router: GET api/devices/{id}/sensors
+activate Router
+Router -> controller: getListOfSensors(@PathVariable String deviceName,\n@RequestParam(required = false) String sensorFunctionalityID)
+activate controller
+
+'SECTION 2: Get list of temperature sensors in the selected device'
+'in controller'
+controller --> deviceID**: <<create>>
+controller --> sensorFunctionalityID**: <<create>>
+
+'in services'
+controller -> sensorService: findSensorsIDOfADeviceBySensorFunctionality\n(deviceID, sensorFunctionality)
+activate sensorService
+sensorService -> sensorRepo: findByDeviceIDAndSensorFunctionality\n(deviceID, sensorFunctionalityID)
+activate sensorRepo
+sensorRepo -> dbDriver : findByDeviceIDAndSensorFunctionality(deviceID, sensorFunctionalityID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> sensorRepo: Iterable<SensorDataModel> sensorDataModelList
+deactivate dbDriver
+sensorRepo -> sensorMapperDataModel: toDomainList(factorySensor, sensorDataModelList)
+activate sensorMapperDataModel
+sensorMapperDataModel --> sensorRepo: Iterable<Sensor> sensorList
+deactivate sensorMapperDataModel
+
+sensorRepo --> sensorService: Iterable<Sensor> sensorList
+deactivate sensorRepo
+
+sensorService --> listOfSensorIDs**: <<create>>
+
+loop for each Sensor in Iterable<Sensor>
+  sensorService -> sensor: identity()
+  activate sensor
+  sensor --> sensorService: sensorID
+  deactivate sensor
+  sensorService -> listOfSensorIDs: add(sensorID)
+  activate listOfSensorIDs
+  listOfSensorIDs --> sensorService: List<SensorID>
+  deactivate listOfSensorIDs
+end
+
+sensorService --> controller: (List<SensorID>)
+
+controller -> sMapper**: sensorIDsToDTOList(List<SensorID>)
+activate sMapper
+
+sMapper --> listOfSensorsDTO**: <<create>>
+
+loop for each SensorID in listOfSensorIDs
+    sMapper -> sMapper: sensorIDToDTO(sensorID)
+    sMapper -> sensorDTO**: <<create>>
+    sMapper -> listOfSensorsDTO: add(sensorDTO)
+    activate listOfSensorsDTO
+    deactivate listOfSensorsDTO
+end loop
+deactivate sMapper
+
+controller --> Router: sensorDTOList, HttpStatus.OK
+deactivate controller
+
+[o<--Router : JSON response, \nHttpStatus.OK
+deactivate Router
+
+
+@enduml

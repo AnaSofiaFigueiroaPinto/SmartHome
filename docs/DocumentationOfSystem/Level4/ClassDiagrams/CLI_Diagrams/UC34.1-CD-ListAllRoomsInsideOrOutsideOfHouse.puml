@@ -1,0 +1,85 @@
+@startuml
+title UC34.1 List of Rooms Inside or Outside of House
+'https://plantuml.com/class-diagram
+ skinparam linetype ortho
+
+package server #LightGray {
+class ListAllRoomsInsideOrOutsideOfHouseController <controller> {
+ -roomService: RoomService
+ +getListOfRoomsDTOInsideOrOutsideHouse(HouseDTO houseDTO,\n boolean areRoomsInside): List<RoomDTO>
+ }
+
+ class RoomMapperDTO {
+ +roomIDsToDTOList(Iterable<RoomID> listOfRoomsIDs): List<RoomDTO>
+ }
+
+ class RoomDTO {
+ +roomName: String
+ +floorNumber: int
+ +width: double
+ +length: double
+ +height: double
+ }
+
+ class Room <root> {
+ -roomName: RoomID
+ -floorNumber: RoomFloor
+ -dimensions: RoomDimensions
+ -houseID: HouseID
+ +identity(): RoomID
+ +getRoomDimensions(): RoomDimensions
+ }
+
+ class RoomService <service> {
+ -roomRepository: RoomRepository
+ -factoryRoom: FactoryRoom
+ -houseRepository: HouseRepository
+ +getListOfRoomsInsideOrOutsideHouse(HouseID houseID,\n boolean areRoomsInside): List<RoomID>
+ }
+  interface HouseRepository <repo> extends Repository {
+  }
+
+ interface Repository <repo>{
+  +containsEntityByID(ID id): boolean
+ }
+
+
+ Interface RoomRepository <repo>{
+ +findByHouseID(HouseID houseID): Iterable<Room>
+ }
+
+ class RoomDimensions <VO> {
+    -width: double
+    -length: double
+    -height: double
+    +getHeight(): double
+}
+
+class RoomID <VO> {
+    -id: String
+}
+
+ class HouseID <VO> {
+ -id: String
+ }
+
+ class HouseDTO {
+    +houseID: String
+}
+
+}
+
+
+ ListAllRoomsInsideOrOutsideOfHouseController -- RoomService
+ ListAllRoomsInsideOrOutsideOfHouseController ..> RoomMapperDTO: <<uses>>
+ ListAllRoomsInsideOrOutsideOfHouseController ..> HouseID: <<creates>>
+ ListAllRoomsInsideOrOutsideOfHouseController ..> HouseDTO: <<uses>>
+
+ RoomRepository -- RoomService
+ RoomMapperDTO ..>  RoomDTO: <<creates>>
+ RoomService -- HouseRepository
+ RoomService ..> Room : <<uses>>
+ Room "1"--* "1"RoomDimensions
+ Room "1"--* "1" RoomID
+
+@enduml

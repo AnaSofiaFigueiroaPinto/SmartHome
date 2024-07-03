@@ -1,0 +1,55 @@
+@startuml
+interface Sensor {
++getSensorName()
++getSensorFunctionality()
+}
+
+class WindSpeedAndDirectionSensor implements SensorSpecificTime{
+-sensorName: String
+-sensorFunctionality: SensorFunctionality
+-value: Value
+-factoryValue: FactoryValue
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getSpeedAndDirection(): String
++getValueFromLog(TimeStamp timeStamp): String
+}
+
+enum SensorFunctionality {
+    TEMPERATURE,
+    HUMIDITY,
+    BINARY_STATUS,
+    SCALE_POSITION,
+    WIND,
+    SUNRISE,
+    SUNSET,
+    DEW_POINT,
+    SOLAR_RADIATION,
+    POWER,
+    ENERGY
+}
+
+class WindSpeedAndDirectionValue implements Value{
+-unitSpeed: String
+- readingInstant: Timestamp
++getValueWithUnit(): String
+}
+
+interface Value {
++getValueWithUnit(): String
+}
+
+interface SensorSpecificTime extends Sensor {
++getValueForSpecificTime(): String
+}
+
+class FactoryValue {
++createValueSpecificTime(): Value
+}
+
+WindSpeedAndDirectionSensor -- FactoryValue: has
+FactoryValue ..> WindSpeedAndDirectionValue: <<creates>>
+WindSpeedAndDirectionSensor -- SensorFunctionality: has
+WindSpeedAndDirectionSensor -- WindSpeedAndDirectionValue: has
+
+@enduml

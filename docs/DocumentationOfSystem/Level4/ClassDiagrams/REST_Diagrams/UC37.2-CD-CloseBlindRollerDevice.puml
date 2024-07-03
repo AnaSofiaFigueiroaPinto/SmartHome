@@ -1,0 +1,83 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+title UC37.2: Close Blind Roller Device
+
+package server #LightGray {
+
+class DeviceControllerWeb{
+    - sensorService: SensorService
+    - sensorMapperDTO:SensorMapperDTO
+    - actuatorService: ActuatorService
+    - actuatorMapperDTO:ActuatorMapperDTO
+    -valueService: ValueService
+    - mapperSensorFunctionality : SensorFunctionalityMapperDTO
+    -mapperReading : ReadingMapperDTO
+    -closeBlindRollerService: CloseBlindRollerService
+    -deviceService: DeviceService
+    +PATCH editDevice(@PathVariable("id") String deviceName, @RequestParam(required = false) Integer percentage: ResponseEntity<Object>
+    -closeBlindRollerDevice(String deviceID, int percentage): boolean
+}
+
+class DeviceID <VO>{
+    -deviceID: String
+}
+
+class ActuatorFunctionalityID <VO>{
+    -actuatorFunctionalityID: String
+}
+
+class CloseBlindRollerService{
+    - actuatorRepository: ActuatorRepository
+    - deviceRepository: DeviceRepository
+    - checkIfDeviceIsActive(DeviceID deviceID): boolean
+    +setActuatorStateOfBlindRollers(DeviceID deviceID, ActuatorFunctionalityID actuatorFunctionalityID, int percentage): boolean
+}
+
+interface Repository <repo>{
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+interface DeviceRepository extends Repository {
+}
+
+class Device {
+    -deviceID: DeviceID
+    -deviceModel: DeviceModel
+    -deviceStatus: DeviceStatus
+    -roomID: RoomID
+    +isActive(): boolean
+}
+
+
+interface ActuatorRepository <repo>{
+    +findByDeviceIDAndActuatorFunctionalityID(DeviceID deviceID,\n ActuatorFunctionality actuatorFunctionalityID): Iterable<Actuator>
+}
+
+abstract class Actuator <root>{
+     -actuatorID: ActuatorID
+     -actuatorProperties: ActuatorProperties
+     -deviceName: DeviceID
+     -actuatorFunctionalityID: ActuatorFunctionalityID
+     +getActuatorFunctionality(): ActuatorFunctionalityID
+    }
+
+class BlindSetterActuator extends Actuator{
+    - actuatorName: ActuatorID
+    - actuatorProperties: ActuatorProperties
+    - deviceName: DeviceID
+    - actuatorFunctionalityID: ActuatorFunctionalityID
+    +setActuatorSpecificValue(int percentage): boolean
+}
+}
+
+DeviceControllerWeb ..> ActuatorFunctionalityID: <<creates>>
+DeviceControllerWeb ..> DeviceID: <<creates>>
+DeviceControllerWeb -- CloseBlindRollerService
+CloseBlindRollerService -- DeviceRepository
+CloseBlindRollerService -- ActuatorRepository
+ActuatorRepository -- Actuator
+CloseBlindRollerService - Device
+
+@enduml

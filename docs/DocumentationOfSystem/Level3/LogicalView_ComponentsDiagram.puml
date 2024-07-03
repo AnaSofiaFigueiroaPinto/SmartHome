@@ -1,0 +1,38 @@
+@startuml
+skinparam linetype ortho
+
+component ":Backend" <<Subsystem>> {
+    component ":Server" <<Component>> as SV {
+    }
+
+    component ":Database" <<Component>> as DB {
+    }
+
+    port " " as P1
+    port " " as P2
+    port " " as P3
+
+    P1 -- SV
+    P2 -- SV
+    P3 -- SV
+
+
+    DB -down-() DatabaseAPI
+    SV -up-( DatabaseAPI
+
+}
+
+rectangle "REST API" as REST
+rectangle "CLI" as CLI
+rectangle "Weather Service API" as WS
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #FFFFFF
+}
+
+P2 -up-0 REST
+P1 -up-0 CLI
+P3 -up-( WS
+
+@enduml

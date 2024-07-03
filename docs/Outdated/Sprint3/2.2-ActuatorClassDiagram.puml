@@ -1,0 +1,102 @@
+@startuml
+enum ActuatorFunctionality {
+    BINARY_SWITCH,
+    PERCENTAGE_SETTER,
+    INTEGER_SETTER,
+    DECIMAL_SETTER
+}
+
+interface Actuator {
++ getActuatorName(): String
++ getActuatorFunctionality(): ActuatorFunctionality
+}
+
+class ActuatorCatalogue {
+- actuatorClasses: List<String>
+- loadConfig(String filePath): void
++ createActuatorFromCatalogue(String actuatorClass,\n String actuatorName, ActuatorProperties actuatorProperties): Actuator
+- isActuatorInList(String actuatorName): boolean
++ getActuatorClasses(): List<String>
+}
+ActuatorCatalogue ..> Actuator: <<creates classes that implement>>
+
+class Device {
+- deviceName: String
+- deviceModel: String
+- status: Status
+- sensorList: List<Sensor>
+- actuatorList: List<Actuator>
++ getDeviceName(): String
++ getDeviceModel(): String
++ getActuatorList(): List<Actuator>
++ createActuatorAndAddToDevice(String actuatorName,\n ActuatorCatalogue actuatorCatalogue, String actuatorClass\n ActuatorProperties actuatorProperties): Actuator
+- isActuatorInList(String actuatorName): boolean
+}
+
+
+Device ..> ActuatorCatalogue:<<uses>>
+Device "1" -- "0..*" Actuator: has classes\n that implement
+
+
+package actuators {
+    interface ActuatorSpecificDecimal {
+    + setDecimalValue(double value): boolean
+    }
+
+    interface ActuatorSpecificInteger {
+    + setActuatorSpecificValue (int specificInteger): boolean
+    }
+
+    class BlindSetterActuator implements ActuatorSpecificDecimal {
+    - actuatorName: String
+    - actuatorFunctionality: ActuatorFunctionality
+    - specificInteger: int
+    - actuatorProperties: ActuatorProperties
+    + getActuatorName(): String
+    + getActuatorFunctionality(): ActuatorFunctionality
+    + setActuatorSpecificValue\n(int specificInteger): boolean
+    }
+    BlindSetterActuator -- ActuatorFunctionality: has
+
+    class DecimalSetterActuator implements ActuatorSpecificDecimal{
+    - actuatorName: String
+    - actuatorFunctionality: ActuatorFunctionality
+    - actuatorProperties: ActuatorProperties
+    - targetValue: double
+    - validConstructorArguments(String actuatorName,\n ActuatorProperties actuatorProperties): boolean
+    + getTargetValue(): double
+    + getActuatorName(): String
+    + getActuatorFunctionality(): ActuatorFunctionality
+    + setDecimalValue(double value): boolean
+    }
+    DecimalSetterActuator -- ActuatorFunctionality: has
+
+    class SwitchActuator implements ActuatorSpecificInteger{
+    - actuatorName: String
+    - actuatorFunctionality: ActuatorFunctionality
+    - status: Status
+    - actuatorProperties: ActuatorProperties
+    + getActuatorName(): String
+    + getActuatorFunctionality(): ActuatorFunctionality
+    + setActuatorSpecificValue(int specificValue): boolean
+    }
+    SwitchActuator -- ActuatorFunctionality:has
+
+    class IntegerSetterActuator implements ActuatorSpecificInteger {
+    -actuatorName: String
+    -actuatorFunctionality: ActuatorFunctionality
+    -actuatorProperties: ActuatorProperties
+    -validConstructorArguments(String actuatorName, ActuatorProperties actuatorProperties): boolean
+    +getActuatorName(): String
+    +getActuatorFunctionality(): ActuatorFunctionality
+    +setActuatorSpecificValue(int specificInteger): boolean
+    }
+    IntegerSetterActuator -- ActuatorFunctionality: has
+}
+
+Actuator <|-- ActuatorSpecificDecimal
+Actuator <|-- ActuatorSpecificInteger
+
+
+
+@enduml

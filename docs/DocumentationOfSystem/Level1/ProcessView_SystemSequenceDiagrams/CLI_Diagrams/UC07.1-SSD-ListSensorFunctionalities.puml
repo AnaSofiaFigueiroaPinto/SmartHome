@@ -1,0 +1,14 @@
+@startuml
+
+autonumber
+title UC07.1 - List Sensor Functionalities
+
+Actor User
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome: get list of sensor functionalities
+activate SmartHome
+User <--SmartHome: list of sensor functionalities
+deactivate SmartHome
+
+@enduml

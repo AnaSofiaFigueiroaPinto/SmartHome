@@ -1,0 +1,25 @@
+@startuml
+
+title US03 - As an Administrator, I want to have a list of existing rooms, so that I can choose one to edit it.
+
+autonumber
+
+participant ":ListAndEditRoomController" as Ctrl
+
+participant ":RoomMapper" as RoomMapper
+participant ":House" as House
+
+-> Ctrl: getRoomList()
+activate Ctrl
+Ctrl -> House: getRoomList()
+activate House
+House --> Ctrl: RoomList
+deactivate House
+Ctrl -> RoomMapper: roomToDTO(RoomList roomList)
+activate RoomMapper
+RoomMapper --> Ctrl: Map<RoomDTO, Room>
+deactivate RoomMapper
+<-- Ctrl: List<RoomDTO>
+deactivate Ctrl
+
+@enduml

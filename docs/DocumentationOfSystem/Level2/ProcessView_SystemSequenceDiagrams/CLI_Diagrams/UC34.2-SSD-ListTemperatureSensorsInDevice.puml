@@ -1,0 +1,15 @@
+@startuml
+
+title UC34.2 - List Temperature Sensors in Device
+autonumber
+
+box "  <<System>>\nSmartHome"
+participant "<<Subsystem>>\nBackend" as backend
+end box
+
+[o-> backend: get list of temperature sensors
+activate backend
+[o<-- backend: list of temperature sensors
+deactivate backend
+
+@enduml

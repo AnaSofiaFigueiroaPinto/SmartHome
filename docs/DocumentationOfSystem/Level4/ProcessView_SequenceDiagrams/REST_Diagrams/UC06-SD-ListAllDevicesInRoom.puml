@@ -1,0 +1,116 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title US06 - As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+
+autonumber
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":Router" as Router <<Component>>
+participant ":RoomControllerWeb" as roomctrl <<Component>>
+participant "roomID:RoomID" as RoomID
+participant ":DeviceService" as service <<Component>>
+participant ":RoomRepository" as RoomRepo <<Component>>
+participant ":DeviceRepository" as DeviceRepo <<Component>>
+participant ":MapperDeviceDataModel" as DeviceMapperDataModel <<Component>>
+participant "listOfDevicesInRoom \n:List<DeviceID>" as listOfDevicesInRoom
+participant "device:Device" as Device
+participant ":DeviceMapperDTO" as DeviceMapperDTO
+participant "listOfDevicesDTO \n:List<DeviceDTO>" as listOfDevicesDTO
+participant ":DeviceDTO" as DeviceDTO
+participant ":DB Driver" as dbDriver <<Component>>
+
+'SECTION 1: Get list of rooms in house'
+ref over Router
+UC03_1-SD-ListRoomsOfHouse
+end ref
+
+'SECTION 2: Get list of devices in the selected room'
+'in controller'
+
+[o-> Router: GET api/rooms/{id}/devices
+activate Router
+
+Router -> roomctrl: GET getListOfDevicesDTOInRoom \n(@PathVariable("id") String roomName)
+activate roomctrl
+
+roomctrl --> RoomID**: <<create>>
+
+'in services'
+roomctrl -> service: getListOfDevicesInRoom(roomID)
+activate service
+
+service -> RoomRepo: containsEntityByID(roomID)
+activate RoomRepo
+RoomRepo -> dbDriver: containsEntityByID(roomID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> RoomRepo: true
+deactivate dbDriver
+RoomRepo --> service: true
+deactivate RoomRepo
+
+service -> DeviceRepo: findByRoomID(roomID)
+activate DeviceRepo
+
+DeviceRepo -> dbDriver: findByRoomID(roomID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> DeviceRepo: Iterable<DeviceDataModel> deviceDataModelList
+deactivate dbDriver
+DeviceRepo -> DeviceMapperDataModel: toDomainList(factoryDevice, deviceDataModelList)
+activate DeviceMapperDataModel
+DeviceMapperDataModel --> DeviceRepo: Iterable<Device> deviceList
+deactivate DeviceMapperDataModel
+
+
+DeviceRepo --> service: Iterable<Device>
+deactivate DeviceRepo
+
+service --> listOfDevicesInRoom**: <<create>>
+
+loop for each Device in Iterable
+        service -> Device: identity()
+        activate Device
+        Device --> service: deviceID
+        deactivate Device
+
+        service -> listOfDevicesInRoom: add(deviceID)
+        activate listOfDevicesInRoom
+        deactivate listOfDevicesInRoom
+end loop
+
+service --> roomctrl: listOfDevicesInRoom
+deactivate service
+
+'SECTION 2: Conversion to DTO'
+
+roomctrl -> DeviceMapperDTO: deviceIDsToDTOList(listOfDevicesInRoom)
+activate DeviceMapperDTO
+
+'in Mapper'
+DeviceMapperDTO --> listOfDevicesDTO**: <<create>>
+
+loop for each DeviceID in listOfDevicesInRoom
+    DeviceMapperDTO -> DeviceMapperDTO: deviceIDsToDTO(deviceID)
+    DeviceMapperDTO --> DeviceDTO**: <<create>>
+    DeviceMapperDTO -> listOfDevicesDTO: add(deviceDTO)
+    activate listOfDevicesDTO
+    deactivate listOfDevicesDTO
+end loop
+
+DeviceMapperDTO --> roomctrl: listOfDevicesDTO
+deactivate DeviceMapperDTO
+
+Router <-- roomctrl: CollectionModel<EntityModel<DeviceDTO>> \n, HttpStatus.OK
+deactivate roomctrl
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+'END SECTION
+
+@enduml

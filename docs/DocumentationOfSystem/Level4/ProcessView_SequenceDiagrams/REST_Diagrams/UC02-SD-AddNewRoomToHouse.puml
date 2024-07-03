@@ -1,0 +1,112 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title UC02 - Add new room to house
+
+
+autonumber
+!pragma teoz true
+
+box " <<SubSystem>>\n  <<Container>>\n    :Backend " #DarkGrey
+box " <<Component>>\n    :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":RoomControllerWeb" as RoomControllerWeb <<Component>>
+participant "roomDTO:RoomDTO" as roomDTO
+participant "houseID:HouseID" as houseID
+participant "roomID:RoomID" as roomID
+participant "roomFloor:RoomFloor" as roomFloor
+participant "roomDimensions:RoomDimensions" as roomDimensions
+participant ":RoomService" as RoomService <<Component>>
+participant ":HouseRepository" as HouseRepository <<Component>>
+participant ":FactoryRoom" as FactoryRoom <<Component>>
+participant ":RoomRepository" as RoomRepository <<Component>>
+participant "room:Room" as Room
+participant "newRomDTO:RoomDTO" as roomDTO2
+participant "roomDataModel:RoomDataModel" as RoomDataModel
+participant ":MapperRoomDM" as MapperRoomDM <<Component>>
+participant ":DB Driver" as DBDriver <<Component>>
+end box
+end box
+
+[o-> Router: POST api/rooms
+activate Router
+Router -> RoomControllerWeb: POST createRoom\n(@RequestBody RoomDTO roomDTO)
+activate RoomControllerWeb
+RoomControllerWeb -> roomDTO: houseID
+activate roomDTO
+roomDTO --> RoomControllerWeb: String houseID
+RoomControllerWeb --> houseID: <<create>>
+RoomControllerWeb -> roomDTO: roomName
+roomDTO --> RoomControllerWeb: String roomName
+RoomControllerWeb --> roomID** : <<create>>
+RoomControllerWeb -> roomDTO: floorNumber
+roomDTO --> RoomControllerWeb: int floorNumber
+RoomControllerWeb --> roomFloor**: <<create>>
+RoomControllerWeb -> roomDTO: roomLength
+roomDTO --> RoomControllerWeb: double roomLength
+RoomControllerWeb -> roomDTO: roomWidth
+roomDTO --> RoomControllerWeb: double roomWidth
+RoomControllerWeb -> roomDTO: roomHeight
+roomDTO --> RoomControllerWeb: double roomHeight
+deactivate roomDTO
+RoomControllerWeb --> roomDimensions**: <<create>>
+
+RoomControllerWeb -> RoomService: createRoomAndSave(roomID, roomFloor, roomDimensions, houseID)
+activate RoomService
+RoomService -> HouseRepository: containsEntityByID(houseID)
+activate HouseRepository
+HouseRepository -> DBDriver: existsById(houseID.toString())
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> HouseRepository: true
+deactivate DBDriver
+HouseRepository --> RoomService: true
+deactivate HouseRepository
+
+RoomService --> FactoryRoom: createRoom(roomID, roomFloor, roomDimensions, houseID)
+activate FactoryRoom
+FactoryRoom --> RoomService: room
+deactivate FactoryRoom
+
+RoomService -> RoomRepository: containsEntityByID(roomID)
+activate RoomRepository
+RoomRepository -> DBDriver: existsById(roomID.toString())
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> RoomRepository: true
+deactivate DBDriver
+RoomRepository --> RoomService: false
+deactivate RoomRepository
+
+RoomService -> RoomRepository: save(room)
+activate RoomRepository
+RoomRepository --> RoomDataModel**:<<create>>
+RoomRepository -> DBDriver: save(roomDataModel)
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> RoomRepository: roomDataModel
+deactivate DBDriver
+RoomRepository -> MapperRoomDM: toDomain(factoryRoom, roomDataModel)
+activate MapperRoomDM
+MapperRoomDM --> RoomRepository: room
+deactivate MapperRoomDM
+
+RoomRepository --> RoomService: room saved
+deactivate RoomRepository
+
+RoomService --> Room: identity()
+activate Room
+Room --> RoomService: roomID
+deactivate Room
+
+RoomService --> RoomControllerWeb: roomID
+deactivate RoomService
+
+RoomControllerWeb --> roomDTO2**: <<create>>
+RoomControllerWeb --> Router: newRoomDTO, HttpStatus.CREATED
+deactivate RoomControllerWeb
+[o<-- Router: JSON response, \nHttpStatus.CREATED
+deactivate Router
+@enduml

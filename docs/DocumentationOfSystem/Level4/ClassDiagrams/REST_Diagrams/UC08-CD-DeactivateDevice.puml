@@ -1,0 +1,60 @@
+@startuml
+title UC08 Deactivate a device
+skinparam linetype ortho
+
+package server #LightGray {
+
+class DeviceControllerWeb {
+    -deviceService: DeviceService
+    -closeBlindRollerSevice: CloseBlindRollerService
+    -sensorService: SensorService
+    -sensorMapperDTO: SensorMapperDTO
+    -actuatorService: ActuatorService
+    -actuatorMapperDTO: ActuatorMapperDTO
+    -valueService: ValueService
+    -mapperSensorFunctionality: SensorFunctionalityMapperDTO
+    -mapperReading: ReadingMapperDTO
+    +PATCH editDevice(@PathVariable("id") String deviceName, @RequestParam(required = false) Integer closePercentage):\n ResponseEntity<Object> response, HttpStatus
+    -deactivateDevice(String deviceName):\n ResponseEntity<Object> response
+}
+
+class DeviceID <VO>{
+    -deviceName: String
+    +getDeviceName(): String
+}
+
+interface DeviceRepository extends Repository{
+    +update(Device device): Device
+}
+
+interface Repository {
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+class Device <Root>{
+    -deviceID: DeviceID
+    -deviceStatus: DeviceStatus
+    +deactivateDevice(): boolean
+}
+
+enum DeviceStatus <VO>{
+    -status: boolean
+    +getStatus(): boolean
+    +setStatus(boolean status): void
+}
+
+class DeviceService {
+    -factoryDevice: FactoryDevice
+    -deviceRepository: DeviceRepository
+    -roomRepository: RoomRepository
+    -houseRepository: HouseRepository
+    +deactivateDevice(DeviceID deviceID): boolean
+}
+
+DeviceControllerWeb ..> DeviceID: <<creates>>
+DeviceControllerWeb -- DeviceService
+DeviceService --  DeviceRepository
+DeviceService ..> Device: <<uses>>
+Device --> DeviceStatus: <<has>>
+}
+@enduml

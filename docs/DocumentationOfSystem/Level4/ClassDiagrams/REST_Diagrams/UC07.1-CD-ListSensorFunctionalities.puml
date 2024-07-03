@@ -1,0 +1,42 @@
+@startuml
+skinparam linetype ortho
+
+title "UC07.1 List of Sensor Functionalities"
+
+package server #LightGray {
+
+class SensorFunctionalityControllerWeb {
+    -sensorFunctionalityService: SensorFunctionalityService
+    +getListOfSensorFunctionalities(): ResponseEntity<CollectionModel\n<EntityModel<SensorFunctionalityDTO>>> collectionModel, HttpStatus.OK
+}
+
+class SensorFunctionalityService {
+    -sensorFunctionalityRepository: SensorFunctionalityRepository
+    +getListOfSensorFunctionalities(): List<SensorFunctionalityID>
+}
+
+class SensorFunctionality <root> {
+    -id: SensorFunctionalityID
+    +identity(): SensorFunctionalityID
+}
+
+interface SensorFunctionalityRepository <repo> {
+    +findAllEntities(): Iterable<SensorFunctionality>
+}
+
+class SensorFunctionalityMapperDTO {
+    +sensorFunctionalityToDTO(SensorFunctionalityID sensorFunctionalityID): \nSensorFunctionalityDTO
+    +sensorFunctionalityToDTOList(List<SensorFunctionalityID> \nsensorFunctionalitiesIDs): List<SensorFunctionalityDTO>
+}
+class SensorFunctionalityDTO{
+ +sensorFunctionalityName : String
+ }
+}
+
+SensorFunctionalityControllerWeb -- SensorFunctionalityService
+SensorFunctionalityService -- SensorFunctionalityRepository
+SensorFunctionalityService ..> SensorFunctionality : <<uses>>
+SensorFunctionalityControllerWeb ..> SensorFunctionalityMapperDTO  : <<creates>>
+SensorFunctionalityMapperDTO ..> SensorFunctionalityDTO  : <<creates>>
+
+@enduml

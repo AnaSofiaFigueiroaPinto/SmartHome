@@ -1,0 +1,57 @@
+@startuml
+skinparam linetype ortho
+title UC08 - Deactivate Device
+
+package server #LightGray {
+
+class DeactivateDeviceController {
+    - deviceService: DeviceService
+    + deactivateDevice(DeviceDTO deviceDTO): boolean
+}
+
+class DeviceService {
+    - factoryDevice: FactoryDevice
+    - deviceRepository: DeviceRepository
+    - roomRepository: RoomRepository
+    - houseRepository: HouseRepository
+    + deactivateDevice(DeviceID deviceID): boolean
+}
+
+interface DeviceRepository extends Repository {
+    + update(Device device): Device
+}
+
+interface Repository {
+    + findEntityByID (ID id): Optional <T>
+}
+
+class Device <Root>{
+    - deviceID: DeviceID
+    - deviceModel: DeviceModel
+    - deviceStatus: DeviceStatus
+    - roomID: RoomID
+    + deactivate(): boolean
+}
+
+enum DeviceStatus <VO>{
+    - ACTIVE
+    - DEACTIVATED
+}
+
+class DeviceDTO {
+    + deviceName: String
+}
+
+class DeviceID <VO>{
+    - deviceName: String
+}
+
+DeactivateDeviceController -- DeviceService
+DeactivateDeviceController ..> DeviceID : <<creates>>
+DeactivateDeviceController ..> DeviceDTO : <<uses>>
+DeviceService ..> Device: <<uses>>
+DeviceService -- DeviceRepository
+DeviceStatus -- Device
+}
+
+@enduml

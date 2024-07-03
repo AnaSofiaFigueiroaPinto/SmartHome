@@ -1,0 +1,35 @@
+@startuml
+title POST request
+
+autonumber
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+box " <<System>> \n:Smarthome " #LightGrey
+participant "<<Subsystem>>\n:Frontend" as fe
+participant "<<Subsystem>>\n:Backend" as be
+end box
+
+[o-> fe++ : Ask to add request
+fe -> be++ : POST /Request
+
+be --> fe: Response
+deactivate
+[o<--fe: Response
+deactivate
+
+
+legend bottom
+  **This request can be included in:**
+  |= Request POST |= Response |
+  |= /rooms (UC02) |= New Room created |
+  |= /devices (UC05) |= New Device created|
+  |= /sensors (UC07.1) |= New Sensor created|
+  |= /actuators (UC12.2) |= New Actuator created|
+end legend
+
+@enduml

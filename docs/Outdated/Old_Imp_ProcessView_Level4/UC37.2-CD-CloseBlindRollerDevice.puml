@@ -1,0 +1,111 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+title UC37.2: Close Blind Roller Device
+
+class ActuatorControllerWeb{
+    -closeBlindRollerService: CloseBlindRollerService
+    -deviceService: DeviceService
+    +closeBlindRollerDevice(String deviceID, String sensorFunctionalityID, int closePercentage): boolean
+}
+
+class DeviceID <VO> {
+    -deviceID: String
+}
+
+class SensorFunctionalityID <VO> {
+    -deviceID: String
+}
+
+class CloseBlindRollerService{
+    - sensorRepository: SensorRepository
+    - actuatorRepository: ActuatorRepository
+    - instantTimeValueRepository: InstantTimeValueRepository
+    +verifyIfClosingPercentageIsValid(DeviceID deviceID, SensorFunctionalityID sensorFunctionalityID, int closePercentage): boolean
+    +getBlindSetterActuatorFromDeviceAndChangeStatus(DeviceID deviceID, SensorFunctionalityID, int closePercentage): boolean
+}
+
+class DeviceService{
+    - deviceRepository: DeviceRepository
+    + checkIfDeviceIsActive(DeviceID deviceID): boolean
+}
+
+interface Repository{
+    +findEntityByID(DeviceID deviceID): Optional<Device>
+}
+
+interface DeviceRepository extends Repository{
+}
+
+class Device {
+    -deviceID: DeviceID
+    -deviceModel: DeviceModel
+    -deviceStatus: DeviceStatus
+    -roomID: RoomID
+    +getDeviceStatus(): boolean
+}
+
+interface SensorRepository{
+    +findByDeviceIDAndSensorFunctionality(DeviceID chosenDevice, \n SensorFunctionalityID chosenSensorFunctionality)
+}
+
+interface ValueRepository{
+}
+
+interface InstantTimeValueRepository extends ValueRepository{
+    +findLastValueRecorded(SensorID sensorID): Value
+}
+
+interface Value {
+    +getReading(): int
+}
+
+class InstantTimeValue implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -instantTime: Timestamp
+    +getReading(): Reading
+}
+
+class Reading <VO>{
+    -measurement: String
+    -unit: String
+    +getMeasurement(): String
+}
+
+interface ActuatorRepository{
+    +findByDeviceID(String deviceID): Iterable<Actuator>
+}
+
+abstract class Actuator {
+     -actuatorID: ActuatorID
+     -actuatorProperties: ActuatorProperties
+     -deviceName: DeviceID
+     -actuatorFunctionalityID: ActuatorFunctionalityID
+     +getActuatorFunctionality(): ActuatorFunctionalityID
+    }
+
+class BlindSetterActuator extends Actuator{
+    - actuatorName: ActuatorID
+    - actuatorProperties: ActuatorProperties
+    - deviceName: DeviceID
+    - actuatorFunctionalityID: ActuatorFunctionalityID
+    +setActuatorSpecificValue(int closePercentage): boolean
+}
+
+ActuatorControllerWeb -- DeviceService
+ActuatorControllerWeb --> SensorFunctionalityID: <<creates>>
+ActuatorControllerWeb --> DeviceID: <<creates>>
+ActuatorControllerWeb -- CloseBlindRollerService
+DeviceService -- DeviceRepository
+CloseBlindRollerService -- SensorRepository
+CloseBlindRollerService -- ActuatorRepository
+CloseBlindRollerService -- ValueRepository
+ActuatorRepository -- Actuator
+DeviceRepository -- Device
+InstantTimeValueRepository -- Value
+Reading -- InstantTimeValue
+
+@enduml

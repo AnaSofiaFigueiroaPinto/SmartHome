@@ -1,0 +1,46 @@
+@startuml
+title UC - POST Request of Objects
+
+autonumber
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Frontend" #LightGrey
+participant "<<Container>>\n  :UI" as frontend
+end box
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+  participant ":Database" as database <<Container>>
+end box
+end box
+
+
+[o->frontend: Add New Object
+activate frontend
+frontend->server: POST New Object
+activate server
+server ->database: find if Object exists
+activate database
+
+database-->server: false
+deactivate database
+
+server -> database: save new Object
+activate database
+
+database-->server: New Object saved
+deactivate database
+frontend<--server: New Object JSON
+deactivate server
+[o<--frontend: New Object added
+deactivate server
+
+legend bottom
+ **This request can be included in:**
+ |= Request Add New Object to parent Object |= Response |
+ |= /rooms (UC02) |= RoomDTO |
+ |= /devices (UC05) |= DeviceDTO|
+ |= /sensor (UC07.2) |= SensorDTO|
+ |= /actuators (UC12.2) |= ActuatorDTO|
+end legend
+@enduml
+

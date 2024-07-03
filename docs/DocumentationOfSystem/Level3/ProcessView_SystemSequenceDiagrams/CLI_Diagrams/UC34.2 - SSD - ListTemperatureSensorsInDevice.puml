@@ -1,0 +1,18 @@
+@startuml
+
+title UC34.2 - List Temperature Sensors in Device
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o-> server: Get list of temperature sensors
+activate server
+server -> server: Get list of temperature sensors
+[o<-- server: List of temperature sensors
+deactivate server
+
+@enduml

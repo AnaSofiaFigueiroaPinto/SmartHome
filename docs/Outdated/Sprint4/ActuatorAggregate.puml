@@ -1,0 +1,198 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package ddd {
+interface ValueObject{
+}
+interface DomainID extends ValueObject{
+}
+interface DomainEntity extends DomainID {
++identity(): ID
++isSameAs(Object object): boolean
+}
+interface AggregateRoot extends DomainEntity{
+}
+interface RepositoryReadWrite extends AggregateRoot{
++updateOrSave(T entity): T
++findAllEntities(): Iterable<T>
++findEntityById(ID id): Optional<T>
++containsEntityById(ID id): boolean
+}
+
+}
+package domain{
+package actuator {
+interface Actuator
+
+class ActuatorFactory{
++createActuator(): Actuator
+}
+
+interface Actuator implements ddd.AggregateRoot{
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
++getDeviceName(): DeviceID
+}
+
+interface ActuatorSpecificDecimal extends Actuator{
++setDecimalValue(double value) : boolean
+}
+interface ActuatorSpecificInteger extends Actuator{
++setActuatorSpecificValue (int specificInteger) : boolean
+}
+
+class BlindSetterActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-actuatorProperties : ActuatorProperties
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++setActuatorSpecificValue(int specificInteger): boolean
++getDeviceName(): DeviceID
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+class DecimalSetterActuator implements ActuatorSpecificDecimal{
+-actuatorName : ActuatorID
+-actuatorProperties: ActuatorProperties
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-targetValue: ActuatorTarget
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++getTargetValue(): ActuatorTarget
++setDecimalValue(double newValue): boolean
++getDeviceName(): DeviceID
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+
+class IntegerSetterActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-actuatorProperties: ActuatorProperties
+-actuatorFunctionalityID: ActuatorFunctionalityID
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++setActuatorSpecificValue(int specificInteger): boolean
++getDeviceName(): DeviceID
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+
+class SwitchActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-actuatorProperties: ActuatorProperties
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-status: SwitchActuatorStatus
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++setActuatorSpecificValue(int specificValue): boolean
++getDeviceName(): DeviceID
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+}
+ActuatorFactory --> Actuator: <<creates>>
+
+
+
+package valueobject{
+class ActuatorID implements ddd.DomainID{
+-actuatorName: String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
+}
+class ActuatorProperties  implements ddd.ValueObject{
+-rangeInt: RangeInt
+-rangeDecimal: RangeDecimal
++getRangeInt(): RangeInt
++getRangeDecimal(): RangeDecimal
+}
+
+class RangeInt implements ddd.ValueObject{
+-upperLimitInt: int
+-lowerLimitInt: int
++getUpperLimitInt(): int
++getLowerLimitInt(): int
+}
+
+class RangeDecimal  implements ddd.ValueObject{
+- upperLimitDecimal: double
+- lowerLimitDecimal: double
+- precision: int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+Enum SwitchActuatorStatus implements ddd.ValueObject{
+    ON,
+    OFF
+}
+
+
+class ActuatorFunctionalityID implements ddd.DomainID{
+   -actuatorFunctionalityName : String
+   + equals(Object object): boolean
+    + hashCode(): int
+    + toString(): String
+
+ }
+
+class ActuatorTarget implements ddd.ValueObject{
+- targetValue: double
++getTargetValue(): double
+}
+class DeviceID  implements ddd.DomainID{
+-deviceName: String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
++ getDeviceName(): String
+}
+
+}
+ActuatorProperties --> RangeInt
+ActuatorProperties --> RangeDecimal
+}
+DecimalSetterActuator  -->  ActuatorProperties
+DecimalSetterActuator  --> ActuatorID
+DecimalSetterActuator  --> DeviceID
+DecimalSetterActuator  --> ActuatorTarget
+DecimalSetterActuator  -->  ActuatorFunctionalityID
+
+IntegerSetterActuator  -->  ActuatorProperties
+IntegerSetterActuator  --> ActuatorID
+IntegerSetterActuator  --> DeviceID
+IntegerSetterActuator  -->  ActuatorFunctionalityID
+
+SwitchActuator  -->  ActuatorProperties
+SwitchActuator  --> ActuatorID
+SwitchActuator  --> DeviceID
+SwitchActuator  -->  SwitchActuatorStatus
+SwitchActuator  -->  ActuatorFunctionalityID
+
+BlindSetterActuator  -->  ActuatorProperties
+BlindSetterActuator  --> ActuatorID
+BlindSetterActuator  --> DeviceID
+BlindSetterActuator  -->  ActuatorFunctionalityID
+
+package repositories{
+
+class ActuatorRepository implements ddd.RepositoryReadWrite {
+-HashMap: Map<ActuatorID, Actuator>
++addAndSaveActuator(Actuator entity): Actuator
++findAllActuators(): Iterable<Actuator>
++findActuatorById(ActuatorID id): Optional<Actuator>
++containsActuatorById(ActuatorID id): boolean
+}
+ActuatorRepository ..> Actuator
+}
+@enduml
+
+
+

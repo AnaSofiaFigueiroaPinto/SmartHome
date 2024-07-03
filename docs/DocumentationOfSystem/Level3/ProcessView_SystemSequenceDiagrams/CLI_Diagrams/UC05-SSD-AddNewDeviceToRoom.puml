@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC05 - Add New Device to Room
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Add new device
+activate server
+server->server: Check if Device exists
+server->server: Create Device
+[o<--server: New Device Added
+deactivate server
+@enduml

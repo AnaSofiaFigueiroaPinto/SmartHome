@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC34.3 - MaxTempDifOutsideInside
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+end box
+
+
+[o->server: Get max temperature \n difference between \n outside and inside
+activate server
+server->server: find inside and outside sensor
+
+server->server: get temperature
+
+server->server: calculate max temp difference
+[o<--server: double
+deactivate server
+@enduml

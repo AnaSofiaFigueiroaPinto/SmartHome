@@ -1,0 +1,101 @@
+@startuml
+title UC34.1 List of Rooms Inside or Outside of House
+'https://plantuml.com/sequence-diagram
+autonumber
+!pragma teoz true
+box "<<SubSystem>>\n<<Container>>\n:Backend" #DarkGrey
+box " <<Component>>\n:Server #LightGrey
+participant ":ListAllRoomsInsideOrOutsideOfHouseController" as controller
+participant "houseDTO:HouseDTO" as houseDTO
+participant "houseID:HouseID" as HouseID
+participant ":RoomService" as service
+participant ":HouseRepository" as houseRepo
+participant "listOfRoomIDs:List<RoomID>" as listOfRoomIDs
+participant ":RoomRepository" as roomRepo
+participant "room:Room" as room
+participant "roomDimensions:RoomDimensions" as roomDimensions
+participant ":RoomMapperDTO" as mapper
+participant "listOfRoomDTO:List<RoomDTO>" as listOfRoomDTO
+participant "roomDTO:RoomDTO" as roomDTO
+
+[o-> controller: getListOfRoomsDTOInsideOrOutsideHouse(HouseDTO houseDTO,\n boolean areRoomsInside): List<RoomDTO>
+activate controller
+controller -> houseDTO: houseID
+activate houseDTO
+houseDTO --> controller: String houseID
+deactivate houseDTO
+controller --> HouseID**: <<creates>>
+controller -> service: getListOfRoomsInsideOrOutsideHouse(houseID, boolean areRoomsInside)
+activate service
+service -> houseRepo: containsEntityByID(houseID)
+activate houseRepo
+houseRepo --> service: true
+deactivate houseRepo
+service --> listOfRoomIDs**: <<create>>
+service -> roomRepo: findByHouseID(houseID)
+activate roomRepo
+roomRepo --> service: Iterable<Room>
+deactivate roomRepo
+
+alt are Rooms Inside
+    loop for each Room in RoomRepository
+        alt height != 0
+        service -> room: getRoomDimensions()
+        activate room
+        room -> roomDimensions: getHeight()
+        activate roomDimensions
+        roomDimensions --> room: double != 0.0
+        deactivate roomDimensions
+        room --> service: roomDimensions
+        service -> room : identity()
+        room --> service: roomID
+        deactivate room
+        service -> listOfRoomIDs: add(roomID)
+        activate listOfRoomIDs
+        deactivate listOfRoomIDs
+        end
+    end
+
+else are Rooms Not Inside
+    loop for each Room in RoomRepository
+        alt height = 0
+        service -> room: getRoomDimensions()
+        activate room
+        room -> roomDimensions: getHeight()
+        activate roomDimensions
+        roomDimensions --> room: double = 0.0
+        deactivate roomDimensions
+        room --> service: roomDimensions
+        service -> room : identity()
+        room --> service: roomID
+        deactivate room
+        service -> listOfRoomIDs: add(roomID)
+        activate listOfRoomIDs
+        deactivate listOfRoomIDs
+        end
+    end
+end
+
+service --> controller: listOfRoomIDs
+deactivate service
+controller -> mapper**:
+controller -> mapper: roomIDsToDTOList(List<RoomID> listOfRoomIDs)
+activate mapper
+
+mapper --> listOfRoomDTO**: <<create>>
+
+loop for each RoomID in listOfRoomIDs
+    mapper -> mapper: roomIDToDTO(roomID)
+    mapper -> roomDTO**: <<create>>
+    mapper -> listOfRoomDTO: add(roomDTO)
+    activate listOfRoomDTO
+    deactivate listOfRoomDTO
+end loop
+
+mapper --> controller: listOfRoomDTO
+deactivate mapper
+
+[o<-- controller: List<RoomDTO>
+deactivate controller
+
+@enduml

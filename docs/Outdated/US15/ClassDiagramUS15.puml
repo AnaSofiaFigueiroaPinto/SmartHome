@@ -1,0 +1,51 @@
+ClassDiagramUS16.puml
+@startuml
+title US15: As Product Owner, I want the system to have a type of actuator that sets an integer value in the range defined by [lower limit, upper limit].
+'https://plantuml.com/class-diagram
+
+interface Actuator {
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
+}
+
+interface ActuatorSpecificInteger extends Actuator {
++setActuatorSpecificValue(int specificInteger): boolean
+}
+
+class ActuatorProperties{
+-upperLimitInt: int
+-lowerLimitInt: int
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+-validConstructorArguments(int upperLimitInt, int lowerLimitInt): boolean
+-validConstructorsArgumentsDecimal(double upperLimitDecimal, double lowerLimitDecimal, int precision): boolean
++getUpperLimitInt(): int
++getLowerLimitInt(): int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+class IntegerSetterActuator implements ActuatorSpecificInteger {
+-actuatorName: String
+-actuatorFunctionality: ActuatorFunctionality
+-actuatorProperties: ActuatorProperties
+-validConstructorArguments(String actuatorName, ActuatorProperties actuatorProperties): boolean
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
++setActuatorSpecificValue(int specificInteger) : boolean
+}
+
+enum ActuatorFunctionality {
+    BINARY_SWITCH,
+    PERCENTAGE_SETTER,
+    INTEGER_SETTER,
+    DECIMAL_SETTER
+    }
+
+IntegerSetterActuator - ActuatorFunctionality: has
+IntegerSetterActuator -- ActuatorProperties: has
+
+
+@enduml

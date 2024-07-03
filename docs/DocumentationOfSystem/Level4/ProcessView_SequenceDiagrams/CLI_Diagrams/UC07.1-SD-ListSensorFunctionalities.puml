@@ -1,0 +1,59 @@
+@startuml
+
+autonumber
+
+title "UC07.1 List Sensor Functionalities"
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":ListSensorFunctionalitiesController" as Controller <<Component>>
+participant "SensorFunctMapper\n:SensorFunctionalityMapperDTO" as FuncMapper
+participant ":SensorFunctionalityService" as FuncService <<Component>>
+participant ":SensorFunctionalityRepository" as FunctionalityRepo <<Component>>
+participant "listOfSensorFunctID\n:List<SensorFunctionalityID>" as mapFunc
+participant "sensorFunctionality\n:SensorFunctionality" as Func
+participant "listOfSensorFunctDTO\n:List<SensorFunctionalityDTO>" as listDTO
+participant "sensorFunctionalityDTO\n:SensorFunctionalityDTO" as FuncDTO
+end box
+end box
+
+-> Controller: getListOfSensorFunctionalities()
+activate Controller
+Controller --> FuncMapper**: <<creates>>
+Controller -> FuncService: getListOfSensorFunctionalities()
+activate FuncService
+FuncService -> FunctionalityRepo: findAllEntities()
+activate FunctionalityRepo
+FunctionalityRepo --> FuncService: Iterable<SensorFunctionality>
+deactivate FunctionalityRepo
+
+FuncService --> mapFunc**: <<creates>>
+loop for each SensorFunctionality in Iterable
+FuncService -> Func : identity()
+activate Func
+Func --> FuncService: sensorFunctionalityID
+deactivate Func
+FuncService -> mapFunc : add(sensorFunctionalityID)
+activate mapFunc
+deactivate mapFunc
+end loop
+FuncService --> Controller : listOfSensorFunctID
+deactivate FuncService
+Controller -> FuncMapper: sensorFunctionalityToDTOList(listOfSensorFunctID)
+activate FuncMapper
+FuncMapper --> listDTO**: <<creates>>
+loop for each SensorFunctionalityID in List
+FuncMapper -> FuncMapper: sensorFunctionalityToDTO(sensorFunctionalityID)
+FuncMapper --> FuncDTO**: <<creates>>
+FuncMapper -> listDTO : add(sensorFunctionalityDTO)
+activate listDTO
+deactivate listDTO
+end
+FuncMapper --> Controller: listOfSensorFunctDTO
+deactivate FuncMapper
+<-- Controller: listOfSensorFunctDTO
+deactivate Controller
+
+@enduml

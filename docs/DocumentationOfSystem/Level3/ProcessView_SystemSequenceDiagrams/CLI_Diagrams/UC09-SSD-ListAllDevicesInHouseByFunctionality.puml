@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC09 - List all Device in House by Functionality
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+
+end box
+
+[o->server: Get all Devices in House by Functionality
+activate server
+server->server: find all devices
+
+server->server: group devices by functionality
+[o<--server: List all Devices by Functionality
+deactivate server
+@enduml

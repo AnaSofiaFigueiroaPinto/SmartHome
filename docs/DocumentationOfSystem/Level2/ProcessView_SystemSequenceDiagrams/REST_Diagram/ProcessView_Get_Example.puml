@@ -1,0 +1,44 @@
+@startuml
+title GET request
+
+autonumber
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+box " <<System>> \n:Smarthome " #LightGrey
+participant "<<Subsystem>>\n:Frontend" as fe
+participant "<<Subsystem>>\n:Backend" as be
+end box
+
+[o-> fe++ : Ask for request
+fe --> be++ : GET /Request
+
+
+be --> fe: Response
+deactivate
+[o<--fe: Response
+deactivate
+
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= /houses/{id}/rooms (UC03.1) |= List of Rooms|
+|= /rooms/{id}/devices (UC06) |= List of Devices|
+|= /sensorfunctionality (UC07.1) |= List of Sensor Functionalities|
+|= /houses/{id} (UC09) |= List of all Devices in House by Functionality|
+|= /actuatorfunctionality (UC12.1) |= List of Actuator Functionalities|
+|= /devices/{id} (UC33) |= List all measurements of Device in a period|
+|= /houses/{id}/rooms (UC34.1) |= List all Rooms inside or outside of House|
+|= /devices/{id}/sensors (UC34.2) |= List of temperatures in Device|
+|= /houses/{id} (UC34.3) |= Double of maximum temperature difference between outside and inside|
+|= /houses/{id} (UC36) |= Double of peak power consumption|
+|= /actuatorfunctionality/{id} (UC37.1) |= List of Devices with Actuator Functionality and Room location|
+|= /devices/{id} (UC38) |= Today's Sunrise/Sunset hours|
+end legend
+
+@enduml

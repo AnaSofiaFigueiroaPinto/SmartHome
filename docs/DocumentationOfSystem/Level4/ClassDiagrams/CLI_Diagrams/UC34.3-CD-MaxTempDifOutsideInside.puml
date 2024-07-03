@@ -1,0 +1,71 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+title UC34: As a Room Owner [or Power User, or Administrator], I want to get the maximum instantaneous \n temperature difference between a device in the room and the outside, in a given period.
+
+package server #LightGray {
+
+class MaxTempDifOutsideInsideController {
+    -maxTempDifOutsideInsideService: MaxTempDifOutsideInsideService
+    +maxTempDifOutsideInside(SensorDTO insideSensorDTO, SensorDTO \n outsideSensorID, Timestamp start, Timestamp end): double
+}
+
+class MaxTempDifOutsideInsideService {
+    -valueRepository: InstantTimeValueRepository
+    -configScraper: ConfigScraper
+    -CONFIG_PROPERTIES = "config/config.properties": String
+    +getMaxTemperatureDifference(SensorID insideSensorID, \n SensorID outsideSensorID, Timestamp startTime, \n Timestamp  endTime): double
+    -findClosestTemperature(List<InstantTimeValue> values, \n long timestamp): double
+}
+
+class SensorDTO {
+    +sensorName: String
+}
+
+class SensorID <VO> {
+    -sensorName: String
+}
+
+interface InstantTimeValueRepository extends ValueRepository{
+    +findBySensorId (SensorID sensorID): List<Value>
+    +findAllEntities(): Iterable<Value>
+}
+
+interface Value{
+    +getReading(): Reading
+}
+
+class InstantTimeValue implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -instantTimeReading: Timestamp
+    +getInstantTimeReading(): Timestamp
+}
+
+class Reading <VO> {
+    -value: String
+    -unit: String
+    +getValue(): String
+}
+
+
+class ConfigScraper{
+    -filePath: String
+    -openingMainBlockTag: String
+    -closingMainBlockTag: String
+    -propertySplitter: String
+    -functionalityProperty: String
+    +loadTolerance(): String
+}
+
+MaxTempDifOutsideInsideController -- MaxTempDifOutsideInsideService
+MaxTempDifOutsideInsideController .. SensorDTO : <<uses>>
+MaxTempDifOutsideInsideController --> SensorID: <<creates>>
+MaxTempDifOutsideInsideService .. Value: <<uses>>
+MaxTempDifOutsideInsideService -- InstantTimeValueRepository
+MaxTempDifOutsideInsideService -- ConfigScraper
+InstantTimeValue - Reading
+
+}
+@enduml

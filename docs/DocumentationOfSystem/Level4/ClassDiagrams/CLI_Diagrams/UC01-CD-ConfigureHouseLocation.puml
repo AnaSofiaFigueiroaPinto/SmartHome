@@ -1,0 +1,75 @@
+@startuml
+title UC01: As an Administrator, I want to configure the location of the house.
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package server #LightGray {
+
+class ConfigureHouseLocationController {
+  -houseService: HouseService
+  -houseID: HouseID
+  +configureHouseLocation(LocationDTO locationDTO):\n HouseDTO
+}
+
+class HouseService {
+  -houseRepository: HouseRepository
+  -factoryHouse: FactoryHouse
+  +editLocation(HouseID, Address, GPSCode): Location
+}
+
+interface HouseRepository <repo>{
+  +update(House): House
+  +findEntityByID(HouseID houseID): Optional<House>
+}
+
+
+class House <root>{
+  -houseID: HouseID houseID
+  -location: Location
+  +editLocation(Address, GPSCode): Location
+}
+
+class Address <VO>{
+  -street: String
+  -doorNumber: String
+  -zipCode: String
+  -city: String
+  -country: String
+}
+
+class GPSCode <VO>{
+  -latitude: double
+  -longitude: double
+}
+
+class Location <VO>{
+  -gpsCode: GPSCode
+  -address: Address
+}
+
+class HouseDTO {
+  +houseID: String
+  +street: String
+  +doorNumber: String
+  +zipCode: String
+  +city: String
+  +country: String
+  +latitude: double
+  +longitude: double
+
+}
+
+class HouseID <VO>{
+  -houseIdentifier: String
+}
+
+ConfigureHouseLocationController -- HouseService
+ConfigureHouseLocationController ..> HouseDTO: <<creates>>
+ConfigureHouseLocationController ..> Address: <<creates>>
+ConfigureHouseLocationController ..> GPSCode: <<creates>>
+HouseService -- HouseRepository
+ConfigureHouseLocationController .> HouseID: <<uses>>
+HouseService .> House: <<uses>>
+House "1" --* "1" Location
+}
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+title UC01: As an Administrator, I want to configure the location of the house.
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package server #LightGray {
+
+class HouseControllerWeb {
+  -houseService: HouseService
+  -houseID: HouseID
+  -roomService: RoomService
+  -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+  -roomMapperDTO: RoomMapperDTO
+  -deviceMapperDTO: DeviceMapperDTO
+  -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+  -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+  +PATCH configureHouseLocation(@RequestBody LocationDTO locationDTO):\n ResponseEntity<Object> houseDTO, HttpStatus.OK
+}
+
+class HouseService {
+  -houseRepository: HouseRepository
+  -factoryHouse: FactoryHouse
+  +getHouseIDFromRepository(): HouseID
+  +editLocation(HouseID, Address, GPSCode): Location
+}
+
+interface HouseRepository <repo>{
+  +findAllEntities(): Iterable<House>
+  +update(House): House
+  +findEntityByID(HouseID houseID): Optional<House>
+}
+
+
+class House <root>{
+  -houseID: HouseID houseID
+  -location: Location
+  +editLocation(Address, GPSCode): Location
+}
+
+class Address <VO>{
+  -street: String
+  -doorNumber: String
+  -zipCode: String
+  -city: String
+  -country: String
+}
+
+class GPSCode <VO>{
+  -latitude: double
+  -longitude: double
+}
+
+class Location <VO>{
+  -gpsCode: GPSCode
+  -address: Address
+}
+
+class HouseDTO {
+  +houseID: String
+  +street: String
+  +doorNumber: String
+  +zipCode: String
+  +city: String
+  +country: String
+  +latitude: double
+  +longitude: double
+
+}
+
+class HouseID <VO> {
+  -houseIdentifier: String
+}
+
+HouseControllerWeb -- HouseService
+HouseControllerWeb ..> HouseDTO: <<creates>>
+HouseControllerWeb ..> Address: <<creates>>
+HouseControllerWeb ..> GPSCode: <<creates>>
+HouseService -- HouseRepository
+HouseService .> HouseID: <<uses>>
+HouseService ..> House: <<uses>>
+House "1" --* "1" Location
+}
+
+@enduml

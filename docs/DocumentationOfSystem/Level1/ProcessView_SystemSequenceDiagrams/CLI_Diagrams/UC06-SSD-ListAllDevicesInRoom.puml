@@ -1,0 +1,14 @@
+@startuml
+
+autonumber
+title UC06 - As a Room Owner [or Power User, or Administrator],\n I want to get a list of all devices in a room, so that I can configure them.
+
+Actor User
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome : get list of devices in room
+activate SmartHome
+User <--SmartHome: list of devices
+deactivate SmartHome
+
+@enduml

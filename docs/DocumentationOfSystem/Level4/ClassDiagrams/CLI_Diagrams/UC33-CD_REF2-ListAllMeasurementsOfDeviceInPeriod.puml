@@ -1,0 +1,90 @@
+@startuml
+
+skinparam linetype polyline
+
+package server #LightGray {
+
+note "Continues in UC33ClassDiagram" as NOTE1
+Value -up-> NOTE1
+
+interface Value {
+    +getReading(): Reading
+}
+
+class InstantTimeValue implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -instantTime: Timestamp
+    +identity(): ValueID
+    +getReading(): Reading
+    +getSensorID(): SensorID
+    +getInstantTime(): Timestamp
+    +isSameAs (Object object): boolean
+}
+
+class PeriodTimeValue implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -startTime: Timestamp
+    -endTime: Timestamp
+    +identity(): ValueID
+    +getReading(): Reading
+    +getSensorID(): SensorID
+    +getStartTime(): Timestamp
+    +getEndTime(): Timestamp
+    +isSameAs (Object object): boolean
+}
+
+class InstantTimeLocationValue implements Value {
+    -valueID: ValueID
+    -reading: Reading
+    -sensorID: SensorID
+    -instantTime: Timestamp
+    -gpsCode: GPSCode
+    +identity(): ValueID
+    +getReading(): Reading
+    +getSensorID(): SensorID
+    +getInstantTime(): Timestamp
+    +getGPSCode(): GPSCode
+    +isSameAs (Object object): boolean
+}
+
+class ValueID <VO> {
+    -valueIdentifier: String
+    +equals(Object o): boolean
+    +hashCode(): int
+    +toString(): String
+}
+
+class Reading <VO> {
+    -value: String
+    -unit: String
+    +getValue(): String
+    +getUnit(): String
+    +getAllValuesWithUnits(): String
+}
+
+class SensorID <VO> {
+    -sensorName: String
+    +equals(Object o): boolean
+    +hashCode(): int
+    +toString(): String
+}
+
+
+
+InstantTimeValue -- SensorID
+PeriodTimeValue -- SensorID
+InstantTimeLocationValue -- SensorID
+
+InstantTimeValue -- ValueID
+PeriodTimeValue -- ValueID
+InstantTimeLocationValue -- ValueID
+
+InstantTimeValue -- Reading
+PeriodTimeValue -- Reading
+InstantTimeLocationValue -- Reading
+}
+@enduml

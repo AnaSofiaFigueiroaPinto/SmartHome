@@ -1,0 +1,89 @@
+@startuml
+skinparam linetype ortho
+package repositories {
+}
+
+package domain {
+    package sensor {
+        class FactorySensor {
+            - FactoryValue factoryValue
+            + createSensor(sensorID, sensorFunctionalityID, deviceID): Sensor
+        }
+        interface Sensor {
+            + getSensorName(): String
+            + getSensorFunctionality(): SensorFunctionalityID
+            + getDeviceName(): DeviceID
+        }
+        interface Value {
+            + getValueWithUnit(): String
+        }
+        interface SensorSpecificTime extends Sensor {
+            + getValueForSpecificTime(Timestamp specificTime): String
+        }
+        package TemperatureCelsiusAggregate {
+            class TemperatureCelsiusSensor <Root> {
+                - SensorID sensorID
+                - SensorFunctionalityID sensorFunctionalityID
+                - DeviceID deviceID
+                - FactoryValue factoryValue
+                + getSensorName(): String
+                + getSensorFunctionality(): SensorFunctionalityID
+                + getValueForSpecificTime(Timestamp specificTime): String
+            }
+            TemperatureCelsiusSensor ..|> SensorSpecificTime
+        }
+        FactorySensor ..> TemperatureCelsiusSensor
+        class FactoryValue {
+            #createValueSpecificTime(String className, Timestamp specificTime): Value
+        }
+        TemperatureCelsiusSensor --> FactoryValue
+    }
+    package valueobjects {
+        class SensorID <VO> {
+            - sensorName: String
+            + getSensorName(): String
+            + equals(Object object): boolean
+        }
+        TemperatureCelsiusSensor --> SensorID
+        class SensorFunctionalityID <VO> {
+            - sensorFunctionality: String
+            + equals(Object o): boolean
+            + toString(): String
+        }
+        TemperatureCelsiusSensor --> SensorFunctionalityID
+        class DeviceID <VO> {
+            - deviceName: String
+            + equals(Object o): boolean
+            + hashCode(): int
+            + toString(): String
+            + getDeviceName(): String
+        }
+        TemperatureCelsiusSensor --> DeviceID
+        package sensorvalues {
+            class TemperatureCelsiusSensorValue <VO> {
+                - unit: String
+                - readingInstant: Timestamp
+                + getValueWithUnit(): String
+                + equals(Object o): boolean
+                + toString(): String
+            }
+            FactoryValue ..> TemperatureCelsiusSensorValue: <<creates>>
+            TemperatureCelsiusSensorValue ..|> Value
+        }
+    }
+}
+
+
+package repositories {
+    class SensorRepository <repo> {
+        - Map<SensorID, Sensor> dataMap
+        + updateOrSave(Sensor entity): Sensor
+        + findAllEntities(): Iterable<Sensor>
+        + findEntityById(SensorID id): Optional<Sensor>
+        + containsEntityByID(SensorID id): boolean
+    }
+    SensorRepository ..> SensorID
+    SensorRepository ..> TemperatureCelsiusSensor
+}
+
+@enduml

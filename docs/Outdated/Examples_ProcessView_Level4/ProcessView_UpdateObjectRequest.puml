@@ -1,0 +1,43 @@
+@startuml
+title Update Object
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+box "<<Container>>\n:Server" #LightGrey
+participant ":Controller" as controller <<Components>>
+participant ":DTO" as dto <<Components>>
+participant "vo:ValueObject" as vo
+participant ":Service" as service <<Components>>
+participant "domain:Domain" as domain <<Components>>
+participant ":Repository" as repo <<Components>>
+end box
+autonumber
+[o->controller : update Object
+controller->vo** : create VOs from Request
+controller->service : update(VOs)
+service->repo : findById(id)
+service <--repo : return Object
+service->domain : update(Object)
+domain-->service : updated Object
+service ->repo : save updated Object
+repo-->service : updated Object
+service-->controller : updated Object/ boolean
+controller->dto** : convert Object to DTO
+[o<--controller : updated ObjectDTO/boolean
+
+
+legend bottom
+ **This request can be included in:**
+ |= Request update Object |= Response |
+ |= Configure House Location (UC01) |= HouseDTO  |
+ |= Edit Room (UC03.2) |= RoomDTO|
+ |= Deactivate Device (UC08) |= boolean |
+end legend
+
+
+@enduml

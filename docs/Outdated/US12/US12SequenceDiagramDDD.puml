@@ -1,0 +1,98 @@
+@startuml
+
+autonumber
+
+title "As a Power User [or Administrator], I want to add a actuator to an existing device in a room. The sensor must be of a model of an existing type of actuator."
+
+participant ":AddNewActuatorToDeviceController" as Controller
+participant ":ActuatorFunctionalityService" as FunctionalityService
+participant ":ActuatorFunctionalityMapper" as FunctionalityMapper
+participant ":ActuatorFunctionalityRepository" as FunctionalityRepo
+participant "hashmapActuatorFunctionalityDTODomain:\nHashMap<ActuatorFunctionalityDTO, ActuatorFunctionality>" as mapFunctionality
+participant ":ActuatorFunctionalityDTO" as FunctionalityDTO
+participant "devicesDTOAndDevices:HashMap<DeviceDTO, Device>" as mapDevice
+participant ":DeviceService" as DeviceService
+participant ":ActuatorService" as ActuatorService
+participant ":FactoryActuator" as Factory
+participant ":Actuator" as Actuator
+participant ":ActuatorRepository" as ActuatorRepo
+
+'SECTION FOR GETTING THE LIST OF ROOMS IN A HOUSE AND DEVICES IN A ROOM
+-> Controller: getRoomList()
+activate Controller
+ref over Controller
+US06SequenceDiagram
+end ref
+<-- Controller: List<DeviceDTO>
+'END SECTION
+
+'SECTION FOR RETRIEVING AND EXTERNALIZING LIST OF FUNCTIONALITIES
+== Retrieve and externalize list of actuators functionalities ==
+-> Controller: getListOfAvailableActuator()
+activate Controller
+Controller -> FunctionalityService: getActuatorFunctionalityList()
+activate FunctionalityService
+FunctionalityService -> FunctionalityMapper: getActuatorFunctionalityMap()
+activate FunctionalityMapper
+FunctionalityMapper -> FunctionalityRepo: findAllEntities()
+activate FunctionalityRepo
+FunctionalityRepo --> FunctionalityMapper: Iterable<ActuatorFunctionality>
+deactivate FunctionalityRepo
+FunctionalityMapper --> mapFunctionality**: <<creates>>
+activate mapFunctionality
+
+loop for each Actuator Functionality in Iterable
+FunctionalityMapper -> FunctionalityDTO**: <<creates>>
+FunctionalityMapper-> mapFunctionality: put(ActuatorFunctionalityDTO actuatorFunctionalityDTO, \n ActuatorFunctionality actuatorFunctionality)
+deactivate mapFunctionality
+end loop
+FunctionalityMapper --> FunctionalityService:hashmapActuatorFunctionalityDTODomain
+deactivate FunctionalityMapper
+FunctionalityService --> Controller: hashmapActuatorFunctionalityDTODomain
+deactivate FunctionalityService
+<-- Controller: List <ActuatorFunctionalityDTO>
+deactivate Controller
+'END SECTION
+
+'SECTION FOR CREATING A ACTUATOR
+== Create Actuator object for a given Device ==
+-> Controller: createActuatorAndSaveInRepository(ActuatorFunctionalityDTO actuatorFunctionalityDTO, \n String actuatorName, ActuatorProperties actuatorProperties, DeviceDTO deviceDTO)
+activate Controller
+Controller -> mapDevice: get(DeviceDTO deviceDTO)
+activate mapDevice
+mapDevice --> Controller: Device
+deactivate mapDevice
+Controller -> mapFunctionality: get(ActuatorFunctionalityDTO actuatorFunctionalityDTO)
+activate mapFunctionality
+mapFunctionality --> Controller: ActuatorFunctionality
+deactivate mapFunctionality
+Controller -> ActuatorService: createActuatorAndSave(ActuatorFunctionality actuatorFunctionality, \n String actuatorName, ActuatorProperties actuatorProperties, Device device)
+activate ActuatorService
+ActuatorService -> ActuatorService: device.isActive()
+ActuatorService -> ActuatorService: device.identity()
+ActuatorService -> ActuatorService: deviceRepository.containsEntityByID(DeviceID deviceID)
+ActuatorService -> ActuatorService: actuatorFunctionality.identity()
+ActuatorService -> Factory: createActuator(ActuatorFunctionalityID actuatorFunctionalityID, \n String actuatorName, ActuatorProperties actuatorProperties, DeviceID deviceID)
+activate Factory
+Factory -> Actuator**: <<creates>>
+Factory --> ActuatorService: Actuator
+deactivate Factory
+'END SECTION
+
+'SECTION FOR SAVING ACTUATOR IN REPOSITORY
+ActuatorService -> ActuatorService: actuator.identity()
+ActuatorService -> ActuatorRepo: containsEntityByID(ActuatorID actuatorID)
+activate ActuatorRepo
+ActuatorRepo --> ActuatorService: false
+ActuatorService -> ActuatorRepo: updateOrSave(Actuator actuator)
+ActuatorRepo --> ActuatorService: Actuator
+deactivate ActuatorRepo
+alt if Actuator was sucessufully created
+ActuatorService --> Controller: true
+deactivate ActuatorService
+<-- Controller: true
+end
+deactivate Controller
+'END SECTION
+
+@enduml

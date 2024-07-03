@@ -1,0 +1,130 @@
+@startuml
+
+autonumber
+
+title UC12.2 Add new Actuator to Device
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":ActuatorControllerWeb" as Controller <<Component>>
+participant "actuatorFunctionalityID:\nActuatorFunctionalityID" as FunctionalityID
+participant "actuatorID:\nActuatorID" as ActuatorID
+participant "deviceID:\nDeviceID" as DeviceID
+participant ":assemblerActuatorProperties" as assembler <<Component>>
+participant ":ActuatorService" as ActuatorService <<Component>>
+participant ":DeviceRepository" as DeviceRepository <<Component>>
+participant "device:\nDevice" as Device
+participant ":ActuatorFunctionalityRepository" as ActuatorFunctionalityRepo <<Component>>
+participant ":FactoryActuator" as Factory <<Component>>
+participant "actuator:\nActuator" as Actuator
+participant ":ActuatorRepository" as ActuatorRepo <<Component>>
+participant "actuatorDTO:\nActuatorDTO" as actuatorDTO
+participant ":DB Driver" as db <<Component>>
+end box
+
+'SECTION FOR GETTING THE LIST OF ROOMS IN A HOUSE AND DEVICES IN A ROOM
+ref over Router
+UC06-SD-ListAllDevicesInRoom
+end ref
+'END SECTION
+
+'SECTION FOR RETRIEVING AND EXTERNALIZING LIST OF FUNCTIONALITIES
+ref over Router
+UC12.1-SD-ListActuatorsFunctionalities
+end ref
+'END SECTION
+
+'SECTION FOR CREATING A ACTUATOR
+[o-> Router: POST api/actuators
+activate Router
+
+Router -> Controller: POST addNewActuatorToDevice \n(@RequestBody ActuatorDTO actuatorDTO)
+activate Controller
+
+Controller --> FunctionalityID**: <<create>>
+Controller --> ActuatorID**: <<create>>
+Controller --> DeviceID**: <<create>>
+
+Controller -> assembler: createActuatorPropertiesFromActuatorDTO(actuatorDTO)
+activate assembler
+assembler --> Controller: actuatorProperties
+deactivate assembler
+
+Controller -> ActuatorService: createActuatorAndSave(actuatorFunctionalityID, actuatorID, actuatorProperties, deviceID)
+activate ActuatorService
+ActuatorService -> DeviceRepository: findEntityByID(deviceID)
+activate DeviceRepository
+DeviceRepository -> db: findEntityByID(deviceID)
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> DeviceRepository: DeviceDataModel:deviceDM
+deactivate db
+
+DeviceRepository --> ActuatorService: device
+deactivate DeviceRepository
+
+ActuatorService -> Device: isActive()
+activate Device
+Device --> ActuatorService: true
+deactivate Device
+
+ActuatorService -> ActuatorFunctionalityRepo: getClassNameForActuatorFunctionalityID(actuatorFunctionalityID)
+activate ActuatorFunctionalityRepo
+
+ActuatorFunctionalityRepo --> ActuatorService: String actuatorClass
+deactivate ActuatorFunctionalityRepo
+
+ActuatorService -> Factory: createActuator(actuatorID, actuatorFunctionalityID,\n actuatorProperties, deviceID, actuatorClass)
+activate Factory
+Factory --> Actuator**: <<create>>
+Factory --> ActuatorService: actuator
+deactivate Factory
+'END SECTION
+
+'SECTION FOR SAVING ACTUATOR IN REPOSITORY
+ActuatorService -> Actuator: identity()
+activate Actuator
+Actuator --> ActuatorService: actuatorID
+deactivate Actuator
+ActuatorService -> ActuatorRepo: containsEntityByID(actuatorID)
+activate ActuatorRepo
+
+ActuatorRepo -> db: existsByID(id.toString())
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> ActuatorRepo: false
+deactivate db
+
+ActuatorRepo --> ActuatorService: false
+deactivate ActuatorRepo
+
+ActuatorService -> ActuatorRepo: save(actuator)
+activate ActuatorRepo
+
+ActuatorRepo -> db: save(actuatorDataModel)
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> ActuatorRepo: ActuatorDataModel:actuatorDM
+deactivate db
+
+ActuatorRepo --> ActuatorService: actuator
+deactivate ActuatorRepo
+
+ActuatorService --> Controller: actuatorID
+deactivate ActuatorService
+
+Controller --> actuatorDTO**: <<create>>
+Router <-- Controller: newActuatorDTO, HttpStatus.CREATED
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.CREATED
+deactivate Router
+'END SECTION
+
+@enduml

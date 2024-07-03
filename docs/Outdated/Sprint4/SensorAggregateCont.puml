@@ -1,0 +1,421 @@
+@startuml
+package sensorAggregate {
+skinparam linetype ortho
+        object SensorAggregate  {
+        Diagram continues in file
+        }
+
+        Sensor <.> SensorAggregate
+        interface SensorSpecificTime extends Sensor {
+            +getValueForSpecificTime():String
+        }
+
+        interface SensorSpecificTimeLocation extends Sensor {
+            +getValueForSpecificTimeLocation():String
+        }
+
+        interface SensorPeriodOfTime extends Sensor {
+            +getValueForPeriodOfTime():String
+        }
+
+        interface Sensor {
+                    +getSensorID(): SensorID
+                    +getSensorFunctionality():\nSensorFunctionality
+                    }
+
+        class FactoryValue {
+        # createValueSpecificTime (String className, Timestamp specificTime): Value
+        # createValuePeriodTime (String className, Timestamp start, Timestamp end): Value
+        # createValueTimeAndLocation (String className, Timestamp specificTime, GPSCode gpsCode): Value
+        }
+
+
+        class BinaryStatusSensor <Root> implements SensorSpecificTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        BinaryStatusSensor -- FactoryValue
+
+        class DewPointSensor <Root> implements SensorSpecificTimeLocation {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        DewPointSensor -- FactoryValue
+
+        class ElectricEnergyConsumptionSensor <Root> implements SensorPeriodOfTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        ElectricEnergyConsumptionSensor -- FactoryValue
+
+        class HumidityPercentageSensor <Root> implements SensorSpecificTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        HumidityPercentageSensor -- FactoryValue
+
+        class PowerAverageSensor <Root> implements SensorPeriodOfTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        PowerAverageSensor -- FactoryValue
+
+        class ScaleSensor <Root> implements SensorSpecificTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        ScaleSensor -- FactoryValue
+
+        class SolarIrradianceSensor <Root> implements SensorSpecificTimeLocation {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        SolarIrradianceSensor -- FactoryValue
+
+        class SpecificTimePowerConsumptionSensor <Root> implements SensorSpecificTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        SpecificTimePowerConsumptionSensor -- FactoryValue
+
+        class SunriseSensor <Root> implements SensorSpecificTimeLocation {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        SunriseSensor -- FactoryValue
+
+        class SunsetSensor <Root> implements SensorSpecificTimeLocation {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        SunsetSensor -- FactoryValue
+
+        class TemperatureCelsiusSensor <Root> implements SensorSpecificTime {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        TemperatureCelsiusSensor -- FactoryValue
+
+        class WindSpeedAndDirectionSensor <Root> implements SensorSpecificTimeLocation {
+        - sensorName: String;
+        - functionality: SensorFunctionality;
+        - value: Value;
+        - factoryValue: FactoryValue;
+        -sensorID : SensorID
+        -sensorFunctionalityID : SensorFunctionalityID
+        -deviceID : DeviceID
+        + getSensorName(): String;
+        + getSensorFunctionality(): SensorFunctionality;
+        + getValueForSpecificTime(): String;
+        +getDeviceName(): DeviceID;
+        +identity() : SensorID;
+        +isSameAs(Object object): boolean;
+        }
+        WindSpeedAndDirectionSensor -- FactoryValue
+}
+
+ BinaryStatusSensor --> valueobjects.SensorFunctionalityID
+ BinaryStatusSensor --> valueobjects.DeviceID
+ BinaryStatusSensor --> valueobjects.SensorID
+
+ DewPointSensor --> valueobjects.SensorFunctionalityID
+ DewPointSensor --> valueobjects.DeviceID
+ DewPointSensor --> valueobjects.SensorID
+
+ ElectricEnergyConsumptionSensor --> valueobjects.SensorFunctionalityID
+ ElectricEnergyConsumptionSensor --> valueobjects.DeviceID
+ ElectricEnergyConsumptionSensor --> valueobjects.SensorID
+
+ HumidityPercentageSensor --> valueobjects.SensorFunctionalityID
+ HumidityPercentageSensor --> valueobjects.DeviceID
+ HumidityPercentageSensor --> valueobjects.SensorID
+
+ PowerAverageSensor --> valueobjects.SensorFunctionalityID
+ PowerAverageSensor --> valueobjects.DeviceID
+ PowerAverageSensor --> valueobjects.SensorID
+
+ ScaleSensor --> valueobjects.SensorFunctionalityID
+ ScaleSensor --> valueobjects.DeviceID
+ ScaleSensor --> valueobjects.SensorID
+
+ SolarIrradianceSensor --> valueobjects.SensorFunctionalityID
+ SolarIrradianceSensor --> valueobjects.DeviceID
+ SolarIrradianceSensor --> valueobjects.SensorID
+
+ SpecificTimePowerConsumptionSensor --> valueobjects.SensorFunctionalityID
+ SpecificTimePowerConsumptionSensor --> valueobjects.DeviceID
+ SpecificTimePowerConsumptionSensor --> valueobjects.SensorID
+
+ SunriseSensor --> valueobjects.SensorFunctionalityID
+ SunriseSensor --> valueobjects.DeviceID
+ SunriseSensor --> valueobjects.SensorID
+
+ SunsetSensor --> valueobjects.SensorFunctionalityID
+ SunsetSensor --> valueobjects.DeviceID
+ SunsetSensor --> valueobjects.SensorID
+
+ TemperatureCelsiusSensor --> valueobjects.SensorFunctionalityID
+ TemperatureCelsiusSensor --> valueobjects.DeviceID
+ TemperatureCelsiusSensor --> valueobjects.SensorID
+
+ WindSpeedAndDirectionSensor --> valueobjects.SensorFunctionalityID
+ WindSpeedAndDirectionSensor --> valueobjects.DeviceID
+ WindSpeedAndDirectionSensor --> valueobjects.SensorID
+
+package valueobjects {
+        skinparam linetype ortho
+    package value{
+        skinparam linetype ortho
+
+        interface Value{
+        +getValueWithUnit():String
+    }
+    class BinaryStatusSensorValue <VO> implements Value {
+    - timestamp: Timestamp;
+    - unit: String;
+    + getValueWithUnit(): String;
+    }
+    class DewPointValue <VO> implements Value {
+    - unit: String;
+    - gpsCode: GPSCode;
+    - timestamp: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class ElectricEnergyConsumptionValue <VO> implements Value {
+    - unit: String;
+    - starDate: Timestamp;
+    - endDate: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class HumidityPercentageValue <VO> implements Value {
+    - unit: String;
+    - readingInstant: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class PowerAverageValue <VO> implements Value {
+    - unit: String;
+    - starDate: Timestamp;
+    - endDate: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class ScaleValue <VO> implements Value {
+    - unit: String;
+    - date: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class SolarIrradianceValue <VO> implements Value {
+    - unit: String;
+    - dateAndTime: Timestamp;
+    - gpsCode: GPSCode;
+    + getValueWithUnit(): String;
+    }
+    class SpecificTimePowerConsumptionValue <VO> implements Value {
+    - unit: String;
+    - date: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class SunriseValue <VO> implements Value {
+    - unit: String;
+    - timestamp: Timestamp;
+    - gpsCode: GPSCode;
+    + getValueWithUnit(): String;
+    }
+    class SunsetValue <VO> implements Value {
+    - unit: String;
+    - timestamp: Timestamp;
+    - gpsCode: GPSCode;
+    + getValueWithUnit(): String;
+    }
+    class TemperatureCelsiusSensorValue <VO> implements Value {
+    - unit: String;
+    - readingInstant: Timestamp;
+    + getValueWithUnit(): String;
+    }
+    class WindSpeedAndDirectionValue <VO> implements Value {
+    - speedUnit: String;
+    - readingInstant: Timestamp;
+    + getValueWithUnit(): String;
+    }
+}
+    class SensorFunctionalityID <VO> {
+        - sensorFunctionality: String
+        + equals(Object o): boolean
+        + toString(): String
+    }
+
+    class DeviceID <VO> {
+        - deviceName: String
+        + equals(Object o): boolean
+        + hashCode(): int
+        + toString(): String
+        + getDeviceName(): String
+    }
+
+    class SensorID <VO> {
+        - sensorName: String
+        + getSensorName(): String
+        + equals(Object object): boolean
+     }
+
+}
+
+
+package ddd {
+        skinparam linetype ortho
+interface Repository extends AggregateRoot{
+}
+interface RepositoryReadWrite extends Repository{
++updateOrSave(T entity): T
++Iterable<T> findAllEntities()
++Optional<T> findEntityById(ID id)
++containsEntityById(ID id): boolean
+}
+interface AggregateRoot extends DomainEntity{}
+interface DomainEntity extends DomainID{
++identity(): ID
++isSameAs(Object object): boolean
+}
+interface DomainID extends ValueObject{}
+interface ValueObject{}
+}
+
+FactoryValue ..> Value:<<creates classes\n that implement>>
+BinaryStatusSensorValue ..|> ValueObject
+DewPointValue ..|> ValueObject
+ElectricEnergyConsumptionValue ..|> ValueObject
+HumidityPercentageValue ..|> ValueObject
+PowerAverageValue ..|> ValueObject
+ScaleValue ..|> ValueObject
+SolarIrradianceValue ..|> ValueObject
+SpecificTimePowerConsumptionValue ..|> ValueObject
+SunriseValue ..|> ValueObject
+SunsetValue ..|> ValueObject
+TemperatureCelsiusSensorValue ..|> ValueObject
+WindSpeedAndDirectionValue ..|> ValueObject
+
+DeviceID ..right..|> DomainID
+SensorFunctionalityID ..right..|> DomainID
+SensorID ..right..|> DomainID
+
+@enduml

@@ -1,0 +1,81 @@
+@startuml
+title UC09 - Get a list of all devices in a house, grouped by device functionality types. It must include device location.
+
+autonumber
+
+!pragma teoz true
+
+box " <<SubSystem>>\n  <<Container>>\n    :Backend " #DarkGrey
+box " <<Component>>\n    :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":HouseControllerWeb" as US09Ctrl <<Component>>
+
+'Participants for DTO conversion'
+participant ":ActuatorFunctionalityMapperDTO" as ActuatorFunctionalityMapper <<Component>>
+participant ":SensorFunctionalityMapperDTO" as SensorFunctionalityMapper <<Component>>
+participant ":RoomMapperDTO" as RoomMapper <<Component>>
+participant ":DeviceMapperDTO" as DeviceMapper <<Component>>
+participant "mapDTOGrouped:\nMap<Object, Map<RoomDTO, DeviceDTO>>" as mapDTOGrouped
+
+participant "actuatorFunctionalityDTO:\nActuatorFunctionalityDTO" as ActuatorFunctionalityDTO
+participant "sensorFunctionalityDTO:\nSensorFunctionalityDTO" as SensorFunctionalityDTO
+
+participant "roomDTOAndDeviceDTOMap:\nMap<RoomID, DeviceID>" as roomDTOAndDeviceDTOMap
+participant "roomDTO:\nRoomDTO" as RoomDTO
+participant "deviceDTO:\nDeviceDTO" as DeviceDTO
+
+end box
+end box
+
+activate Router
+activate US09Ctrl
+ref over US09Ctrl
+     UC09-SD-ListAllDevicesInHouseByFunctionality-2
+     end ref
+
+'SECTION 5: RETURN MAIN MAP TO CONTROLLER FOR CONVERSION TO DTO'
+
+US09Ctrl --> ActuatorFunctionalityMapper**: <<creates>>
+US09Ctrl --> SensorFunctionalityMapper**: <<creates>>
+US09Ctrl --> RoomMapper**: <<creates>>
+US09Ctrl --> DeviceMapper**: <<creates>>
+
+US09Ctrl --> mapDTOGrouped**: <<creates>>
+
+loop for each entry in mainMap
+    alt if Object is an instance of ActuatorFunctionalityID
+        US09Ctrl -> ActuatorFunctionalityMapper: actuatorFunctionalityToDTO(actuatorFunctionalityID)
+        activate ActuatorFunctionalityMapper
+        ActuatorFunctionalityMapper --> ActuatorFunctionalityDTO**: <<creates>>
+        deactivate ActuatorFunctionalityMapper
+    else if Object is an instance of SensorFunctionalityID
+        US09Ctrl -> SensorFunctionalityMapper: sensorFunctionalityToDTO(sensorFunctionalityID)
+        activate SensorFunctionalityMapper
+        SensorFunctionalityMapper --> SensorFunctionalityDTO**: <<creates>>
+        deactivate SensorFunctionalityMapper
+
+    US09Ctrl --> roomDTOAndDeviceDTOMap**: <<creates>>
+        loop for each entry in Map<RoomID, DeviceID>
+            US09Ctrl -> RoomMapper: roomToDTO(roomID)
+            activate RoomMapper
+            RoomMapper --> RoomDTO**: <<creates>>
+            deactivate RoomMapper
+
+            US09Ctrl -> DeviceMapper: deviceToDTO(deviceID)
+            activate DeviceMapper
+            DeviceMapper --> DeviceDTO**: <<creates>>
+            deactivate DeviceMapper
+            US09Ctrl -> roomDTOAndDeviceDTOMap: put(roomDTO, deviceDTO)
+        end
+    US09Ctrl -> mapDTOGrouped: put(Object, roomDTOAndDeviceDTOMap)
+    end
+end
+
+Router <-- US09Ctrl: mapDTOGrouped, \nResponseEntity.OK
+deactivate US09Ctrl
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+
+@enduml

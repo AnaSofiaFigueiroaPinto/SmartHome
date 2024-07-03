@@ -1,0 +1,114 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam linetype ortho
+
+package ddd {
+    interface valueObject
+    interface DomainID extends valueObject
+    interface DomainEntity
+    interface AggregateRoot extends DomainEntity
+    interface RepositoryReadWrite
+
+    interface DomainEntity extends DomainID {
+      +identity():ID
+      +isSameAs(Object object): boolean
+    }
+
+    interface RepositoryReadWrite extends AggregateRoot {
+        +updateOrSave(T entity): T
+        +findAllEntities(): Iterable<T>
+        +findEntityByID(ID id): Optional<T>
+        +containsEntityByID(ID id): boolean
+    }
+}
+
+package services {
+    class RoomService {
+    - roomRepository: RoomRepository
+    - roomFactory: FactoryRoom
+    - houseRepository: HouseRepository
+    +createAndSaveRoom(String roomId,\n int floorNumber, double length,\n double width, double height): boolean
+    +filterRoomsByHouseID(HouseID houseID):\n Map<RoomDTO, Room>
+    +editRoom(RoomDTO): boolean
+    }
+
+}
+
+
+package repositories {
+    RepositoryRoom ...|> RepositoryReadWrite
+    class RepositoryRoom <repo> {
+        -DATA: Map<RoomID, Room>
+        +updateOrSave(Room entity): Room
+        +findAllEntities(): Iterable<Room>
+        +findEntityByID(RoomID id): Optional<Room>
+        +containsEntityByID(RoomID id): boolean
+    }
+
+     entity HouseRepository <repo> {
+         - data: Map<HouseID, House>
+         + updateOrSave(House entity): House
+         + findAllEntities(): Iterable<House>
+         + findEntityByID(HouseID houseID)): Optional<House>
+         + containsEntityByID(HouseID houseID): boolean
+     }
+}
+
+package domain {
+    entity roomAggregate.Room implements ddd.AggregateRoot
+    class valueobject.RoomId implements ddd.DomainID
+    class valueobject.RoomFloor implements ddd.valueObject
+    class valueobject.RoomDimensions implements ddd.valueObject
+
+    package roomAggregate {
+        interface FactoryRoom {
+            +createRoom(String roomName, int floorNumber,\n double length, double width, double length, HouseID houseID): Room
+        }
+        class ImplFactoryRoom implements FactoryRoom {
+
+            +createRoom(String roomName, int floorNumber,\n double length, double width, double length, HouseID houseID): Room
+        }
+        entity Room <root> {
+            -roomName: RoomId
+            -floorNumber: FloorNumber
+            -dimensions: Dimensions
+            +editRoomConfiguration(RoomFloor roomFloor, RoomDimensions roomDimensions): boolean
+            +getRoomFloor(): FloorNumber
+            +getRoomDimensions(): Dimensions
+            +identity(): RoomId
+            +isSameAs(Object object): boolean
+        }
+
+        ImplFactoryRoom --> Room: <<creates>>
+    }
+
+    package valueobject {
+        class RoomId <VO> {
+            - roomName: String
+            + getRoomName(): String
+        }
+        class RoomFloor <VO> {
+            - floorNumber: int
+            + getFloorNumber(): int
+        }
+        class RoomDimensions <VO> {
+            - length: double
+            - width: double
+            - height: double
+            + getLength(): double
+            + getWidth(): double
+            + getHeight(): double
+        }
+    }
+      Room ---> RoomDimensions
+      Room ---> RoomFloor
+      Room ---> RoomId
+      RepositoryRoom .....> Room
+      RepositoryRoom <... RoomService: <<uses>>
+      FactoryRoom <... RoomService: <<uses>>
+}
+
+ RoomService .> HouseRepository : <<uses>>
+
+@enduml

@@ -1,0 +1,43 @@
+/* Home.css */
+.home-container {
+    text-align: left;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: transparent;
+}
+
+.home-details p {
+    margin: 10px 0;
+}
+
+.home-details strong {
+    font-weight: bold;
+}
+
+.home-links {
+    margin-top: 20px;
+}
+
+.home-links h2 {
+    margin-bottom: 10px;
+}
+
+.home-links ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.home-links li {
+    margin: 5px 0;
+}
+
+.home-links a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.home-links a:hover {
+    text-decoration: underline;
+}

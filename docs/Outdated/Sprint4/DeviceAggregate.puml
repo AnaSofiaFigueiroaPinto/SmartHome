@@ -1,0 +1,90 @@
+@startuml
+title DeviceAgregate
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+package ddd{
+interface ValueObject{
+}
+
+interface DomainID extends ValueObject{
+}
+
+interface DomainEntity extends DomainID{
++identity():ID
++isSameAs(Object object):boolean
+}
+
+interface AgreggateRoot extends DomainEntity{
+}
+
+interface Repository extends AgreggateRoot{
+    +updateOrSave(T entity): T
+    +findAllEntities(): Iterable<T>
+    +findEntityByID(ID id): Optional<T>
+    +containsEntityByID(ID id): boolean
+}
+}
+package repositories{
+class RepositoryDevice <repo>{
+-DATA: Map<DeviceID, Device>
+    +updateOrSave(Device entity): Device
+    +findAllEntities(): Iterable<Device>
+    +findEntityByID(DeviceID id): Optional<Device>
+    +containsEntityByID(DeviceID id): boolean
+}
+RepositoryDevice ...|> Repository
+
+}
+package domain{
+package device{
+RepositoryDevice ...|> Device
+class Device <root>{
+- deviceID: DeviceID
+- model: Model
+- status: Status
++getDeviceID():DeviceID
++getStatus():Status
++getModel():Model
++createActuatorAndAddToDevice(ActuatorID actuatorID, ActuatorCatalogue actuatorCatalogue, String actuatorClass, ActuatorProperties actuatorProperties):Actuator
++isActuatorInList(ActuatorID actuatorID):boolean
++createSensorAndAddToDevice(SensorID sensorID, SensorCatalogue sensorCatalogue, String sensorClass, SensorProperties sensorProperties):Sensor
++isSensorInList(SensorID sensorID):boolean
++doesDeviceHaveSensorsOfSpecificFunctionality(SensorFunctionality sensorFunctionality):boolean
++deactivate(): boolean
++isActive(): boolean
++identity(): DeviceID
++isSameAs(Object object): boolean
+}
+
+interface FactoryDevice{
+    +createDevice(): Device
+}
+
+class ImpDeviceFactory implements FactoryDevice{
+    +createDevice():Device
+}
+ImpDeviceFactory --> Device: <<creates>>
+}
+
+package valueobjects{
+    class DeviceID <VO>{
+    -deviceName: String
+    }
+    class Model <VO> {
+    - model: String
+    }
+    enum Status <VO>
+    }
+
+Device --> DeviceID
+Device --> Model
+Device --> Status
+}
+Device ...|> AgreggateRoot
+DeviceID ...|> DomainID
+Model ...|> ValueObject
+Status ...|> ValueObject
+
+
+
+@enduml

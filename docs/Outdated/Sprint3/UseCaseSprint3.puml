@@ -1,0 +1,23 @@
+@startuml
+title Sprint 3: Use Case
+
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+
+:Administrator: as Admin
+:Power User: as PU
+
+UC3.1 as (Access list of rooms)
+UC6.1 as (Get list of devices in room)
+UC12 as (Add actuator to device)
+
+
+UC6.1 ..> UC3.1: <<includes>>
+
+Admin --> UC12
+UC12 ..> UC6.1: <<includes>>
+
+PU --> UC12
+
+@enduml

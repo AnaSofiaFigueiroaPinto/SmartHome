@@ -1,0 +1,60 @@
+@startuml
+title Use Case Diagram
+
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+skinparam linetype polyline
+
+:Administrator: as Admin
+:Power User: as PU
+:Room Owner: as RO
+
+UC01 as (Configure house location)
+UC02 as (Add new room to house)
+UC03.1 as (List rooms of house)
+UC03.2 as (Edit Room)
+UC05V2 as (Add new device to room)
+UC06 as (List devices in room)
+UC07.1 as (List sensor functionalities)
+UC07.2 as (Add new sensor to device)
+UC08 as (Deactivate device)
+UC09 as (List all devices in house by functionality)
+UC12.1 as (List actuator functionalities)
+UC12.2 as (Add new actuator to device)
+
+Admin --> UC01
+Admin --> UC02
+Admin --> UC03.1
+Admin --> UC03.2
+UC03.2 ..> UC03.1: <<includes>>
+
+Admin --> UC05V2
+UC05V2 ..> UC03.1: <<includes>>
+
+Admin --> UC06
+UC06 ..> UC03.1: <<includes>>
+
+Admin --> UC07.2
+UC07.2 ..> UC06: <<includes>>
+UC07.2 ..> UC07.1: <<includes>>
+
+Admin --> UC09
+
+PU --> UC05V2
+PU --> UC07.2
+PU --> UC08
+UC08 ..> UC06: <<includes>>
+
+PU --> UC09
+
+UC06 <-- RO
+UC06 ..> UC03.1: <<includes>>
+
+Admin --> UC12.2
+UC12.2 ..> UC06: <<includes>>
+UC12.2 ..> UC12.1: <<includes>>
+
+PU --> UC12.2
+
+@enduml

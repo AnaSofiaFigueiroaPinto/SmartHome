@@ -1,0 +1,69 @@
+ @startuml
+title UC03.1 List Rooms of House
+
+skinparam linetype ortho
+
+package server #LightGray {
+
+class HouseControllerWeb {
+  -houseService: HouseService
+  -houseID: HouseID
+  -roomService: RoomService
+  -roomMapperDTO: RoomMapperDTO
+  +GET getListOfRoomsInHouse(@PathVariable("id") String houseIDstr):\nResponseEntity<>(roomDTOList, HttpStatus.OK)
+}
+
+class HouseService {
+  -houseRepository: HouseRepository
+  -factoryHouse: FactoryHouse
+  +getHouseIDFromRepository(): HouseID
+}
+
+interface HouseRepository <repo>{
+  +findAllEntities(): Iterable<House>
+  +update(House): House
+  +findEntityByID(HouseID houseID): Optional<House>
+}
+
+class House <root>{
+  -houseID: HouseID houseID
+}
+
+class HouseID <VO>{
+    +houseIdentifier: String
+}
+
+class RoomMapperDTO {
++roomToDTO(RoomID roomID): RoomDTO
++roomIDsToDTOList(Iterable<RoomID> listOfRoomsIDs): List<RoomDTO>
+}
+
+class RoomDTO {
++roomName: String
++floorNumber: int
++width: double
++length: double
++height: double
+}
+
+class RoomRepository {
++findByHouseID(HouseID houseID): Iterable<Room>
+}
+
+
+class RoomService {
+-roomRepository: RoomRepository
+-factoryRoom: FactoryRoom
+-houseRepository: HouseRepository
++getListOfRoomsInHouse(HouseID houseID): List<RoomID>
+}
+
+HouseControllerWeb -- HouseService
+HouseControllerWeb ..> HouseID: <<creates>>
+HouseControllerWeb -- RoomService
+HouseControllerWeb -- RoomMapperDTO
+HouseService -- HouseRepository
+HouseService ..> House: <<uses>>
+RoomRepository -- RoomService
+RoomMapperDTO --  RoomDTO: <<creates>>
+@enduml

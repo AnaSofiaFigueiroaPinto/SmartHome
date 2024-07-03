@@ -1,0 +1,14 @@
+@startuml
+
+title UC34.3 - Get the maximum instantaneous temperature difference between\n readings of the chosen sensor and a standard sensor outside.
+autonumber
+
+Actor User
+participant ":SmartHome" as smartHome <<System>>
+
+User -> smartHome: get the maximum instantaneous temperature difference\n between readings of the chosen sensor and a standard sensor outside
+activate smartHome
+User <-- smartHome: maximum instantaneous temperature
+deactivate smartHome
+
+@enduml

@@ -1,0 +1,79 @@
+@startuml
+skinparam linetype ortho
+
+package server #LightGray {
+
+'--------------------------------DeviceRepository--------------------------------
+interface DeviceRepository {
+}
+
+class DeviceRepositoryMem <Repo> implements DeviceRepository {
+    -deviceData: Map<DeviceID, Device>
+    +findEntityById(DeviceID): Optional<Device>
+}
+
+class DeviceRepositoryJPAImp <Repo> implements DeviceRepository {
+    -deviceDataModelForUpdate: DeviceDataModel
+    -entityManager: EntityManager
+    -factoryDevice: FactoryDevice
+    +findEntityById(DeviceID): Optional<Device>
+}
+
+class DeviceRepositorySpringDataImp <Repo> implements DeviceRepository {
+    -deviceRepositorySpringData: DeviceRepositorySpringData
+    -deviceDataModelForUpdate: DeviceDataModel
+    -deviceRepository: DeviceRepository
+    -factoryDevice: FactoryDevice
+    +findEntityById(DeviceID): Optional<Device>
+}
+
+'--------------------------------SensorRepository--------------------------------
+interface SensorRepository {
+}
+
+class SensorRepositoryMem <Repo> implements SensorRepository{
+    -sensorData: Map<SensorID, Sensor>
+    +findAllEntities(): Iterable<Sensor>
+}
+
+class SensorRepositoryJPAImp <Repo> implements SensorRepository{
+    -sensorDataModelForUpdate: SensorDataModel
+    -entityManager: EntityManager
+    -factorySensor: FactorySensor
+    +findAllEntities(): Iterable<Sensor>
+}
+
+class SensorRepositorySpringDataImp <Repo> implements SensorRepository{
+    -sensorRepositorySpringData: SensorRepositorySpringData
+    -factorySensor: FactorySensor
+    +findAllEntities(): Iterable<Sensor>
+}
+
+'--------------------------------ActuatorRepository--------------------------------
+interface ActuatorRepository {
+}
+
+class ActuatorRepositoryMem <Repo> implements ActuatorRepository{
+-actuatorData: Map<ActuatorID, Actuator>
++findAllEntities(): Iterable<Actuator>
+}
+
+class ActuatorRepositoryJPAImp <Repo> implements ActuatorRepository{
+-actuatorDataModelForUpdate: ActuatorDataModel
+-entityManager: EntityManager
+-factoryActuator: FactoryActuator
++findAllEntities(): Iterable<Actuator>
+}
+
+class ActuatorRepositorySpringDataImp <Repo> implements ActuatorRepository{
+- actuatorRepositorySpringDataInt: ActuatorRepositorySpringData
+- factoryActuator: FactoryActuator
++findAllEntities(): Iterable<Actuator>
+}
+}
+note "Continues in UC09ClassDiagram" as N1
+DeviceRepository -up- N1
+SensorRepository -up- N1
+ActuatorRepository -up- N1
+
+@enduml

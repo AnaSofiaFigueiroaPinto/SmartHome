@@ -1,0 +1,112 @@
+@startuml
+title UC09: Get list of all devices in a house, grouped by device functionality types. It must include device location.
+skinparam linetype ortho
+
+package server #LightGray {
+class HouseControllerWeb {
+-listAllDevicesInHouseByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
++getListOfDevicesByFunctionality(): Map<Object,  Map<RoomDTO, DeviceDTO>>
+}
+
+HouseControllerWeb -- ListAllDevicesInHouseByFunctionalityService
+HouseControllerWeb ..> RoomMapper: <<creates>>
+HouseControllerWeb ..> DeviceMapper: <<creates>>
+HouseControllerWeb ..> SensorFunctionalityMapper: <<creates>>
+HouseControllerWeb ..> ActuatorFunctionalityMapper: <<creates>>
+
+class ListAllDevicesInHouseByFunctionalityService {
+-deviceRepository: DeviceRepository
+-actuatorRepository: ActuatorRepository
+-sensorRepository: SensorRepository
++devicesGroupedByFunctionalityAndLocation(): Map<Object, Map<RoomID, Set<DeviceID>>>
+-sensorFunctionalityMap(): Map<SensorFunctionalityID, Map<RoomID, Set<DeviceID>>>
+-actuatorFunctionalityMap(): Map<ActuatorFunctionalityID, Map<RoomID, Set<DeviceID>>>
+}
+
+ListAllDevicesInHouseByFunctionalityService -down-- DeviceRepository
+ListAllDevicesInHouseByFunctionalityService -down- ActuatorRepository
+ListAllDevicesInHouseByFunctionalityService -down- SensorRepository
+ListAllDevicesInHouseByFunctionalityService ...> Device: uses
+ListAllDevicesInHouseByFunctionalityService ...> Actuator: uses
+ListAllDevicesInHouseByFunctionalityService ...> Sensor: uses
+
+
+interface DeviceRepository <repo>{
+}
+
+interface SensorRepository <repo>{
+}
+
+interface ActuatorRepository <repo>{
+}
+
+note "Continues in UC09ClassDiagramREF1" as N1
+DeviceRepository -down- N1
+SensorRepository -down- N1
+ActuatorRepository -down- N1
+
+class Sensor <root>{
+-sensorName: SensorID
+-sensorFunctionalityID: SensorFunctionalityID
+-deviceID: DeviceID
++getSensorFunctionalityID(): SensorFunctionalityID
++getDeviceID(): DeviceID
+}
+
+class Device <root>{
+-deviceName: DeviceID
+-deviceModel: DeviceModel
+-deviceStatus: DeviceStatus
+-roomID: RoomID
++getRoomID(): RoomID
+}
+
+class Actuator <root>{
+-actuatorName: ActuatorID
+-actuatorFunctionalityID: ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-deviceID: DeviceID
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++getDeviceID(): DeviceID
+}
+
+class DeviceMapper {
++deviceToDTO(DeviceID): \nDeviceDTO
+}
+
+class RoomMapper {
++roomToDTO(RoomID): \nRoomDTO
+}
+
+class SensorFunctionalityMapper {
++sensorFunctionalityToDTO(SensorFunctionalityID): \nSensorFunctionalityDTO
+}
+
+class ActuatorFunctionalityMapper {
++actuatorFunctionalityToDTO(ActuatorFunctionalityID): \nActuatorFunctionalityDTO
+}
+
+class ActuatorFunctionalityDTO {
++actuatorFunctionality: String
+}
+
+class SensorFunctionalityDTO {
++sensorFunctionality: String
+}
+
+class DeviceDTO {
++deviceName: String
+}
+
+class RoomDTO {
++roomName: String
+}
+}
+
+RoomMapper ..> RoomDTO: <<creates>>
+DeviceMapper ..> DeviceDTO: <<creates>>
+SensorFunctionalityMapper ..> SensorFunctionalityDTO: <<creates>>
+ActuatorFunctionalityMapper ..> ActuatorFunctionalityDTO: <<creates>>
+
+
+@enduml

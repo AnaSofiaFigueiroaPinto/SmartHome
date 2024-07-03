@@ -1,0 +1,66 @@
+@startuml
+
+title "UC 33 - List all values of device for a given Period - REF1"
+
+autonumber
+!pragma teoz true
+
+
+box "<<SubSystem>>\n"<<Container>>"\n:Backend" #DarkGrey
+box " <<Component>>\n:Server" #LightGrey
+participant ":ValueService" as service <<Component>>
+participant ":InstantTimeValueRepository" as instantRepo <<Component>>
+participant ":PeriodTimeValueRepository" as periodRepo <<Component>>
+participant ":InstantTimeLocationValueRepository" as instantLocationRepo <<Component>>
+participant ":DB Driver" as driver <<Component>>
+end box
+end box
+
+
+
+ref over service:UC33-ListAllMeasurementsOfDeviceInPeriod]
+opt if serviceMethodToCall equals listInstantValuesForSensorID
+
+    activate service
+    service -> service: listInstantValuesForSensorID(sensorID, startInterval, endInterval)
+    service -> instantRepo: findBySensorIdBetweenPeriodOfTime(sensorID, startInterval, endInterval)
+    activate instantRepo
+    instantRepo -> driver: findBySensorIdBetweenPeriodOfTime(sensorID.toString, startInterval, endInterval)
+    activate driver
+    driver ->o]: DATABASE QUERY
+    driver <--o]: QUERY RESPONSE
+    driver --> instantRepo: List<InstantTimeValueDataModel> listOfValues
+    deactivate driver
+    instantRepo --> service: List<Value> listOfValues
+    deactivate instantRepo
+
+else if serviceMethodToCall equals listPeriodValuesForSensorID
+
+    service -> service: listPeriodValuesForSensorID(sensorID, startInterval, endInterval)
+    service -> periodRepo: findBySensorIdBetweenPeriodOfTime(sensorID, startInterval, endInterval)
+    activate periodRepo
+    periodRepo -> driver: findBySensorIdBetweenPeriodOfTime(sensorID.toString, startInterval, endInterval)
+    driver ->o]: DATABASE QUERY
+    driver <--o]: QUERY RESPONSE
+    driver --> periodRepo: List<PeriodTimeValueDataModel> listOfValues
+    deactivate driver
+    periodRepo --> service: List<Value> listOfValues
+    deactivate periodRepo
+
+else if serviceMethodToCall equals listInstantLocationValuesForSensorID
+
+    service -> service: listInstantLocationValuesForSensorID(sensorID, startInterval, endInterval)
+    service -> instantLocationRepo: findBySensorIdBetweenPeriodOfTime(sensorID, startInterval, endInterval)
+    activate instantLocationRepo
+    instantLocationRepo -> driver: findBySensorIdBetweenPeriodOfTime(sensorID.toString, startInterval, endInterval)
+    activate driver
+    driver ->o]: DATABASE QUERY
+    driver <--o]: QUERY RESPONSE
+    driver --> instantLocationRepo: List<InstantTimeLocationValueDataModel> listOfValues
+    deactivate driver
+    instantLocationRepo --> service: List<Value> listOfValues
+    deactivate instantLocationRepo
+
+end
+ref over service:UC33-ListAllMeasurementsOfDeviceInPeriod]
+@enduml

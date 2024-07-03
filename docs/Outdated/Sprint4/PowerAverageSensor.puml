@@ -1,0 +1,92 @@
+@startuml
+skinparam linetype ortho
+package repositories {
+}
+
+package domain {
+    package sensor {
+        class FactorySensor {
+            - FactoryValue factoryValue
+            + createSensor(sensorID, sensorFunctionalityID, deviceID): Sensor
+        }
+        interface Sensor {
+            + getSensorName(): String
+            + getSensorFunctionality(): SensorFunctionalityID
+            + getDeviceName(): DeviceID
+        }
+        interface Value {
+            + getValueWithUnit(): String
+        }
+        interface SensorPeriodOfTime extends Sensor {
+            + getValueForPeriodOfTime(Timestamp startDate,\n Timestamp endDate): String
+        }
+        package DewPointCelsiusSensorAggregate {
+            class PowerAverageSensor <Root> {
+                - SensorID sensorID
+                - SensorFunctionalityID sensorFunctionalityID
+                - DeviceID deviceID
+                - FactoryValue factoryValue
+                + getSensorName(): String
+                + getSensorFunctionality(): SensorFunctionalityID
+                + isSameAs(Object object): boolean
+                + getDeviceName(): DeviceID
+                + getValueForPeriodOfTime(Timestamp startDate,\n Timestamp endDate): String
+            }
+            PowerAverageSensor ..|> SensorPeriodOfTime
+        }
+        FactorySensor ..> PowerAverageSensor
+        class FactoryValue {
+            # createValueSpecificTime(String className, Timestamp startDate, Timestamp endDate): Value
+        }
+        PowerAverageSensor --> FactoryValue
+    }
+    package valueobjects {
+        class SensorID <VO> {
+            - sensorName: String
+            + getSensorName(): String
+            + equals(Object object): boolean
+        }
+        PowerAverageSensor --> SensorID
+        class SensorFunctionalityID <VO> {
+            - sensorFunctionality: String
+            + equals(Object o): boolean
+            + toString(): String
+        }
+        PowerAverageSensor --> SensorFunctionalityID
+        class DeviceID <VO> {
+            - deviceName: String
+            + equals(Object o): boolean
+            + hashCode(): int
+            + toString(): String
+            + getDeviceName(): String
+        }
+        PowerAverageSensor --> DeviceID
+        package sensorvalues {
+            class DewPointCelsiusSensorValue <VO> {
+                - unit: String
+                - startDate: Timestamp
+                - endDate: Timestamp
+                + getValueWithUnit(): String
+                + equals(Object o): boolean
+                + toString(): String
+            }
+            FactoryValue ..> DewPointCelsiusSensorValue: <<creates>>
+            DewPointCelsiusSensorValue ..|> Value
+        }
+    }
+}
+
+
+package repositories {
+    class SensorRepository <repo> {
+        - Map<SensorID, Sensor> dataMap
+        + updateOrSave(Sensor entity): Sensor
+        + findAllEntities(): Iterable<Sensor>
+        + findEntityById(SensorID id): Optional<Sensor>
+        + containsEntityByID(SensorID id): boolean
+    }
+    SensorRepository ..> SensorID
+    SensorRepository ..> PowerAverageSensor
+}
+
+@enduml

@@ -1,0 +1,107 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package domain{
+package actuator {
+interface Actuator
+
+class ActuatorFactory{
++createActuator(): Actuator
+
+}
+interface Actuator{
++getActuatorFunctionality(): ActuatorFunctionality
++getDeviceName(): DeviceID
+}
+
+interface ActuatorSpecificDecimal extends Actuator{
++setDecimalValue(double value) : boolean
+}
+
+package DecimalSetterActuatorAggregate{
+class DecimalSetterActuator<Root>{
+-actuatorName : ActuatorID
+-actuatorProperties: ActuatorProperties
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-targetValue: TargetValue
+-deviceName : DeviceID
++getActuatorName(): String
++getActuatorFunctionalityID(): ActuatorFunctionalityID
++setDecimalValue(double newValue): boolean
++getActuatorTarget():ActuatorTarget
++getDeviceName(): DeviceID
++identity() : ActuatorID
++isSameAs(Object object): boolean
+}
+}
+ActuatorFactory --> Actuator: <<creates>>
+
+
+}
+package valueobject{
+
+class ActuatorID <VO>{
+-actuatorName: String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
+
+}
+class ActuatorProperties<VO>{
+-rangeDecimal: RangeDecimal
++getRangeDecimal(): RangeDecimal
+}
+
+class RangeDecimal <VO>{
+- upperLimitDecimal: double
+- lowerLimitDecimal: double
+- precision: int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+class ActuatorFunctionalityID <VO>{
+-actuatorFunctionalityName : String
++ equals(Object object): boolean
++ hashCode(): int
++ toString(): String
+}
+
+class ActuatorTarget <VO>{
+- targetActuator: double
++getTargetValue(): double
+}
+
+class DeviceID <VO> {
+- deviceName: String
++ equals(Object o): boolean
++ hashCode(): int
++ toString(): String
++ getDeviceName(): String
+}
+}
+ActuatorProperties --> RangeDecimal
+}
+DecimalSetterActuator  -->  ActuatorProperties
+DecimalSetterActuator  --> ActuatorID
+DecimalSetterActuator  --> DeviceID
+DecimalSetterActuator  --> ActuatorTarget
+DecimalSetterActuator  -->  ActuatorFunctionalityID
+DecimalSetterActuator ..|> ActuatorSpecificDecimal
+
+package repositories{
+class ActuatorRepository {
+-HashMap: Map<ActuatorID, Actuator>
++addAndSaveActuator(Actuator entity): Actuator
++findAllActuators(): Iterable<Actuator>
++findActuatorById(ActuatorID id): Optional<Actuator>
++containsActuatorById(ActuatorID id): boolean
+}
+ActuatorRepository --> ActuatorID
+ActuatorRepository --> DecimalSetterActuator
+}
+@enduml
+
+

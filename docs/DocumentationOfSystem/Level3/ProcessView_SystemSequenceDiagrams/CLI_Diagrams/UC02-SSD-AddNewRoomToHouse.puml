@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC02 - Add New Room to House
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Add new room
+activate server
+server->server: Check if Room exists
+server->server: Create Room
+[o<--server: New room added
+deactivate server
+@enduml

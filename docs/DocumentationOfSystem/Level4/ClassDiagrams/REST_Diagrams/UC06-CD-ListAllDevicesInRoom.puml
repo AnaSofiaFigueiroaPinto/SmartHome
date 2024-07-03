@@ -1,0 +1,67 @@
+@startuml
+
+skinparam linetype ortho
+title US06 - As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+
+package server #LightGray {
+
+class RoomControllerWeb {
+-roomService: RoomService
+-deviceService: DeviceService
+-deviceMapperDTO: DeviceMapperDTO
++GET getListOfDevicesDTOInRoom (@PathVariable("id") String roomName):\n ResponseEntity<CollectionModel<EntityModel<DeviceDTO>>, HttpStatus.OK
+}
+
+class DeviceService {
+-deviceRepository: DeviceRepository
+-roomRepository: RoomRepository
+-factoryDevice: FactoryDevice
++getListOfDevicesInRoom(RoomID roomID): List<DeviceID>
+}
+
+interface Repository {
++containsEntityByID(RoomID): boolean
+}
+
+interface DeviceRepository {
++findByRoomID(roomID): Iterable<Device>
+}
+
+interface RoomRepository extends Repository {
+}
+
+class RoomDTO {
++roomName: String
+}
+
+class DeviceDTO {
++deviceName: String
+}
+
+class RoomID <VO> {
+-roomName: String
+}
+
+class Device <ROOT> {
+-deviceName: DeviceID
+-deviceModel: DeviceModel
+-deviceStatus: DeviceStatus
+-roomID: RoomID
++identity(): DeviceID
+}
+
+class DeviceMapperDTO {
++deviceListToDTO(Iterable<DeviceID>): List<DeviceDTO>
++deviceToDTO(DeviceID): DeviceDTO
+}
+
+RoomControllerWeb -- DeviceService
+RoomControllerWeb ..> RoomDTO: <<uses>>
+RoomControllerWeb ..> RoomID: <<creates>>
+RoomControllerWeb ..> DeviceMapperDTO: <<uses>>
+DeviceMapperDTO ..> DeviceDTO: <<creates>>
+DeviceService -- DeviceRepository
+DeviceService -- RoomRepository
+DeviceService ...> Device: <<uses>>
+}
+@enduml

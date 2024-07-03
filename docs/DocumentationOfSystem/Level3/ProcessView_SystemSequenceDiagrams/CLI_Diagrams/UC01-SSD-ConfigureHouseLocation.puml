@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title UC01 - Configure House Location
+
+autonumber
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: configure House Location
+activate server
+server->server: Find House
+server->server: Update Location
+[o<--server: House with new Location
+deactivate server
+
+@enduml

@@ -1,0 +1,99 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC05 Add new device to room.
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":Router" as Router <<Component>>
+participant ":DeviceControllerWeb" as Controller <<Component>>
+participant "deviceDTO:\nDeviceDTO" as deviceDTO
+participant "deviceID:\nDeviceID" as deviceID
+participant "deviceModel:\nDeviceModel" as deviceModel
+participant "roomDTO:\nRoomDTO" as roomDTO
+participant "roomID:\nRoomID" as roomID
+participant ":DeviceService" as DeviceService <<Component>>
+participant ":RoomRepository" as RoomRepository <<Component>>
+participant ":DeviceRepository" as DeviceRepository <<Component>>
+participant ":FactoryDevice" as Factory <<Component>>
+participant "MapperDeviceDataModel" as DeviceDataModel <<Component>>
+participant "device:Device" as Device
+participant ":DB Driver" as dbDriver <<Component>>
+
+ref over Router
+UC03.1-SD-ListRoomsOfHouse
+end ref
+
+[o-> Router: POST api/devices
+activate Router
+
+Router -> Controller: POST createDeviceAndSaveToRepository \n(@RequestBody DeviceDTO deviceDTO)
+activate Controller
+Controller --> deviceID** : <<create>>
+Controller --> deviceModel** : <<create>>
+Controller -> roomDTO : roomName
+activate roomDTO
+roomDTO --> Controller: String roomName
+deactivate roomDTO
+Controller --> roomID** : <<create>>
+Controller -> DeviceService: createDeviceAndSaveToRepository (deviceID, deviceModel, roomID)
+activate DeviceService
+
+DeviceService -> RoomRepository: containsEntityByID(roomID)
+activate RoomRepository
+RoomRepository -> dbDriver: containsEntityByID(roomID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> RoomRepository: true
+deactivate dbDriver
+RoomRepository --> DeviceService: true
+deactivate RoomRepository
+DeviceService -> DeviceRepository: containsEntityByID(deviceID)
+activate DeviceRepository
+DeviceRepository -> dbDriver: containsEntityByID(deviceID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> DeviceRepository: false
+deactivate dbDriver
+DeviceRepository --> DeviceService: false
+deactivate DeviceRepository
+DeviceService -> Factory: createDevice(deviceID, deviceModel, roomID)
+activate Factory
+Factory -> Device**: <<creates>>
+
+Factory --> DeviceService: Device
+deactivate Factory
+DeviceService -> DeviceRepository: save(device)
+activate DeviceRepository
+DeviceRepository -> dbDriver: save(device)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> DeviceRepository: DeviceDataModel
+deactivate dbDriver
+DeviceRepository -> DeviceDataModel: toDomain(factoryDevice, DeviceDataModel)
+activate DeviceDataModel
+DeviceDataModel --> DeviceRepository: device
+deactivate DeviceDataModel
+DeviceRepository --> DeviceService: Device
+deactivate DeviceRepository
+DeviceService -> Device: identity()
+activate Device
+Device --> DeviceService: DeviceID
+deactivate Device
+
+DeviceService --> Controller: DeviceID
+deactivate DeviceService
+Controller --> deviceDTO** : <<create>>
+Router <-- Controller: newDeviceDTO, HttpStatus.CREATED
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.CREATED
+deactivate Router
+
+
+@enduml

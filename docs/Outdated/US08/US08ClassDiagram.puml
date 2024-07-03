@@ -1,0 +1,72 @@
+@startuml
+title US08: As a Power User [or Administrator], I want to deactivate a device, so that it is no longer used. Nevertheless, it should be possible to access its configuration and activity log.
+!theme toy
+
+class DeactivateDeviceController {
+  -house: House
+  +getRoomListDTO(): List<RoomDTO>
+  +getDeviceList(RoomDTO RoomDTO): List<DeviceDTO>
+  +deactivateDevice(DeviceDTO deviceDTO): boolean
+}
+
+class RoomDTO {
+  -roomName: String
+  -floor: int
+  -length: double
+  -width: double
+  -height: double
+  +getName(): String
+}
+
+class RoomMapper {
+  +roomToDTO(Room room): RoomDTO
+  +roomToDTO(Roomlist roomlist): Map<RoomDTO, Room>
+
+}
+
+class DeviceDTO {
+  -deviceName: String
+  +getDeviceName(): String
+}
+
+class DeviceMapper {
+  +deviceToDTO(Device device): DeviceDTO
+  +deviceDTOList(DeviceList deviceList): Map<DeviceDTO, Device>
+}
+
+class House {
+  -location: Location
+  -roomList: RoomList
+  +getRoomList(): RoomList
+  }
+
+class Room {
+  -roomName: String
+  -floorNumber: int
+  -dimensions: Dimensions
+  -deviceList: DeviceList
+  +getDeviceList(): DeviceList
+  }
+
+class Device {
+   -deviceName: String
+   -sensorList: List<Sensor>
+   -status: Status
+   +deactivateDevice(): boolean
+}
+
+enum Status {
+ - ACTIVE
+ - DEACTIVATED
+}
+
+House -- DeactivateDeviceController
+Room -- DeactivateDeviceController
+RoomMapper -- RoomDTO
+DeactivateDeviceController -- RoomMapper
+DeactivateDeviceController -- DeviceMapper
+DeviceMapper -- DeviceDTO
+DeactivateDeviceController - Device
+Status <-- Device
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title UC06 - List all Devices in Room
+
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+[o->server: Get list of devices in room
+activate server
+server->server: find all devices
+[o<--server: List of Devices
+deactivate server
+@enduml

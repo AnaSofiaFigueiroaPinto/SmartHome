@@ -1,0 +1,96 @@
+@startuml
+
+autonumber
+
+title UC12.2 Add new Actuator to Device
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":AddNewActuatorToDeviceController" as Controller <<Component>>
+participant "actuatorFunctionalityID:\nActuatorFunctionalityID" as FunctionalityID
+participant "actuatorID:\nActuatorID" as ActuatorID
+participant "deviceID:\nDeviceID" as DeviceID
+participant "propertiesMapper:\nAssemblerActuatorProperties" as assembler
+participant ":ActuatorService" as ActuatorService <<Component>>
+participant ":DeviceRepository" as DeviceRepository <<Component>>
+participant "device:\nDevice" as Device
+participant ":ActuatorFunctionalityRepository" as ActuatorFunctionalityRepo <<Component>>
+participant ":FactoryActuator" as Factory <<Component>>
+participant "actuator:\nActuator" as Actuator
+participant ":ActuatorRepository" as ActuatorRepo <<Component>>
+participant "actuatorDTO:\nActuatorDTO" as actuatorDTO
+end box
+
+'SECTION FOR GETTING THE LIST OF ROOMS IN A HOUSE AND DEVICES IN A ROOM
+ref over Controller
+UC06-SD-ListAllDevicesInRoom
+end ref
+'END SECTION
+
+'SECTION FOR RETRIEVING AND EXTERNALIZING LIST OF FUNCTIONALITIES
+ref over Controller
+UC12.1-SD-ListActuatorsFunctionalities
+end ref
+'END SECTION
+
+'SECTION FOR CREATING A ACTUATOR
+[o-> Controller: createActuatorAndSaveToRepository \n(actuatorDTO)
+activate Controller
+
+Controller --> FunctionalityID**: <<create>>
+Controller --> ActuatorID**: <<create>>
+Controller --> DeviceID**: <<create>>
+Controller --> assembler**: <<create>>
+
+Controller -> assembler: createActuatorPropertiesFromActuatorDTO(actuatorDTO)
+activate assembler
+assembler --> Controller: actuatorProperties
+deactivate assembler
+
+Controller -> ActuatorService: createActuatorAndSave(actuatorFunctionalityID, actuatorID, actuatorProperties, deviceID)
+activate ActuatorService
+ActuatorService -> DeviceRepository: findEntityByID(deviceID)
+activate DeviceRepository
+DeviceRepository --> ActuatorService: device
+deactivate DeviceRepository
+
+ActuatorService -> Device: isActive()
+activate Device
+Device --> ActuatorService: true
+deactivate Device
+
+ActuatorService -> ActuatorFunctionalityRepo: getClassNameForActuatorFunctionalityID(actuatorFunctionalityID)
+activate ActuatorFunctionalityRepo
+ActuatorFunctionalityRepo --> ActuatorService: String actuatorClass
+deactivate ActuatorFunctionalityRepo
+
+ActuatorService -> Factory: createActuator(actuatorID, actuatorFunctionalityID,\n actuatorProperties, deviceID, actuatorClass)
+activate Factory
+Factory --> Actuator**: <<create>>
+Factory --> ActuatorService: actuator
+deactivate Factory
+'END SECTION
+
+'SECTION FOR SAVING ACTUATOR IN REPOSITORY
+ActuatorService -> Actuator: identity()
+activate Actuator
+Actuator --> ActuatorService: actuatorID
+deactivate Actuator
+ActuatorService -> ActuatorRepo: containsEntityByID(actuatorID)
+activate ActuatorRepo
+ActuatorRepo --> ActuatorService: false
+ActuatorService -> ActuatorRepo: save(actuator)
+ActuatorRepo --> ActuatorService: actuator
+deactivate ActuatorRepo
+
+ActuatorService --> Controller: actuatorID
+deactivate ActuatorService
+
+Controller --> actuatorDTO**: <<create>>
+[o<-- Controller: actuatorDTO
+deactivate Controller
+'END SECTION
+
+@enduml

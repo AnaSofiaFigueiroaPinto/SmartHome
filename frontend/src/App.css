@@ -1,0 +1,124 @@
+/* App.css */
+#App {
+  text-align: center;
+  background-image: url('./images/wallpaper.jpg');
+  background-attachment: fixed;
+  background-size: cover;
+  height: 100vh;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  font-family: Calibri, serif;
+}
+
+body {
+  font-family: Calibri, serif; /* Mudar o tipo de letra */
+  color: #333;
+  margin: 0;
+  overflow-y: hidden;
+}
+
+#App-main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 5px;
+}
+
+.central-box {
+  background: rgba(255, 255, 255, 0.5); /* Fundo branco com 50% de transparência */
+  border-radius: 10px; /* Bordas arredondadas */
+  padding: 15px; /* Espaçamento interno */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve para destacar a caixa */
+  margin: auto; /* Centraliza a caixa */
+  max-width: 80%; /* Limita a largura máxima */
+  max-height: 700px;
+}
+
+#sunset, #date {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 100px;
+  margin: 0; /* Reduce margin */
+  flex: 0 0 auto;
+  padding: 0; /* Reduce padding */
+}
+
+.sunset-date-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 0; /* Reduce margin */
+}
+
+.orbit-container {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+}
+
+.copyright {
+  display: flex;
+  margin-top: auto;
+  width: 100%;
+}
+
+.icon {
+  font-size: 50px;
+  margin-right: 4%;
+  font-family: Calibri, serif;
+}
+
+.room-list-title {
+  font-size: 50px;
+  font-family: Calibri, serif;
+}
+
+.room-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.room-item {
+  margin: 10px 0;
+  padding: 10px 20px;
+}
+
+.room-link {
+  text-decoration: none;
+  color: black;
+  font-size: 18px;
+}
+
+.room-link:hover {
+  color: #e0ebf5;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-humidity-container,
+.sunrise-sunset-container {
+  display: flex;
+  justify-content: space-between;
+  width: 300px; /* Ajuste a largura dos contêineres conforme necessário */
+  height: 200px; /* Defina a altura dos contêineres */
+  margin-bottom: 40px; /* Aumente a margem inferior para aumentar o espaçamento */
+  margin: 14px; /* Defina a margem entre os contêineres */
+}
+
+.image-text-container * {
+  font-family: Calibri, serif;
+  font-size: 16px; /* Defina o tamanho da fonte conforme necessário */
+  font-weight: normal; /* Defina a espessura da fonte como normal */
+  margin-top: 5px; /* Adicione um espaçamento superior */
+  margin-bottom: 5px; /* Adicione um espaçamento inferior */
+}

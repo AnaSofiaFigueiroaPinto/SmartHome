@@ -1,0 +1,14 @@
+@startuml
+
+title UC01 - Configure House Location
+
+actor User
+autonumber
+participant ":SmartHome" as smartHome <<System>>
+
+User ->smartHome: configure House Location
+activate smartHome
+User <-- smartHome: House Location configured
+deactivate smartHome
+
+@enduml

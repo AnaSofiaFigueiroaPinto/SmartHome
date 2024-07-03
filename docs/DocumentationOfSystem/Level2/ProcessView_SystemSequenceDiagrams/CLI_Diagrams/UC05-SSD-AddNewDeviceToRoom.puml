@@ -1,0 +1,15 @@
+@startuml
+
+title UC05 - Add a new device to a room
+autonumber
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as Backend
+end box
+
+[o-> Backend : create device and save to repository
+activate Backend
+[o<--Backend: device created
+deactivate Backend
+
+@enduml

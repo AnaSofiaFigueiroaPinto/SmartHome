@@ -1,0 +1,85 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title UC34.2 - List temperature sensors in device.
+
+
+autonumber
+!pragma teoz true
+box "<<SubSystem>>\n<<Container>>\n:Backend" #DarkGrey
+box " <<Component>>\n:Server" #LightGrey
+participant ":ListAllDevicesInRoomController" as deviceController <<Component>>
+participant ":ListTemperatureSensorsInDeviceController" as tempSensorsController <<Component>>
+participant "deviceDTO:DeviceDTO" as deviceDTO
+participant "deviceID:DeviceID" as deviceID
+participant "sensorFunctionalityID:SensorFunctionalityID" as sensorFunctionalityID
+participant ":SensorService" as sensorService <<Component>>
+participant ":SensorRepository" as sensorRepo <<Component>>
+participant "listOfSensorIDs\n:List<SensorID>" as listOfSensorIDs
+participant "sensor:Sensor" as sensor
+participant ":SensorMapperDTO" as sMapper
+participant "listOfSensorsDTO\n:List<SensorDTO>" as listOfSensorsDTO
+participant ":SensorDTO" as sensorDTO
+
+'SECTION 1: Get list of devices in a room'
+
+ref over deviceController
+[[docs/DocumentationOfSystem/UC06-ListAllDevicesInRoom/UC06SequenceDiagram.puml]]
+end ref
+
+'SECTION 2: Get list of temperature sensors in the selected device'
+'in controller'
+-> tempSensorsController: getListOfTemperatureSensorsDTOInDevice (deviceDTO)
+activate tempSensorsController
+tempSensorsController -> deviceDTO: deviceName
+activate deviceDTO
+deviceDTO --> tempSensorsController: String deviceName
+deactivate deviceDTO
+tempSensorsController --> deviceID**: <<create>>
+tempSensorsController -> sensorFunctionalityID**: String <<creates>>
+
+
+'in services'
+tempSensorsController -> sensorService: findSensorsIDOfADeviceBySensorFunctionality(deviceID, sensorFunctionalityID)
+activate sensorService
+sensorService -> sensorRepo: findByDeviceIDAndSensorFunctionality(deviceID, sensorFunctionalityID)
+activate sensorRepo
+sensorRepo --> sensorService: Iterable<Sensor>
+deactivate sensorRepo
+
+sensorService -> listOfSensorIDs**: <<create>>
+
+    alt if SensorFunctionalityID.toString() equals "TemperatureCelsius"
+    sensorService -> sensor: identity()
+    activate sensor
+    sensor --> sensorService: sensorID
+    deactivate sensor
+    sensorService -> listOfSensorIDs: add(sensorID)
+    activate listOfSensorIDs
+    deactivate listOfSensorIDs
+    end
+
+sensorService --> tempSensorsController: listOfSensorIDs
+deactivate sensorService
+
+'SECTION 3: Conversion to DTO'
+
+tempSensorsController -> sMapper**:
+tempSensorsController -> sMapper: sensorIDsToDTOList(List<SensorID>)
+activate sMapper
+
+sMapper --> listOfSensorsDTO**: <<create>>
+
+loop for each SensorID in listOfSensorIDs
+    sMapper -> sMapper: sensorIDToDTO(sensorID)
+    sMapper -> sensorDTO**: <<create>>
+    sMapper -> listOfSensorsDTO: add(sensorDTO)
+    activate listOfSensorsDTO
+    deactivate listOfSensorsDTO
+end loop
+
+sMapper --> tempSensorsController: listOfSensorsDTO
+deactivate sMapper
+<-- tempSensorsController: listOfSensorsDTO
+deactivate tempSensorsController
+
+@enduml

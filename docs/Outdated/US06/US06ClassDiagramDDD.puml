@@ -1,0 +1,93 @@
+@startuml
+skinparam linetype ortho
+title US06: As a Room Owner [or Power User, or Administrator], I want to get a list of all devices in a room, so that I can configure them.
+'https://plantuml.com/class-diagram
+
+class ListAllDevicesInRoomController {
+-house: House
+-deviceService: DeviceService
++getListOfRoomsDTO(): List<RoomDTO>
++getListOfDevicesDTOInRoom(): List<DeviceDTO>
+}
+
+class DeviceService {
++getListOfDevicesInRoom(): List<DeviceDTO>
+}
+
+class RoomService {
++getListOfRooms(): List<RoomDTO>
+}
+
+class DeviceRepository {
++findAllEntities(): Iterable<Device>
+}
+
+class RoomRepository {
++containsEntityByID(RoomID): boolean
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-width: double
+-length: double
+-height: double
++getRoomName(): String
+}
+
+class DeviceDTO {
+-DeviceName: String
+
++getDeviceName(): String
+}
+
+class RoomMapper {
++roomToDTO(RoomList): Map<RoomDTO, Room>
++roomToDTO(Room): RoomDTO
+}
+
+class RoomID {
+-roomName: String
+}
+
+class House {
+
+}
+
+class Device {
+-DeviceName: DeviceID
+-DeviceModel: DeviceModel
+-DeviceStatus: DeviceStatus
+-RoomID: RoomID
++getRoomID(): RoomID
+}
+
+
+class DeviceMapper {
++deviceListToDTO(DeviceList): Map<DeviceDTO, Device>
++DeviceToDTO(Device): DeviceDTO
+}
+
+
+
+
+ListAllDevicesInRoomController - House
+
+ListAllDevicesInRoomController -- DeviceService
+
+ListAllDevicesInRoomController -- RoomService
+
+RoomService ..> RoomMapper: <<uses>>
+
+
+RoomMapper ..> RoomDTO: <<uses>>
+DeviceMapper ..> DeviceDTO: <<uses>>
+
+DeviceService - DeviceRepository
+DeviceService -- RoomRepository
+DeviceService ...> Device: <<uses>>
+DeviceService ..> DeviceMapper: <<uses>>
+DeviceService ..> RoomID: <<uses>>
+
+
+@enduml

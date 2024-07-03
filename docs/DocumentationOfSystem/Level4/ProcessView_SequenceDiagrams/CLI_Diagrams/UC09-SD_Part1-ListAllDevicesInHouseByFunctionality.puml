@@ -1,0 +1,114 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title US09 - As a Power User [or Administrator], I want to get a list of all devices in a house, grouped by device functionality types. It must include device location. Main success case
+
+autonumber
+
+!pragma teoz true
+
+box " <<SubSystem>>\n  <<Container>>\n    :Backend " #DarkGrey
+box " <<Component>>\n    :Server" #LightGrey
+participant ":ListAllDevicesInHouseByFunctionalityController" as US09Ctrl
+participant ":ListAllDevicesInHouseByFunctionalityService" as HouseService
+participant "mainSensorMap:\nMap<SensorFunctionalityID, \nMap<RoomID, DeviceID>>" as mainSensorMap
+participant ":SensorRepository" as SensorRepository
+participant "sensor:Sensor" as Sensor
+participant ":DeviceRepository" as DeviceRepository
+participant "device:Device" as Device
+participant "mainActuatorMap:\nMap<ActuatorFuntionalityID, \nMap<RoomID, DeviceID>>" as mainActuatorMap
+participant ":ActuatorRepository" as ActuatorRepository
+participant "actuator:Actuator" as Actuator
+participant "mainMap:Map<Object, \nMap<RoomID, DeviceID>>" as mainMap
+end box
+end box
+
+'SECTION 1: CALL TO CONTROLLER AND CONTROLLER TO SERVICE'
+[o-> US09Ctrl: getListOfDevicesByFunctionality()
+activate US09Ctrl
+US09Ctrl -> HouseService: devicesGroupedByFunctionalityAndLocation()
+activate HouseService
+'END SECTION'
+
+'SECTION 2: ITERATE THROUGH SENSORS AND GROUP SENSORS BY FUNCTIONALITY'
+HouseService -> HouseService: sensorFunctionalityMap()
+    activate HouseService
+    HouseService --> mainSensorMap**: <<creates>>
+    HouseService -> SensorRepository: findAllEntities()
+    activate SensorRepository
+    SensorRepository --> HouseService: Iterable<Sensor> sensors
+    deactivate SensorRepository
+    'SECTION 2.1: LOOPING THROUGH EACH SENSOR'
+    loop for each Sensor in sensors
+        HouseService -> Sensor: getSensorFunctionalityID()
+        activate Sensor
+        Sensor --> HouseService: SensorFunctionalityID sensorFunctionalityID
+        HouseService -> Sensor: getDeviceID()
+        Sensor --> HouseService: DeviceID deviceID
+        deactivate Sensor
+        HouseService -> DeviceRepository: findEntityByID(deviceID)
+        activate DeviceRepository
+        DeviceRepository --> HouseService: Device device
+        deactivate DeviceRepository
+        HouseService -> Device: getRoomID()
+        activate Device
+        Device --> HouseService: RoomID roomID
+        deactivate Device
+        note over HouseService: On Step <b>15</b> make sure not to overwrite\n Map key and value if they already exist.
+        HouseService -> mainSensorMap: add (sensorFunctionalityID, roomID, deviceID)
+        activate mainSensorMap
+        deactivate mainSensorMap
+    end
+HouseService --> HouseService: mainSensorMap
+deactivate HouseService
+'END SECTION'
+
+'SECTION 3: ITERATE THROUGH ACTUATORS AND GROUP SENSORS BY FUNCTIONALITY'
+HouseService -> HouseService: actuatorFunctionalityMap()
+    activate HouseService
+    HouseService --> mainActuatorMap**: <<creates>>
+    HouseService -> ActuatorRepository: findAllEntities()
+    activate ActuatorRepository
+    ActuatorRepository --> HouseService: Iterable<Actuator> actuators
+    deactivate ActuatorRepository
+    'SECTION 3.1: LOOPING THROUGH EACH ACTUATOR'
+    loop for each Actuator in actuators
+        HouseService -> Actuator: getActuatorFunctionalityID()
+        activate Actuator
+        Actuator --> HouseService: ActuatorFunctionalityID actuatorFunctionalityID
+        HouseService -> Actuator: getDeviceID()
+        Actuator --> HouseService: DeviceID deviceID
+        deactivate Actuator
+        HouseService -> DeviceRepository: findEntityByID(deviceID)
+        activate DeviceRepository
+        DeviceRepository --> HouseService: Device device
+        deactivate DeviceRepository
+        HouseService -> Device: getRoomID()
+        activate Device
+        Device --> HouseService: RoomID roomID
+        deactivate Device
+        note over HouseService: On Step <b>29</b> make sure not to overwrite\n Map key and value if they already exist.
+        HouseService -> mainActuatorMap: add (actuatorFunctionalityID, roomID, deviceID)
+        activate mainActuatorMap
+        deactivate mainActuatorMap
+    end
+HouseService --> HouseService: mainActuatorMap
+deactivate HouseService
+'END SECTION'
+
+'SECTION 4: MERGE SENSOR AND ACTUATOR MAPS AND PUT ALL DATA INTO MAIN MAP'
+HouseService --> mainMap**: <<creates>>
+    HouseService -> mainMap: putAll(mainSensorMap)
+    activate mainMap
+
+    HouseService -> mainMap: putAll(mainActuatorMap)
+    deactivate mainMap
+
+'END SECTION'
+
+'SECTION 5: RETURN MAIN MAP TO CONTROLLER FOR CONVERSION TO DTO'
+HouseService --> US09Ctrl: mainMap
+deactivate HouseService
+'END SECTION'
+
+ref over HouseService: UC09-SD_Part2-ListAllDevicesInHouseByFunctionality.puml]
+@enduml

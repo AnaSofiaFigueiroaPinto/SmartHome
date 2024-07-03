@@ -1,0 +1,33 @@
+@startuml
+title GET Request
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+
+box "<<Container>>\n:Server"
+participant ":Controller" as controller <<Components>>
+participant ":Service" as service <<Components>>
+participant ":Repository" as repo <<Components>>
+
+end box
+autonumber
+[o--> controller : GET /Request
+controller -> service: getReadings(VOs)
+service ->repo : getReadings(VOs)
+service <--repo : List<Readings>
+service ->service : Calculating
+controller <-- service: double
+[o<-- controller : double
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= api/houses/{id} (UC34.3) |= Double maxTempDifOutsideInside|
+|= api/houses/{id} (UC36) |= Double peakPowerConsumption|
+end legend
+@enduml

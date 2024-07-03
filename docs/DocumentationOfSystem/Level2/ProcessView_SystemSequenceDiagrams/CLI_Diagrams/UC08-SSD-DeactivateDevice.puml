@@ -1,0 +1,16 @@
+@startuml
+
+title UC08 - Deactivate Device
+autonumber
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as backend
+end box
+
+[o-> backend: deactivate device
+activate backend
+
+[o<-- backend: device deactivated
+deactivate backend
+
+@enduml

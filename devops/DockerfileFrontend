@@ -1,0 +1,44 @@
+# Use Node.js image as the base image
+FROM node:slim
+
+# Install dependencies - SHH client to clone repo and git to clone the repo
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       openssh-client \
+       git \
+       dos2unix \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create the .ssh directory and copy the SSH key
+RUN mkdir -p /root/.ssh
+
+# Copy the SSH key in provision folder to the container
+COPY docker_img_provisions/id_rsa /root/.ssh/id_rsa
+
+# Run dos2unix to standerdize line endings. Avoids CRLF additions when cloning the repo on machines with Windows OS as Host
+RUN dos2unix /root/.ssh/id_rsa
+
+# Correct permissions for the SSH key
+RUN chmod 600 /root/.ssh/id_rsa
+
+# Disable host key checking so we don't get stuck at prompt
+RUN echo "StrictHostKeyChecking no" > /root/.ssh/config
+
+# Clone the repository to the container
+RUN git clone git@github.com:Departamento-de-Engenharia-Informatica/2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5.git
+
+# Change working directory to cloned project specifically the frontend folder
+WORKDIR 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/frontend
+
+# REMOVE PACKAGE-LOCK.JSON FILE
+RUN rm package-lock.json
+
+# Use npm to install frontend dependencies
+RUN npm install
+
+# Expose FE port
+EXPOSE 3000
+
+# Start the frontend application
+ENTRYPOINT ["npm", "start"]

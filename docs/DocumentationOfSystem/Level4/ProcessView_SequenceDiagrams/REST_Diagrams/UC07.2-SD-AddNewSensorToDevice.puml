@@ -1,0 +1,128 @@
+@startuml
+
+autonumber
+
+title UC7.2 - Add new Sensor to Device
+
+!pragma teoz true
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":SensorControllerWeb" as Controller <<Component>>
+participant "sensorFunctionalityID:\nSensorFunctionalityID" as sensorFuncID
+participant "sensorID:\nSensorID" as sensorID
+participant "deviceID:\nDeviceID" as deviceID
+participant ":SensorService" as SensorService <<Component>>
+participant ":DeviceRepository" as DeviceRepo <<Component>>
+participant "device:\nDevice" as Device
+participant ":SensorFunctionalityRepository" as SensorFuncRepo <<Component>>
+participant ":FactorySensor" as Factory <<Component>>
+participant "sensor:\nSensor" as Sensor
+participant ":SensorRepository" as Repo <<Component>>
+participant "sensorDTO:\nSensorDTO" as sensorDTO
+participant ":DB Driver" as db <<Component>>
+end box
+
+
+'SECTION FOR GETTING THE LIST OF ROOMS IN A HOUSE AND DEVICES IN A ROOM
+ref over Router
+UC06-SD-ListAllDevicesInRoom
+end ref
+'END SECTION
+
+'SECTION FOR RETRIEVING AND EXTERNALIZING LIST OF FUNCTIONALITIES
+ref over Router
+UC7.1-SD-ListSensorFunctionalities
+end ref
+'END SECTION
+
+'SECTION FOR CREATING A SENSOR
+[o-> Router: POST api/sensors
+activate Router
+
+Router -> Controller: POST addSensorToDevice \n(@RequestBody SensorDTO sensorDTO)
+activate Controller
+
+Controller --> sensorFuncID**: <<create>>
+Controller --> sensorID**: <<create>>
+Controller --> deviceID**: <<create>>
+
+Controller -> SensorService: createSensorAndSave(deviceID, \nsensorFunctionalityID, sensorID)
+activate SensorService
+
+SensorService -> DeviceRepo: findEntityByID(deviceID)
+activate DeviceRepo
+
+DeviceRepo -> db: findByID(id.toString())
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> DeviceRepo: DeviceDataModel:deviceDM
+deactivate db
+
+DeviceRepo --> SensorService: Device
+deactivate DeviceRepo
+
+SensorService -> Device: isActive()
+activate Device
+Device --> SensorService: true
+deactivate Device
+
+SensorService -> SensorFuncRepo: getClassNameForSensorFunctionalityID(sensorFunctionalityID)
+activate SensorFuncRepo
+
+SensorFuncRepo --> SensorService: String sensorClass
+deactivate SensorFuncRepo
+
+SensorService -> Factory: createSensor(sensorID, deviceID, sensorFunctionalityID, sensorClass)
+activate Factory
+Factory --> Sensor**: <<create>>
+Factory --> SensorService: Sensor
+deactivate Factory
+'END SECTION
+
+'SECTION FOR SAVING A SENSOR
+SensorService -> Sensor: identity()
+activate Sensor
+Sensor --> SensorService: SensorID
+deactivate Sensor
+
+SensorService -> Repo: containsEntityByID(sensorID)
+activate Repo
+
+Repo -> db: existsByID(id.toString())
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> Repo: false
+deactivate db
+
+Repo --> SensorService: false
+deactivate Repo
+
+SensorService -> Repo: save(sensor)
+activate Repo
+
+Repo -> db: save(sensorDataModel)
+activate db
+db ->o]: DATABASE QUERY
+db <--o]: QUERY RESPONSE
+db --> Repo: SensorDataModel:sensorDM
+deactivate db
+
+Repo --> SensorService: Sensor
+deactivate Repo
+
+SensorService --> Controller: SensorID
+deactivate SensorService
+
+Controller --> sensorDTO**: <<create>>
+Router <-- Controller: newSensorDTO, HttpStatus.CREATED
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.CREATED
+deactivate Router
+'END SECTION
+
+@enduml

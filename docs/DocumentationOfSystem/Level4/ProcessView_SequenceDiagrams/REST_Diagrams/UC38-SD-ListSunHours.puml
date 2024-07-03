@@ -1,0 +1,71 @@
+@startuml
+title UC38 - As a User, I want to have today’s sunrise and sunset hours on the front/main page of my Web App.
+
+!pragma teoz true
+
+
+box "<<SubSystem>>\n:Backend" #DarkGrey
+box " <<Container>>\n:Server" #LightGrey
+participant ":Router" as router <<Component>>
+participant ":HouseWebController" as controller <<Component>>
+participant ":WeatherAPIService" as service <<Component>>
+participant ":ConfigScraper" as scraper <<Component>>
+participant ":HouseRepository" as repository <<Component>>
+participant ":House" as house <<Component>>
+participant ":Location" as location <<Component>>
+participant ":GPSCode" as gps <<Component>>
+participant ":WeatherAPIGateway" as gateway <<Component>>
+participant ":WeatherServiceDriver" as driver <<Component>>
+
+
+end box
+note over router
+SunX can represent sunrise or sunset
+end note
+[o-> router: GET \n/house/weather?option=sunX
+activate router
+router -> controller: getWeatherInfo (@RequestParam String option)
+activate controller
+controller -> service: getSunriseSunsetHour\n(option)
+activate service
+service -> service: defineGroupHouseLocation()
+activate service
+service -> scraper: loadGroupNumber()
+activate scraper
+scraper --> service: int groupNumber
+deactivate scraper
+service -> repository: findAllEntities()
+activate repository
+repository --> service: Iterable<House> houses
+deactivate repository
+service -> house**: houses.iterator().next()
+activate house
+house -> location**: getHouseLocation()
+deactivate house
+activate location
+location -> gps**: getGpsCode()
+deactivate location
+activate gps
+service -> gps: getLatitude()
+gps --> service: double latitude
+service -> gps: getLongitude()
+gps --> service: double longitude
+deactivate gps
+deactivate service
+service -> gateway: getSunriseSunsetHours\n(groupNumber, latitude, longitude, option)
+activate gateway
+gateway -> driver: getForEntity\n(url, SunriseSunsetDTO.class)
+activate driver
+driver ->o]: Request external Weather service
+driver <--o]: Response from external Weather service
+driver --> gateway: SunriseSunsetDTO
+deactivate driver
+gateway --> service: SunriseSunsetDTO
+deactivate gateway
+service --> controller: double sunXHours
+deactivate service
+controller --> router: sunXHours, HTTP Status OK
+deactivate controller
+[o<-- router: JSON sunXHours, HTTP Status OK
+deactivate router
+@enduml

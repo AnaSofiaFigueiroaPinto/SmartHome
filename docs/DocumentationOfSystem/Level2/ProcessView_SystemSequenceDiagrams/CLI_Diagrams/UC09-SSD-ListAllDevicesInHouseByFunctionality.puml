@@ -1,0 +1,16 @@
+@startuml
+
+title UC09 - List All Devices In House By Functionality
+autonumber
+
+box "  <<System>>\nSmartHome " #LightGrey
+participant ":Backend" as backend
+end box
+
+[o-> backend: get list of devices by functionality
+activate backend
+
+[o<-- backend: list of devices
+deactivate backend
+
+@enduml

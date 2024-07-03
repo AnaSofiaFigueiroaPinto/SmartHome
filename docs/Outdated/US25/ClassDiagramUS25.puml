@@ -1,0 +1,64 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title "US25: As Product Owner, I want the system to have a \n type of sensor that gives the average power consumption over a period (W)."
+
+enum SensorFunctionality {
+    TEMPERATURE,
+    HUMIDITY,
+    BINARY_STATUS,
+    SCALE_POSITION,
+    WIND,
+    SUNRISE,
+    SUNSET,
+    DEW_POINT,
+    SOLAR_RADIATION,
+    POWER,
+    ENERGY
+    }
+
+interface Sensor {
+    +getSensorName(): String
+    +getSensorFunctionality(): SensorFunctionality
+}
+
+
+interface SensorPowerAverage extends Sensor{
+    +getAveragePowerForSpecificPeriod\n(Timestamp startDate, Timestamp endDate): String
+}
+
+interface Value {
+    +getValueWithUnit(): String
+}
+
+class PowerAverageSensorValue implements Value{
+    -unit: String
+    -startDate: Timestamp
+    -endDate: Timestamp
+
+    +getValueWithUnit(): String
+}
+
+
+class PowerAverageSensor implements SensorPowerAverage{
+    -sensorName: String
+    -functionality: SensorFunctionality
+    -factoryValue: FactoryValue
+    -value: Value
+
+    +getSensorName(): String
+    +getSensorFunctionality(): SensorFunctionality
+    +getAveragePowerForSpecificPeriod\n(Timestamp startDate, Timestamp endDate): String
+}
+
+class FactoryValue {
++createValuePeriodTime(): Value
+}
+
+FactoryValue - PowerAverageSensor: has
+FactoryValue ..> PowerAverageSensorValue: <<creates>>
+PowerAverageSensor - SensorFunctionality: has
+PowerAverageSensor -- PowerAverageSensorValue: has
+
+
+@enduml

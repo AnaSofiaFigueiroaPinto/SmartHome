@@ -1,0 +1,23 @@
+@startuml
+skinparam linetype ortho
+
+node "localhost:" as client {
+
+    component "Browser" as browser {
+        component "UI" as UI {
+
+        }
+    }
+}
+
+node ":Server" as server {
+    component ":Smarthome\n<<System>>" as sh<<component>> {
+    }
+
+    port "Port 3000" as p3000
+    port "Port 8080" as p8080
+}
+
+UI -[bold]right- p3000 :http
+UI -[bold]right- p8080 :http
+@enduml

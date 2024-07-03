@@ -1,0 +1,65 @@
+# Use an official Tomcat image as the base image
+FROM tomcat:10-jdk17-openjdk-slim
+
+# Install dependencies - SHH client to clone repo and git to clone the repo. Install dos2unix to remove CRLF on Windows machines
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       openssh-client \
+       git \
+       maven \
+       dos2unix \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create the .ssh directory and copy the SSH key
+RUN mkdir -p /root/.ssh
+
+# Copy the SSH key in provision folder to the container
+COPY docker_img_provisions/id_rsa /root/.ssh/id_rsa
+
+# Run dos2unix to standerdize line endings. Avoids CRLF additions when cloning the repo on machines with Windows OS as Host
+RUN dos2unix /root/.ssh/id_rsa
+
+# Set permissions for the SSH key
+RUN chmod 600 /root/.ssh/id_rsa
+
+# Disable host key checking so we don't get stuck at prompt
+RUN mkdir -p /root/.ssh && \echo "StrictHostKeyChecking no" > /root/.ssh/config
+
+# To avoid using cached repositories
+ARG CACHEBUST=1
+
+# Clone the repository to the container
+RUN git clone git@github.com:Departamento-de-Engenharia-Informatica/2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5.git
+
+# Copy file in docker_img_provisions to the container
+# pom.xml
+COPY docker_img_provisions/pom.xml 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/pom.xml
+
+# ServletInitializer class
+COPY docker_img_provisions/ServletInitializer.java 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/src/main/java/smarthome/ServletInitializer.java
+
+# application.properties
+COPY docker_img_provisions/application.properties 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/src/main/resources/application.properties
+
+# CorsConfig class
+COPY docker_img_provisions/CorsConfig.java 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/src/main/java/smarthome/CorsConfig.java
+
+# Remove integration tests folder
+RUN rm -rf 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/src/test/java/smarthome/integration
+
+# Remove TestRepositoryConfig Test class
+RUN rm -rf 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5/src/test/java/smarthome/util/config/TestRepositoryConfigTest.java
+
+# Change working directory to cloned project
+WORKDIR 2023-2024-switch-dev-project-assignment-switch-project-2023-2024-grupo5
+
+# Build the project
+RUN mvn clean install
+
+# Copy the war file to the tomcat webapps directory
+RUN cp target/switch2023project_g5-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/switch2023project_g5-1.0-SNAPSHOT.war
+
+# Start the backend application
+CMD ["catalina.sh", "run"]
+

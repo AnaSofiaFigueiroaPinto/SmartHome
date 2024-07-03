@@ -1,0 +1,180 @@
+@startuml
+skinparam linetype ortho
+
+class RoomService {
++getRoomList()
+}
+
+class RoomRepository{
++findAllEntities(): Iterable<Room>
+}
+
+class RoomMapper{
++convertObjects(Iterable<Room>): Map<RoomDTO, Room>
+}
+class RoomDTO{
+-roomName : String
++getRoomName()
+ }
+
+class DeviceService {
++getDeviceList()
+}
+class DeviceRepository{
++findAllEntities(): Iterable<Device>
+}
+
+class DeviceMapper{
++convertObjects(Iterable<Device>): Map<DeviceDTO, Device>
+}
+class DeviceDTO{
+-deviceName : String
++getDeviceName()
+ }
+
+class AddNewActuatorToDeviceController {
++getRoomList()
++getDeviceList()
++getListOfAvailableActuatorFunctionality()
++createActuatorAndAddToDevice(DeviceDTO, ActuatorFunctionalityDTO, String actuatorName)
+}
+
+class ActuatorFunctionalityService {
++getActuatorFunctionalityList()
+}
+
+class ActuatorFunctionalityRepository {
++findAllEntities(): Iterable<ActuatorFunctionality>
+}
+
+class ActuatorFunctionalityMapper {
++convertObjects(Iterable<ActuatorFunctionality>): Map<ActuatorFunctionalityDTO, ActuatorFunctionality>
+}
+class ActuatorFunctionalityDTO{
+-actuatorFunctionalityName : String
++getActuatorFunctionalityName()
+ }
+
+class ActuatorService {
++createActuatorAndAddToDevice(Device, ActuatorFunctionality, String actuatorName)
+}
+
+class ActuatorFactory {
++createActuator(DeviceID, ActuatorFunctionalityID, String actuatorName): Actuator
+}
+
+interface Actuator {
+}
+
+interface ActuatorSpecificInteger extends Actuator{
+}
+
+interface ActuatorSpecificDecimal extends Actuator {
+}
+class BlindSetterActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-deviceName : DeviceID
+}
+class DecimalSetterActuator implements ActuatorSpecificDecimal{
+-actuatorName : ActuatorID
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-actuatorTarget: ActuatorTarget
+-deviceName : DeviceID
+}
+
+class IntegerSetterActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-deviceName : DeviceID
+}
+
+class SwitchActuator implements ActuatorSpecificInteger{
+-actuatorName : ActuatorID
+-status: SwitchActuatorStatus
+-actuatorFunctionalityID : ActuatorFunctionalityID
+-actuatorProperties: ActuatorProperties
+-deviceName : DeviceID
+}
+
+
+class ActuatorRepository {
++containsEntityByID(ActuatorID): boolean
++updateOrSave(Actuator): Actuator
+}
+
+class ActuatorFunctionalityDTO
+
+class ActuatorID{
+-actuatorID : String
+}
+class DeviceID {
+-deviceID : String
+}
+class ActuatorFunctionalityID{
+- actuatorFunctionalityID : String
+}
+class ActuatorProperties  {
+-rangeInt: RangeInt
+-rangeDecimal: RangeDecimal
++getRangeInt(): RangeInt
++getRangeDecimal(): RangeDecimal
+}
+
+class RangeInt {
+-upperLimitInt: int
+-lowerLimitInt: int
+}
+
+class RangeDecimal  {
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+}
+
+RoomService -- RoomRepository
+RoomService ..> RoomMapper : <<uses>>
+RoomMapper ..> RoomDTO  : <<uses>>
+DeviceService -- DeviceRepository
+DeviceService ..> DeviceMapper  : <<uses>>
+DeviceMapper ..> DeviceDTO  : <<uses>>
+AddNewActuatorToDeviceController -- RoomService
+AddNewActuatorToDeviceController -- DeviceService
+AddNewActuatorToDeviceController -- ActuatorFunctionalityService
+AddNewActuatorToDeviceController -- ActuatorService
+
+ActuatorFunctionalityService -- ActuatorFunctionalityRepository
+ActuatorFunctionalityService ..> ActuatorFunctionalityMapper  : <<uses>>
+ActuatorFunctionalityMapper ..> ActuatorFunctionalityDTO  : <<uses>>
+
+ActuatorService -- ActuatorFactory
+ActuatorService -- ActuatorRepository
+ActuatorFactory --> Actuator: <<creates>>
+
+
+ActuatorProperties --> RangeInt
+ActuatorProperties --> RangeDecimal
+
+DecimalSetterActuator  -->  ActuatorProperties
+DecimalSetterActuator  --> ActuatorID
+DecimalSetterActuator  --> DeviceID
+DecimalSetterActuator  -->  ActuatorFunctionalityID
+
+IntegerSetterActuator  -->  ActuatorProperties
+IntegerSetterActuator  --> ActuatorID
+IntegerSetterActuator  --> DeviceID
+IntegerSetterActuator  -->  ActuatorFunctionalityID
+
+SwitchActuator  -->  ActuatorProperties
+SwitchActuator  --> ActuatorID
+SwitchActuator  --> DeviceID
+SwitchActuator  -->  ActuatorFunctionalityID
+
+BlindSetterActuator  -->  ActuatorProperties
+BlindSetterActuator  --> ActuatorID
+BlindSetterActuator  --> DeviceID
+BlindSetterActuator  -->  ActuatorFunctionalityID
+@enduml

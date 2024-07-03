@@ -1,0 +1,52 @@
+@startuml
+title UC - GET Request of Objects
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+
+autonumber
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Frontend" #LightGrey
+participant "<<Container>>\n  :UI" as frontend
+end box
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+  participant ":Database" as database <<Container>>
+end box
+end box
+
+
+[o-> frontend: Request to get Objects
+activate frontend
+frontend -> server: GET Objects Request
+activate server
+server->database : findAll Objects
+activate database
+
+database-->server : Objects requested
+deactivate database
+server-->frontend: Objects requested JSON
+deactivate server
+[o<--frontend: Objects requested
+deactivate frontend
+
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= /houses/{id}/rooms (UC03.1) |= List<RoomDTO> |
+|= /rooms/{id}/devices (UC06) |= List<DeviceDTO> |
+|= /houses/{id} (UC09) |= Map<Object, Map<RoomDTO, DeviceDTO>>|
+|= /devices/{id} (UC33) |= Map<SensorFunctionalityDTO, List<ReadingDTO>>|
+|= /houses/{id}/rooms (UC34.1) |= List<RoomDTO>|
+|= /devices/{id}/sensors (UC34.2) |= List<SensorsDTO>|
+|= /houses/{id} (UC36) |= Double peakPowerConsumption|
+|= /actuatorfunctionality/{id} (UC37.1) |= Map<DeviceDTO, RoomDTO>|
+end legend
+@enduml

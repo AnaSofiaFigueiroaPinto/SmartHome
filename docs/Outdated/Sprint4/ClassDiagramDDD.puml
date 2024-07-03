@@ -1,0 +1,309 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+
+    package houseAggregate {
+        class House <root>
+        interface FactoryHouse{
+        }
+        class ImpFactoryHouse implements FactoryHouse{
+        }
+        class House{
+        }
+        class Location <VO>{
+        }
+        class Address <VO>{
+        }
+        class GPSCode <VO>{
+        }
+    ImpFactoryHouse --> House: <<creates>>
+    Location --> Address
+    Location --> GPSCode
+    House  -->  Location
+    }
+    class HouseID <VO>{
+    }
+    House  --> HouseID
+
+    package roomAggregate {
+        class Room <root>
+        interface FactoryRoom {
+        }
+        class ImplFactoryRoom implements FactoryRoom {
+        }
+        class Room{
+        }
+        class FloorNumber <VO>{
+        }
+        class Dimensions <VO>{
+        }
+    ImplFactoryRoom --> Room: <<creates>>
+    Room ---> Dimensions
+    Room ---> FloorNumber
+    }
+    class RoomId <VO>{
+    }
+    Room ---> RoomId
+    Room ---> HouseID
+
+    package deviceAggregate{
+        class Device <root>{
+        }
+        interface FactoryDevice{
+        }
+        class ImpDeviceFactory implements FactoryDevice{
+        }
+        class Model <VO>{
+        }
+        enum DeviceStatus <VO>{
+        }
+    ImpDeviceFactory --> Device: <<creates>>
+    Device --> Model
+    Device --> DeviceStatus
+    }
+    class DeviceID <VO>{
+    }
+    Device --> DeviceID
+    Device --> RoomId
+
+    package Actuator {
+    class FactoryActuator{
+    }
+    interface Actuator{
+    }
+    interface ActuatorSpecificDecimal extends Actuator{
+    }
+    interface ActuatorSpecificInteger extends Actuator{
+    }
+
+    package blindSetterActuatorAggregate {
+        class BlindSetterActuator <root>{
+        }
+    }
+    BlindSetterActuator --> ActuatorID
+    BlindSetterActuator --> DeviceID
+    BlindSetterActuator --> ActuatorProperties
+    BlindSetterActuator ..> ActuatorSpecificInteger
+
+    package decimalSetterActuatorAggregate {
+        class DecimalSetterActuator <root>{
+        }
+    }
+    DecimalSetterActuator --> ActuatorID
+    DecimalSetterActuator --> DeviceID
+    DecimalSetterActuator --> ActuatorProperties
+    DecimalSetterActuator --> ActuatorTarget
+    DecimalSetterActuator ..> ActuatorSpecificDecimal
+
+    package integerSetterActuatorAggregate {
+        class IntegerSetterActuator <root>{
+        }
+    }
+    IntegerSetterActuator --> ActuatorID
+    IntegerSetterActuator --> DeviceID
+    IntegerSetterActuator --> ActuatorProperties
+    IntegerSetterActuator ..> ActuatorSpecificInteger
+
+    package switchActuatorAggregate {
+        class SwitchActuator <root>{
+        }
+    }
+    SwitchActuator --> ActuatorID
+    SwitchActuator --> DeviceID
+    SwitchActuator --> ActuatorProperties
+    SwitchActuator --> SwitchActuatorStatus
+    SwitchActuator ..> ActuatorSpecificInteger
+
+        class ActuatorProperties <VO>{
+        }
+        class RangeInt <VO>{
+        }
+        class RangeDecimal <VO>{
+        }
+        enum SwitchActuatorStatus <VO>{
+        }
+        class TargetValue <VO>{
+        }
+    FactoryActuator --> Actuator: <<creates>>
+    ActuatorProperties --> RangeInt
+    ActuatorProperties --> RangeDecimal
+
+    class ActuatorID <VO>{
+    }
+    }
+
+    package actuatorFunctionalityAggregate {
+        interface FactoryActuatorFunctionality{
+        }
+        class ImpFactoryActuatorFunctionality implements FactoryActuatorFunctionality {
+        }
+        class ActuatorFunctionality <root> {
+        }
+    ImpFactoryActuatorFunctionality ..> ActuatorFunctionality: <<creates>>
+    }
+    class ActuatorFunctionalityID <VO>{
+    }
+    ActuatorFunctionality --> ActuatorFunctionalityID
+    BlindSetterActuator --> ActuatorFunctionalityID
+    DecimalSetterActuator --> ActuatorFunctionalityID
+    IntegerSetterActuator --> ActuatorFunctionalityID
+    SwitchActuator --> ActuatorFunctionalityID
+
+
+    package sensor {
+        class FactorySensor {
+        }
+        interface Sensor {
+        }
+        interface SensorSpecificTime extends Sensor {
+        }
+        interface SensorSpecificTimeLocation extends Sensor {
+        }
+        interface SensorPeriodOfTime extends Sensor {
+        }
+        class FactoryValue {
+        }
+
+        FactorySensor --> Sensor: <<creates>>
+
+        package binaryStatusSensorAggregate {
+            class BinaryStatusSensor <root> {
+            }
+            BinaryStatusSensor -- FactoryValue
+        }
+        BinaryStatusSensor --> SensorID
+        BinaryStatusSensor --> DeviceID
+        BinaryStatusSensor ..> SensorSpecificTime
+
+        package dewPointSensorAggregate {
+            class DewPointSensor <root> {
+            }
+            DewPointSensor -- FactoryValue
+        }
+        DewPointSensor --> SensorID
+        DewPointSensor --> DeviceID
+        DewPointSensor ..> SensorSpecificTimeLocation
+
+        package electricEnergyConsumptionSensorAggregate {
+            class ElectricEnergyConsumptionSensor <root> {
+            }
+            ElectricEnergyConsumptionSensor -- FactoryValue
+        }
+        ElectricEnergyConsumptionSensor--> SensorID
+        ElectricEnergyConsumptionSensor --> DeviceID
+        ElectricEnergyConsumptionSensor ..> SensorPeriodOfTime
+
+        package humidityPercentageSensorAggregate {
+            class HumidityPercentageSensor <root> {
+            }
+            HumidityPercentageSensor -- FactoryValue
+        }
+        HumidityPercentageSensor --> SensorID
+        HumidityPercentageSensor --> DeviceID
+        HumidityPercentageSensor ..> SensorSpecificTime
+
+        package powerAverageSensorAggregate {
+            class PowerAverageSensor <root> {
+            }
+            PowerAverageSensor -- FactoryValue
+        }
+        PowerAverageSensor --> SensorID
+        PowerAverageSensor --> DeviceID
+        PowerAverageSensor ..> SensorPeriodOfTime
+
+        package scaleSensorAggregate {
+            class ScaleSensor <root> {
+            }
+            ScaleSensor -- FactoryValue
+        }
+        ScaleSensor --> SensorID
+        ScaleSensor --> DeviceID
+        ScaleSensor ..> SensorSpecificTime
+
+        package solarIrradianceSensorAggregate {
+            class SolarIrradianceSensor <root> {
+            }
+            SolarIrradianceSensor -- FactoryValue
+        }
+        SolarIrradianceSensor --> SensorID
+        SolarIrradianceSensor --> DeviceID
+        SolarIrradianceSensor ..> SensorSpecificTimeLocation
+
+        package specificTimePowerConsumptionSensorAggregate {
+            class SpecificTimePowerConsumptionSensor <root> {
+            }
+            SpecificTimePowerConsumptionSensor -- FactoryValue
+        }
+        SpecificTimePowerConsumptionSensor --> SensorID
+        SpecificTimePowerConsumptionSensor --> DeviceID
+        SpecificTimePowerConsumptionSensor ..> SensorSpecificTime
+
+        package sunriseSensorAggregate {
+            class SunriseSensor <root> {
+            }
+            SunriseSensor -- FactoryValue
+        }
+        SunriseSensor --> SensorID
+        SunriseSensor --> DeviceID
+        SunriseSensor ..> SensorSpecificTimeLocation
+
+        package sunsetSensorAggregate {
+            class SunsetSensor <root> {
+            }
+            SunsetSensor -- FactoryValue
+        }
+        SunsetSensor --> SensorID
+        SunsetSensor --> DeviceID
+        SunsetSensor ..> SensorSpecificTimeLocation
+
+        package temperatureCelsiusSensorAggregate {
+            class TemperatureCelsiusSensor <root> {
+            }
+            TemperatureCelsiusSensor -- FactoryValue
+        }
+        TemperatureCelsiusSensor --> SensorID
+        TemperatureCelsiusSensor --> DeviceID
+        TemperatureCelsiusSensor ..> SensorSpecificTime
+
+        package windSpeedAndDirectionSensorAggregate {
+            class WindSpeedAndDirectionSensor <root> {
+            }
+            WindSpeedAndDirectionSensor -- FactoryValue
+        }
+        WindSpeedAndDirectionSensor --> SensorID
+        WindSpeedAndDirectionSensor --> DeviceID
+        WindSpeedAndDirectionSensor ..> SensorSpecificTimeLocation
+    class SensorID <VO> {
+    }
+    }
+
+    package sensorFunctionalityAggregate {
+        interface FactorySensorFunctionality {
+        }
+        class IMPFactorySensorFunctionality implements FactorySensorFunctionality {
+        }
+        class SensorFunctionality <root> {
+        }
+    IMPFactorySensorFunctionality ..> SensorFunctionality: <<creates>>
+    }
+    class SensorFunctionalityID <VO> {
+    }
+    SensorFunctionality --> SensorFunctionalityID
+    BinaryStatusSensor --> SensorFunctionalityID
+    DewPointSensor --> SensorFunctionalityID
+    ElectricEnergyConsumptionSensor --> SensorFunctionalityID
+    HumidityPercentageSensor --> SensorFunctionalityID
+    PowerAverageSensor --> SensorFunctionalityID
+    ScaleSensor --> SensorFunctionalityID
+    SolarIrradianceSensor --> SensorFunctionalityID
+    SpecificTimePowerConsumptionSensor --> SensorFunctionalityID
+    SunriseSensor --> SensorFunctionalityID
+    SunsetSensor --> SensorFunctionalityID
+    TemperatureCelsiusSensor --> SensorFunctionalityID
+    WindSpeedAndDirectionSensor --> SensorFunctionalityID
+
+}
+
+
+@enduml

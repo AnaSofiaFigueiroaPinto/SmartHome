@@ -1,0 +1,70 @@
+ @startuml
+ skinparam linetype ortho
+
+title UC03.2 Edit Room
+
+package server #LightGray {
+
+class RoomControllerWeb {
+-houseService: HouseService
+    -roomService: RoomService
+    -deviceService: DeviceService
+    -deviceMapperDTO: DeviceMapperDTO
+    +PATCH editRoom(@PathVariable String id, @RequestBody RoomDTO roomDTO):\n ResponseEntity<> editedRoomDTO, HttpStatus.OK)
+}
+
+class RoomDTO {
++roomName: String
++floorNumber: int
++width: double
++length: double
++height: double
+}
+
+interface RoomRepository <factory>{
++findEntityByID(RoomID roomID): Optional<Room>
++save(Room): Room
+}
+
+class Room <root>{
+-houseID: HouseID
+-roomName: RoomID
+-floorNumber: RoomFloor
+-dimensions: RoomDimensions
++editRoom(RoomFloor, RoomDimensions): Room
++identity(): RoomID
+}
+
+class RoomID <VO> {
+-roomName: String
+}
+
+class RoomFloor <VO> {
+-floorNumber: int
+}
+
+class RoomDimensions <VO>{
+-length: double
+-width: double
+-height: double
+
+}
+
+class RoomService {
+-roomRepository: RoomRepository
+-factoryRoom: FactoryRoom
+-houseRepository: HouseRepository
++editRoomAndSave(RoomID roomID, RoomFloor roomFloor,\n RoomDimensions roomDimensions): RoomID
+}
+
+}
+
+RoomControllerWeb -- RoomService
+RoomControllerWeb ..> RoomDTO : <<creates>>
+RoomControllerWeb ..> RoomID : <<creates>>
+RoomControllerWeb ..> RoomFloor : <<creates>>
+RoomControllerWeb ..> RoomDimensions : <<creates>>
+RoomService -- RoomRepository
+RoomService ..> Room : <<uses>>
+
+@enduml

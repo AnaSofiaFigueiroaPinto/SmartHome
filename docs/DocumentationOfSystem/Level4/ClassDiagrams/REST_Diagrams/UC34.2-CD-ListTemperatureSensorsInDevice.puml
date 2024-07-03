@@ -1,0 +1,83 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam linetype ortho
+title UC34.2: List temperature sensors in device.
+package server #LightGray {
+
+class DeviceControllerWeb{
+- deviceService: DeviceService
+- closeBlindRollerService: CloseBlindRollerService
+- sensorService: SensorService
+- sensorMapperDTO: SensorMapperDTO
+- actuatorService: ActuatorService
+- actuatorMapperDTO: ActuatorMapperDTO
+- valueService: ValueService
+- mapperSensorFunctionality: MapperSensorFunctionality
+- mapperReading: MapperReading
+-listSensorsOfDeviceWithSensorFunctionality(\nString deviceName, String sensorFunctionalityID)\n:List<SensorID>
++GET getListOfSensors(@PathVariable("id") String deviceName, \n@RequestParam(required = false) String sensorFunctionalityID) \n ResponseEntity<Object> listSensorDTO, HttpStatus.OK
+}
+
+class DeviceID <VO> {
+- id: String
+}
+
+class SensorFunctionalityID <VO> {
+- id: String
+}
+
+class SensorService {
+- factorySensor: FactorySensor
+- sensorRepo: SensorRepository
+- deviceRepository: DeviceRepository
+- sensorFunctionalityRepository: SensorFunctionalityRepository
++findSensorsIDOfADeviceBySensorFunctionality\n(deviceID, sensorFunctionalityID): List<SensorID>
+}
+
+interface SensorRepository {
+- sensorRepositorySpringData: SensorRepositorySpringData
+- factorySensor: FactorySensor
+- mapperSensorDataModel: MapperSensorDataModel
++findByDeviceIDAndSensorFunctionality(deviceID, sensorFunctionalityID): List<Sensor>
+}
+
+abstract class Sensor <ROOT> {
+    -sensorID: SensorID
+    -sensorName: String
+    -sensorFunctionalityID: SensorFunctionalityID
+    +getSensorFunctionalityID(): SensorFunctionalityID
+    +identity(): SensorID
+}
+class SensorID <VO> {
+- id: String
+}
+
+class SensorFunctionalityID <VO> {
+- id: String
+}
+
+class SensorMapperDTO {
+ +sensorIDsToDTOList(Iterable<SensorID> listOfSensorIDs): List<SensorDTO>
+}
+
+class SensorDTO {
+    +sensorName: String
+    }
+
+DeviceControllerWeb ..>  SensorMapperDTO: <<uses>>
+DeviceControllerWeb -- SensorService
+DeviceControllerWeb ..> DeviceID: <<creates>>
+DeviceControllerWeb ..> SensorFunctionalityID: <<creates>>
+SensorService -- SensorRepository
+SensorService ..> Sensor : <<uses>>
+SensorMapperDTO ..> SensorDTO: <<creates>>
+
+Sensor "1"--*"1"SensorID
+Sensor "1"--*"1" SensorFunctionalityID
+Sensor "1"--*"1" DeviceID
+
+
+
+
+@enduml

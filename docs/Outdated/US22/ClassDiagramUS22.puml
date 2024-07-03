@@ -1,0 +1,58 @@
+@startuml
+title US22: As Product Owner, I want the system to have a type of sensor that gives the dew point (C).
+'https://plantuml.com/class-diagram
+
+interface Sensor {
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
+
+}
+
+interface SensorSpecificTimeLocation extends Sensor{
++getValueAtSpecificTimeAndLocation\n(Timestamp timestamp, GPSCode gpsCode): String
+}
+
+class DewPointCelsiusSensor implements SensorSpecificTimeLocation{
+-sensorName: String
+-sensorFunctionality: SensorFunctionality
+-factoryValue: FactoryValue
+-value: Value
++getSensorName(): String
++getSensorFunctionality(): SensorFunctionality
++getValueAtSpecificTimeAndLocation\n(Timestamp dateAndTime, GPSCode gpsCode): String
+}
+
+class FactoryValue {
++createValueTimeAndLocation(): Value
+}
+
+enum SensorFunctionality {
+TEMPERATURE
+HUMIDITY
+BINARY_STATUS
+SCALE_POSITION
+WIND
+SUNRISE
+SUNSET
+DEW_POINT
+SOLAR_RADIATION
+POWER
+ENERGY
+}
+
+class DewPointCelsiusSensorValue implements Value{
+-unit: String
+-gpsCode: GPSCode
+-dateAndTime: TimeStamp
++getValueWithUnit(): String
+}
+
+interface Value {
++getValueWithUnit(): String
+}
+
+FactoryValue - DewPointCelsiusSensor: has
+DewPointCelsiusSensor - SensorFunctionality: has
+DewPointCelsiusSensor -- DewPointCelsiusSensorValue
+DewPointCelsiusSensorValue <.. FactoryValue: <<creates>>
+@enduml

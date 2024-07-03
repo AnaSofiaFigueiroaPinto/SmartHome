@@ -1,0 +1,15 @@
+@startuml
+
+autonumber
+title UC12.1 - List Actuator Functionalities
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant ":Backend" as Backend
+end box
+
+[o-> Backend: get list of actuator functionalities
+activate Backend
+[o<--Backend: list of actuator functionalities
+deactivate Backend
+
+@enduml

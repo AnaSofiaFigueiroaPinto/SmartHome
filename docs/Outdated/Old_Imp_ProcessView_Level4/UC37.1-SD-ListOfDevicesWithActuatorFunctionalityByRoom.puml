@@ -1,0 +1,51 @@
+@startuml
+title UC37.1 - Get list of Devices with Actuator Functionality by Room
+
+autonumber
+
+participant ":DeviceControllerWeb" as deviceCTRL
+participant "chosenFunctionality:ActuatorFunctionalityID" as functionality
+participant ":CloseBlindRollerService" as closeBlindRollerService
+participant ":ActuatorRepository" as actuatorRepo
+participant ":Actuator" as actuator
+participant ":DeviceRepository" as deviceRepo
+participant ":Device" as device
+
+-> deviceCTRL: listOfDevicesWithActuatorFunctionalityByRoom\n(@PathVariable("id") String actuatorFunctionalityID)
+activate deviceCTRL
+deviceCTRL -> functionality** : <<create>
+deviceCTRL -> closeBlindRollerService: listOfDevicesWithActuatorFunctionalityByRoom\n(chosenFunctionality)
+activate closeBlindRollerService
+closeBlindRollerService -> actuatorRepo: findByActuatorFunctionality\n(chosenFunctionality)
+activate actuatorRepo
+actuatorRepo --> closeBlindRollerService: Iterable<Actuator>
+deactivate actuatorRepo
+loop for each Actuator in List
+closeBlindRollerService -> actuator** : getDeviceName()
+activate actuator
+actuator --> closeBlindRollerService: DeviceID
+deactivate actuator
+closeBlindRollerService -> closeBlindRollerService: devicesWithActuatorFunctionality:\nList<DeviceID>
+end loop
+loop for each DeviceID in List
+closeBlindRollerService -> deviceRepo: findEntityByID(deviceID)
+activate deviceRepo
+deviceRepo --> closeBlindRollerService: List<Device>
+deactivate deviceRepo
+closeBlindRollerService -> device** : getDeviceName()
+activate device
+device --> closeBlindRollerService: DeviceID
+closeBlindRollerService -> device : getRoomID()
+device --> closeBlindRollerService: RoomID
+deactivate device
+closeBlindRollerService -> closeBlindRollerService: deviceIDRoomIDMap:\nMap<DeviceID, RoomID>
+closeBlindRollerService --> deviceCTRL: deviceIDRoomIDMap:\nMap<DeviceID, RoomID>
+deactivate closeBlindRollerService
+end loop
+
+
+<-- deviceCTRL: Map<DeviceID, RoomID>, ResponseEntity.OK
+deactivate deviceCTRL
+
+
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+title US01: As an Administrator, I want to configure the location of the house.
+'https://plantuml.com/class-diagram
+
+class ConfigureHouseLocationController {
+-house: House
++configureHouseLocation(LocationDTO locationDTO): boolean
+}
+
+class LocationDTO {
+-street: String
+-doorNumber: String
+-zipCode: String
+-city: String
+-country: String
+-latitude: double
+-longitude: double
++getStreet(): String
++getDoorNumber(): String
++getZipCode(): String
++getCity(): String
++getCountry(): String
++getLatitude(): double
++getLongitude(): double
+}
+
+class House {
+-location: Location
+-roomList: RoomList
++editLocation(String street, String doorNumber, String zipCode, String city, String country, double latitude, double longitude): boolean
+}
+
+class Location {
+-street: String
+-doorNumber: String
+-zipCode: String
+-city: String
+-country: String
+-gpsCode: GPSCode
+-validLocationArguments(): boolean
+}
+
+class GPSCode {
+-latitude: double
+-longitude: double
+-validGPSCodeArguments(): boolean
+}
+
+ConfigureHouseLocationController -- House
+ConfigureHouseLocationController - LocationDTO
+House "1" o-- "0..1" Location
+Location "1" *-- "1" GPSCode
+
+@enduml

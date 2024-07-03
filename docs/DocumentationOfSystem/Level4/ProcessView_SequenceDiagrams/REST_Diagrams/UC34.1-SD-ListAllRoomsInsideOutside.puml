@@ -1,0 +1,129 @@
+@startuml
+title UC34.1 List of Rooms Inside or Outside of House
+
+autonumber
+!pragma teoz true
+
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":HouseControllerWeb" as controller <<Component>>
+participant ":RoomService" as roomService <<Component>>
+participant ":HouseRepository" as houseRepo <<Component>>
+participant ":RoomRepository" as roomRepo <<Component>>
+participant ":MapperRoomDataModel" as RoomMapperDataModel <<Component>>
+participant "room:Room" as room
+participant "roomDimensions:RoomDimensions" as roomDimensions
+participant "listRoomID:List<RoomID>" as list
+participant ":RoomMapperDTO" as mapper <<Component>>
+participant "listOfRoomDTO:List<RoomDTO>" as listOfRoomDTO
+participant "roomDTO:RoomDTO" as roomDTO
+participant ":DB Driver" as dbDriver <<Component>>
+end box
+
+end box
+
+[o-> Router: GET api/houses/{ID}/rooms
+activate Router
+Router -> controller: getListOfRoomsInHouse(@PathVariable("id") String houseIDstr,\n @RequestParam(required = false) Boolean areRoomsInside)
+activate controller
+controller -> roomService: getListOfRoomsInsideOrOutsideHouse(houseID, areRoomsInside)
+activate roomService
+roomService -> houseRepo: containsEntityByID(houseID)
+activate houseRepo
+houseRepo -> dbDriver : containsEntityByID(houseID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> houseRepo: boolean
+deactivate dbDriver
+
+houseRepo --> roomService: boolean
+deactivate houseRepo
+
+roomService -> roomRepo: findByHouseID(houseID)
+activate roomRepo
+roomRepo -> dbDriver : findByHouseID(houseID)
+activate dbDriver
+dbDriver ->o]: DATABASE QUERY
+dbDriver <--o]: QUERY RESPONSE
+dbDriver --> roomRepo: Iterable<RoomDataModel> roomDataModelList
+deactivate dbDriver
+roomRepo -> RoomMapperDataModel: toDomainList(factoryRoom, roomDataModelList)
+activate RoomMapperDataModel
+RoomMapperDataModel --> roomRepo: Iterable<Room> roomList
+deactivate RoomMapperDataModel
+roomRepo --> roomService: Iterable<Room> roomList
+deactivate roomRepo
+roomService --> list**: <<create>>
+
+alt are Rooms Inside
+    loop for each Room in List
+        alt height != 0
+
+roomService -> room: getRoomDimensions()
+
+activate room
+room -> roomDimensions: getHeight()
+activate roomDimensions
+roomDimensions --> room: double != 0.0
+deactivate roomDimensions
+room --> roomService: roomDimensions
+deactivate room
+roomService -> room: identity()
+activate room
+room --> roomService: roomID
+deactivate room
+roomService -> list: add(roomID)
+activate list
+list-> roomService: List<RoomID>
+
+deactivate list
+end
+end
+
+else are Rooms Not Inside
+    loop for each Room in RoomRepository
+        alt height = 0
+
+roomService -> room: getRoomDimensions()
+activate room
+room -> roomDimensions: getHeight()
+activate roomDimensions
+roomDimensions --> room: double = 0.0
+deactivate roomDimensions
+room --> roomService: roomDimensions
+deactivate room
+roomService -> room: identity()
+activate room
+room --> roomService: roomID
+deactivate room
+roomService -> list: add(roomID)
+activate list
+list-> roomService: List<RoomID>
+deactivate list
+end
+end
+
+roomService -> controller: List<RoomID>
+deactivate roomService
+controller -> mapper**:roomIDsToDTOList(Iterable<RoomID> roomsIDs)
+
+activate mapper
+mapper --> listOfRoomDTO**: <<create>>
+loop for each RoomID in listOfRoomIDs
+    mapper -> mapper: roomIDToDTO(roomID)
+    mapper -> roomDTO**: <<create>>
+    mapper -> listOfRoomDTO: add(roomDTO)
+    activate listOfRoomDTO
+    deactivate listOfRoomDTO
+end loop
+mapper --> controller: listOfRoomDTO
+deactivate mapper
+
+controller --> Router: roomDTOList, HttpStatus.OK
+deactivate controller
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+@enduml

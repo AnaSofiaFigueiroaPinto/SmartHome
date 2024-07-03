@@ -1,0 +1,58 @@
+@startuml
+
+autonumber
+title UC03.1 List Rooms of House
+
+!pragma teoz true
+box "<<SubSystem>>\n <<Container>>\n   :Backend" #DarkGrey
+box "<<Component>>\n  :Server" #LightGrey
+
+participant ":ListAndEditRoomController" as controller <<Component>>
+participant ":RoomService" as service <<Component>>
+participant ":HouseRepository" as houseRepo <<Component>>
+participant ":RoomRepository" as roomRepo <<Component>>
+participant "List<RoomID>" as list
+participant ":Room" as room <<Component>>
+participant ":RoomMapperDTO" as mapper <<Component>>
+
+[o-> controller: getListOfRoomsDTOInHouse
+activate controller
+controller -> service: getListOfRoomsInHouse(HouseID houseID): List<RoomID>
+activate service
+service -> houseRepo: containsEntityByID(HouseID houseID): boolean
+activate service
+activate houseRepo
+houseRepo --> service: true
+deactivate houseRepo
+service -> roomRepo: findAllEntities(): Iterable<Room>
+activate roomRepo
+roomRepo --> service: Iterable<Room>
+deactivate roomRepo
+service --> list**: <<create>>
+
+loop for each Room in RoomRepository
+service -> room: getHouseID() : HouseID
+activate room
+room --> service: roomHouseID : HouseID
+deactivate room
+
+note over service: Method executes step 10 \nif roomHouseID equals houseID
+service -> list: add(room.identity())
+activate list
+list --> service: List<RoomID>
+deactivate list
+deactivate service
+end
+
+service --> controller : List<RoomID>
+deactivate service
+
+
+controller -> mapper: roomIDsToDTOList(List<RoomID> listOfRoomsIDs): List<RoomDTO>
+activate mapper
+mapper --> controller: List<RoomDTO>
+deactivate mapper
+[o<-- controller: List<RoomDTO>
+deactivate controller
+
+@enduml

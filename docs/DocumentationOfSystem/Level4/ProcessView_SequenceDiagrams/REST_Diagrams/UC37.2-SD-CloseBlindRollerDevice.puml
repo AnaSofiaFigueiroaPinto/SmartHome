@@ -1,0 +1,92 @@
+@startuml
+title UC37.2 - Close Blind Roller Device
+
+autonumber
+
+!pragma teoz true
+
+
+box "<<SubSystem>>\n <<Container>> \n   :Backend" #DarkGrey
+box " <<Component>>\n      :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":DeviceControllerWeb" as Controller <<Component>>
+participant "deviceID:\nDeviceID" as deviceID
+participant "actuatorFunctionalityID:\nActuatorFunctionalityID" as actuatorFunctionalityID
+participant ":CloseBlindRollerService" as service <<Component>>
+participant ":DeviceRepository" as deviceRepo <<Component>>
+participant ":MapperDeviceDataModel" as mapperDM <<Component>>
+participant "blindRollerDevice:\nDevice" as deviceObject
+participant ":SensorRepository" as sensorRepo <<Component>>
+participant ":ActuatorRepository" as actuatorRepo <<Component>>
+participant ":MapperActuatorDataModel" as mapperActuatorDM <<Component>>
+participant "actuatorList:\nIterable<Actuator>" as iterableActuator
+participant "blindSetterActuator:\nActuator" as actuator
+participant ":DBDriver" as DBDriver <<Component>>
+end box
+end box
+
+[o-> Router: PATCH api/devices/{id}
+activate Router
+
+Router -> Controller: PATCH editDevice \n(@RequestBody String deviceName, \n@RequestParam(required = false) \nInteger closePercentage)
+activate Controller
+Controller -> Controller : closeBlindRollerDevice\n(deviceName, percentage)
+activate Controller
+
+Controller --> deviceID** : <<create>
+Controller --> actuatorFunctionalityID** : <<create>
+
+Controller -> service : setActuatorStateOfBlindRoller \n(deviceID, actuatorFunctionalityID, closePercentage)
+activate service
+
+service -> deviceRepo : findEntityByID (deviceID)
+activate deviceRepo
+deviceRepo -> DBDriver : findByID(deviceID)
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> deviceRepo : Optional<DeviceDataModel> deviceDataModel
+deactivate DBDriver
+deviceRepo -> mapperDM : toDomain(factoryDevice, deviceDataModel)
+activate mapperDM
+mapperDM --> deviceRepo : Optional<Device> blindRollerDevice
+deactivate mapperDM
+deviceRepo --> service : Optional<Device> blindRollerDevice
+deactivate deviceRepo
+service -> deviceObject : isActive()
+activate deviceObject
+deviceObject --> service : true
+deactivate deviceObject
+
+service -> actuatorRepo: findByDeviceIDAndActuatorFunctionalityID (deviceID, actuatorFunctionalityID)
+activate actuatorRepo
+actuatorRepo -> DBDriver : findByDeviceIDAndActuatorFunctionalityID(deviceID, actuatorFunctionalityID)
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> actuatorRepo : Iterable<ActuatorDataModel> listOfActuatorsOfDevice
+deactivate DBDriver
+actuatorRepo -> mapperActuatorDM : toDomainList(factoryActuator, listOfActuatorsOfDevice)
+activate mapperActuatorDM
+mapperActuatorDM --> actuatorRepo : Iterable<Actuator> listOfActuatorsOfDevice
+deactivate mapperActuatorDM
+actuatorRepo --> service: listOfActuatorsOfDevice:Iterable<Actuator>
+deactivate actuatorRepo
+service -> iterableActuator : iterator().hasNext()
+activate iterableActuator
+iterableActuator --> service : true
+deactivate iterableActuator
+service -> actuator : setActuatorSpecificValue(percentage)
+activate actuator
+actuator --> service: true
+deactivate actuator
+
+service --> Controller: true
+deactivate service
+Router <-- Controller: true, HttpStatus.OK
+deactivate Controller
+
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+
+@enduml

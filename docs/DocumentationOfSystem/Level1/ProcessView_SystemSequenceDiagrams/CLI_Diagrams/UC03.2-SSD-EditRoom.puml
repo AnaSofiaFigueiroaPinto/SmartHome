@@ -1,0 +1,14 @@
+@startuml
+title UC03.2 - Edit Room
+
+autonumber
+
+Actor User
+participant ":SmartHome" as smarthome <<System>>
+
+User -> smarthome: edit Room
+activate smarthome
+User <-- smarthome: room edited
+deactivate smarthome
+
+@enduml

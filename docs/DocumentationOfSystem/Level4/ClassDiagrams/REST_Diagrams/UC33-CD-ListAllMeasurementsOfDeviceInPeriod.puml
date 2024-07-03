@@ -1,0 +1,57 @@
+@startuml
+title UC33: List All Measurements Of Device In Period
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package server #LightGray {
+class DeviceControllerWeb {
+    -valueService: ValueService
+    +GET getObjectByDeviceID(@PathVariable("id") String deviceName,
+    -listAllMeasurementsOfDeviceInPeriod(String deviceIDString, LocalDateTime givenStart, LocalDateTime givenEnd): ResponseEntity<Object>
+}
+
+class DeviceID <VO> {
+    -deviceName: String
+    +getDeviceName(): String
+}
+
+interface SensorRepository <Repo>{
+    +findEntityByID(SensorID sensorID): Optional<Sensor>
+}
+
+abstract Sensor <Root> {
+    -sensorID: SensorID
+    +identity(): SensorID
+}
+
+interface SensorFunctionalityRepository <Repo>{
+    +findEntityByID(SensorFunctionalityID sensorFunctionalityID): Optional<SensorFunctionality>
+}
+
+class SensorFunctionality <Root>{
+    -sensorFunctionalityID: SensorFunctionalityID
+    +identity(): SensorFunctionalityID
+}
+
+class ValueService {
+    -sensorRepository: SensorRepository
+    -sensorFunctionalityRepository: SensorFunctionalityRepository
+    +getAllMeasurementsForDeviceBetweenPeriod(DeviceID deviceID, Timestamp start, Timestamp end): Map<SensorFunctionalityID, List<Reading>>
+    -getAllValuesForSensorID (String serviceMethodToCall, SensorID sensorID, Timestamp startInterval, Timestamp endInterval): List<Value>
+    -convertValueIterableToReadingIterable (List<Value> values): List<Reading>
+}
+
+interface Value <Root> {
+    +getReading(): Reading
+    +getSensorID(): SensorID
+}
+
+DeviceControllerWeb --> DeviceID: <<creates>>
+DeviceControllerWeb -- ValueService
+ValueService ..>  SensorRepository: <<uses>>
+ValueService ..>  SensorFunctionalityRepository: <<uses>>
+SensorRepository --> Sensor: <<finds>>
+SensorFunctionalityRepository --> SensorFunctionality: <<finds>>
+ValueService ..> Value: <<uses>>
+}
+@enduml

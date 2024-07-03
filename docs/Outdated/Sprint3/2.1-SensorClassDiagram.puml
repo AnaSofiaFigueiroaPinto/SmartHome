@@ -1,0 +1,120 @@
+@startuml
+package domain {
+    enum SensorFunctionality {
+    TEMPERATURE,
+    HUMIDITY,
+    BINARY_STATUS,
+    SCALE_POSITION,
+    WIND,
+    SUNRISE,
+    SUNSET,
+    DEW_POINT,
+    SOLAR_RADIATION,
+    POWER,
+    ENERGY
+    }
+
+    interface Sensor {
+    + getSensorName(): String
+    + getSensorFunctionality(): SensorFunctionality
+    }
+
+    package sensors {
+        interface SensorSpecificTime {
+        + getValueForSpecificTime\n(Timestamp specificTime): String
+        }
+
+        interface SensorSpecificTimeLocation {
+        + getValueAtSpecificTimeAndLocation\n(Timestamp dateAndTime,\n GPSCode gpsCode): String
+        }
+
+        interface SensorPeriodOfTime {
+        + getValueForPeriodOfTime\n(Timestamp start,\n Timestamp end): String
+        }
+
+        class SpecificTimePowerConsumptionSensor {
+            - sensorName: String
+            - functionality: SensorFunctionality
+            - factoryValue: FactoryValue
+            - value: Value
+            + getSensorName(): String
+            + getFunctionality(): SensorFunctionality
+            + getValueForSpecificTime\n(Timestamp specificTime): String
+        }
+        SensorSpecificTime <|... SpecificTimePowerConsumptionSensor: <<implements>>
+        Sensor <|-- SensorSpecificTime
+        SpecificTimePowerConsumptionSensor -- SensorFunctionality:has
+
+
+        class WindSpeedAndDirectionSensor {
+            - sensorName: String
+            - functionality: SensorFunctionality
+            - factoryValue: FactoryValue
+            - value: Value
+            + getSensorName(): String
+            + getFunctionality(): SensorFunctionality
+            + getValueForSpecificTime\n(Timestamp specificTime): String
+        }
+
+        SensorSpecificTime <|... WindSpeedAndDirectionSensor: <<implements>>
+        WindSpeedAndDirectionSensor -- SensorFunctionality:has
+
+
+        class ElectricEnergyConsumptionSensor {
+            - sensorName: String
+            - functionality: SensorFunctionality
+            - factoryValue: FactoryValue
+            - value: Value
+            + getSensorName(): String
+            + getFunctionality(): SensorFunctionality
+            + getValueForPeriodOfTime\n(Timestamp startDate, Timestamp endDate): \nString
+        }
+        SensorPeriodOfTime <|... ElectricEnergyConsumptionSensor: <<implements>>
+        Sensor <|-- SensorPeriodOfTime
+        ElectricEnergyConsumptionSensor -- SensorFunctionality: has
+
+        class DewPointCelsiusSensor {
+            - String name
+            - SensorFunctionality functionality
+            - DewPointCelsiusValue value
+            + getSensorName(): String
+            + getFunctionality(): SensorFunctionality
+            + getValueForSpecificTime\n(Timestamp specificTime): String
+        }
+        SensorSpecificTimeLocation <|... DewPointCelsiusSensor: <<implements>>
+        DewPointCelsiusSensor -- SensorFunctionality:has
+        Sensor <|-- SensorSpecificTimeLocation
+
+}
+
+
+
+    class SensorCatalogue {
+        - sensorClasses: List<String>
+        - factoryValue: FactoryValue
+        + getSensorClasses(): List<String>
+        + createSensorFromCatalogue(String sensorClass, String sensorName): Sensor
+        - isSensorInList(String sensorName): boolean
+    }
+
+    Sensor <.. SensorCatalogue: <<creates classes that implement>>
+
+    class Device {
+        - deviceName: String
+        - deviceModel: String
+        - status: Status
+        - sensorList: List<Sensor>
+        - actuatorList: List<Actuator>
+        + getDeviceName(): String
+        + getDeviceModel(): String
+        + getSensorList(): List<Sensor>
+        + createSensorAndAddToDevice(String sensorName, \nSensorCatalogue sensorCatalogue, String sensorClass): Sensor
+        - isSensorInList(String sensorName): boolean
+    }
+
+    Device "1" -- "0..*" Sensor: has classes that implement
+    Device .> SensorCatalogue: <<uses>>
+
+}
+
+@enduml

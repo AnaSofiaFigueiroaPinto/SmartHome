@@ -1,0 +1,66 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Jaldi', sans-serif;
+    font-size: 16px; /* Slightly increased font size */
+    color: white;
+}
+
+.thermometer {
+    width: 20px; /* Moderately increased width */
+    height: 75px; /* Moderately increased height */
+    background: slategray;
+    border: 3px solid #2f2f34; /* Moderately increased border size */
+    border-radius: 15px; /* Moderately increased border radius */
+    position: relative;
+    margin-bottom: 30px; /* Moderately increased margin-bottom */
+}
+
+.thermometer::after {
+    content: "";
+    position: absolute;
+    width: 35px; /* Moderately increased width */
+    height: 35px; /* Moderately increased height */
+    background: #3dcadf; /* Fallback color */
+    bottom: -25px; /* Adjusted position */
+    left: 50%;
+    transform: translateX(-50%);
+    border: 3px solid #2f2f34; /* Moderately increased border size */
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.graduations {
+    height: 59%; /* Maintained percentage */
+    top: 20%; /* Maintained percentage */
+    width: 50%; /* Maintained percentage */
+    position: absolute;
+    border-top: 3px solid rgba(0, 0, 0, 0.5); /* Moderately increased border size */
+    border-bottom: 3px solid rgba(0, 0, 0, 0.5); /* Moderately increased border size */
+}
+
+.temperature-bar {
+    bottom: 0;
+    width: 100%;
+    border-radius: 15px; /* Moderately increased border radius */
+    background-size: 100% 400%; /* Increased background size */
+    transition: height 0.3s ease-in-out, background-position 0.3s ease-in-out;
+    position: absolute;
+    z-index: 1;
+}
+
+.temperature-bar::before {
+    content: attr(data-value);
+    background: slategrey;
+    color: white;
+    z-index: 2;
+    padding: 7px 14px; /* Moderately increased padding */
+    border-radius: 7px; /* Moderately increased border radius */
+    font-size: 1.2em; /* Slightly increased font size */
+    line-height: 1;
+    transform: translateY(50%);
+    position: absolute;
+    left: calc(100% + 1em / 1.5);
+    top: calc(-1em + 5px - 15px); /* Adjusted position */
+}

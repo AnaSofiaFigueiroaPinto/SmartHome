@@ -1,0 +1,69 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+title UC34.2: List temperature sensors in device.
+
+package server #LightGray {
+
+class ListTemperatureSensorsInDeviceController <controller> {
+    - sensorService: SensorService
+    + getListOfTemperatureSensorDTOInDevice(DeviceDTO deviceDTO): List<SensorDTO>
+}
+
+class DeviceDTO {
+    +deviceName: String
+}
+
+class DeviceID <VO> {
+    -deviceName: String
+}
+
+class SensorDTO {
+    +sensorName: String
+}
+
+
+class SensorService <service> {
+    -factorySensor: FactorySensor
+    -sensorRepo: SensorRepository
+    -deviceRepository: DeviceRepository
+    -sensorFunctionalityRepository: SensorFunctionalityRepository
+    +findSensorsIDOfADeviceBySensorFunctionality(DeviceID deviceID,\n SensorFunctionalityID sensorFunctionalityID): List<SensorID>
+}
+
+abstract class Sensor <root> {
+    -sensorID: SensorID
+    -deviceID: DeviceID
+    -functionalityID: SensorFunctionalityID
+    +getSensorFunctionalityID(): SensorFunctionalityID
+    +identity(): SensorID
+}
+class SensorID <VO> {
+    -sensorID: String
+}
+
+class SensorFunctionalityID <VO> {
+    -sensorFunctionalityID: String
+}
+
+class SensorMapperDTO{
+    +sensorIDsToDTOList(List<SensorID>): List<SensorDTO>
+    +sensorToDTO(SensorID): SensorDTO
+}
+
+interface SensorRepository <repo> {
+    +findByDeviceIDAndSensorFunctionality(deviceID, sensorFunctionalityID): Iterable<Sensor>
+}
+}
+
+ListTemperatureSensorsInDeviceController --- SensorService
+ListTemperatureSensorsInDeviceController .. DeviceDTO: <<uses>>
+ListTemperatureSensorsInDeviceController ..> DeviceID: <<creates>>
+ListTemperatureSensorsInDeviceController ..> SensorMapperDTO: <<uses>>
+SensorService -- SensorRepository
+SensorService ..> Sensor : <<uses>>
+SensorMapperDTO ..> SensorDTO : <<creates>>
+Sensor "1"--*"1" SensorID
+Sensor "1"--*"1" DeviceID
+Sensor "1"--*"1" SensorFunctionalityID
+@enduml

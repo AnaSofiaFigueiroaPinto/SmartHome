@@ -1,0 +1,123 @@
+@startuml
+
+autonumber
+
+title "UC33 - List all values of device for a given Period"
+
+!pragma teoz true
+
+
+
+box <<SubSystem>>\n<<Container>>\n:Backend" #DarkGrey
+box <<Component>>\n:Server" #LightGrey
+
+participant ":Router" as router <<Component>>
+participant ":DeviceControllerWeb" as controller <<Component>>
+participant "deviceDTO:DeviceDTO" as deviceDTO
+participant "deviceID:DeviceID" as deviceID
+participant ":ValueService" as service <<Component>>
+participant ":SensorRepository" as sensorRepo <<Component>>
+participant "returnMap:\nMap<SensorFunctionalityID, \nList<Reading>>" as returnMap
+participant "sensor:Sensor" as sensor
+participant ":SensorFunctionalityRepository" as sensorFunctionalityRepo <<Component>>
+participant "value:Value" as value
+participant "finalMap:\nMap<SensorFunctionalityDTO, \nList<ReadingDTO>>" as finalMap
+participant ":SensorFunctionalityMapper" as funcMapper <<Component>>
+participant ":ReadingMapperDTO" as readingMapper <<Component>>
+participant ":DB Driver" as driver <<Component>>
+
+ref over router
+UC06-SD-ListAllDevicesInRoom
+end ref
+
+[o-> router: GET /devices/{id}?givenStart={timestampStart}\n&givenEnd={timestampEnd}
+activate router
+'END SECTION 1
+
+'SECTION 1: INTERACTION BETWEEN APPLICATION AND DATABASE
+    'SECTION 1: Receive input, unpackDTO, create DeviceID and call Service'
+    router -> controller : GET getObjectByDeviceID(\n@PathVariable("id")String deviceName,\n@RequestParam\LocalDateTime givenStart, \n@RequestParam\LocalDateTime givenEnd)
+    activate controller
+    controller -> controller : listAllMeasurementsOfDeviceInPeriod(\ndeviceName, givenStart, givenEnd)
+    activate controller
+    controller -> deviceDTO : deviceName
+    activate deviceDTO
+    deviceDTO --> controller: String deviceName
+    deactivate deviceDTO
+    controller --> deviceID**: <<create>>
+    controller -> service : getAllReadingsForDeviceBetweenPeriod\n(deviceID, Timestamp start, Timestamp end)
+    activate service
+
+    'SECTION 2: Get all sensors belonging to a DeviceID'
+    service -> sensorRepo: findByDeviceID(deviceID)
+    activate sensorRepo
+    sensorRepo -> driver: findByDeviceID(deviceID.toString)
+    activate driver
+    driver ->o]: DATABASE QUERY
+    driver <--o]: QUERY RESPONSE
+    driver --> sensorRepo: Iterable<SensorDataModel> sensorDataModels
+    deactivate driver
+    sensorRepo --> service: Iterable<Sensor>
+    deactivate sensorRepo
+    service --> returnMap**: <<create>>
+
+    'SECTION 3: Loop through all sensors and get the functionalityID for each'
+    loop for each Sensor in Iterable<Sensor>
+        service -> sensor: getSensorFunctionalityID()
+        activate sensor
+        sensor --> service: SensorFunctionalityID sensorFunctionalityID
+        service -> sensor: identity()
+        sensor --> service: SensorID sensorID
+        deactivate sensor
+
+            'SECTION 4: Get method to call in repo and call repo to get values'
+            service -> sensorFunctionalityRepo: getServiceMethodToCallForSensorFunctionalityID\n(sensorFunctionalityID)
+            activate sensorFunctionalityRepo
+            sensorFunctionalityRepo --> service: String serviceMethodToCall
+            deactivate sensorFunctionalityRepo
+            service -> service: getAllValuesForSensorID\n(serviceMethodToCall, sensorID, startInterval, endInterval)
+                note over service: List all values of a specific type for a given Period
+                ref over service:UC33-SD-ListAllMeasurementsOfDeviceInPeriod.svg]
+
+            'SECTION 5: Get readings for each value and add each to returnMap
+            loop for each Value in listOfValues
+                service -> value: getReading()
+                activate value
+                value --> service: Reading reading
+                deactivate value
+                note over service: Step 18 uses computeIfAbsent method \n from the Map class to avoid \n overwriting keys/values
+                service -> returnMap : add SensorFunctionalityID (key) List<Reading> (value)
+                activate returnMap
+            end
+            deactivate returnMap
+    end
+
+    'SECTION 6: Return returnMap to controller and create a SensorFunctionalityDTO for each SensorFunctionalityID and String for each Reading numeric value'
+    service --> controller: returnMap
+    deactivate service
+    controller --> finalMap**: <<create>>
+    loop for each SensorFunctionalityID in returnMap
+        controller -> funcMapper: sensorFunctionalityIDToDTO(sensorFunctionalityID)
+        activate funcMapper
+        funcMapper --> controller: SensorFunctionalityDTO sensorFunctionalityDTO
+        deactivate funcMapper
+            loop for each List<Reading> in returnMap
+            controller -> readingMapper: readingsToDTOList(List<Reading>)
+            activate readingMapper
+            readingMapper --> controller: List<ReadingDTO> readingDTOList
+            deactivate readingMapper
+            controller -> finalMap : put(SensorFunctionalityDTO, readingDTOList)
+            activate finalMap
+            end
+            deactivate finalMap
+        end
+        controller --> controller: finalMap
+        deactivate controller
+        controller --> router: finalMap, HttpStatus.OK
+    deactivate controller
+    'END SECTION 6
+   [o<-- router : JSON response, \nHttpStatus.OK
+    deactivate router
+
+'END SECTION 1
+@enduml

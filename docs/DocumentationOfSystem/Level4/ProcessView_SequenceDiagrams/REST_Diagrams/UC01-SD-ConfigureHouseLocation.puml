@@ -1,0 +1,110 @@
+@startuml
+title UC01 - As an Administrator, I want to configure the location of the house. Main success scenario.
+
+autonumber
+!pragma teoz true
+!pragma teoz true
+
+box " <<SubSystem>>\n    :Backend " #DarkGrey
+box " <<Container>>\n    :Server" #LightGrey
+participant ":Router" as Router <<Component>>
+participant ":HouseControllerWeb" as US01Ctrl <<Component>>
+participant "locationDTO:LocationDTO" as LocationDTO
+participant ":HouseService" as HouseService <<Component>>
+participant "address:Address" as Address
+participant "gpsCode:GPSCode" as GPSCode
+participant ":HouseRepository" as HouseRepository <<Component>>
+participant "house:House" as House
+participant "location:Location" as Location
+participant "houseDTO:HouseDTO" as HouseDTO
+participant ":MapperHouseDM" as HouseDataModel
+participant ":DB Driver" as DBDriver <<Component>>
+
+end box
+end box
+
+[o-> Router: PATCH api/house
+activate Router
+Router -> US01Ctrl: PATCH configureHouseLocation\n(@RequestBody LocationDTO locationDTO)
+activate US01Ctrl
+
+US01Ctrl -> LocationDTO: street
+activate LocationDTO
+LocationDTO --> US01Ctrl: String street
+US01Ctrl -> LocationDTO: doorNumber
+LocationDTO --> US01Ctrl: String doorNumber
+US01Ctrl -> LocationDTO: zipCode
+LocationDTO --> US01Ctrl: String zipCode
+US01Ctrl -> LocationDTO: city
+LocationDTO --> US01Ctrl: String city
+US01Ctrl -> LocationDTO: country
+LocationDTO --> US01Ctrl: String country
+US01Ctrl --> Address** : <<creates>>
+US01Ctrl -> LocationDTO: latitude
+LocationDTO --> US01Ctrl: double latitude
+US01Ctrl -> LocationDTO: longitude
+LocationDTO --> US01Ctrl: double longitude
+deactivate LocationDTO
+US01Ctrl --> GPSCode** : <<creates>>
+
+US01Ctrl -> HouseService: getHouseIDFromRepository()
+activate HouseService
+HouseService -> HouseRepository: findAllEntities()
+activate HouseRepository
+HouseRepository -> DBDriver: findAll()
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> HouseRepository: houseDataModelList
+deactivate DBDriver
+HouseRepository -> HouseDataModel: toDomainList(factoryHouse, houseDataModelList)
+activate HouseDataModel
+HouseDataModel --> HouseRepository: houseList
+deactivate HouseDataModel
+HouseRepository --> HouseService: houseList
+deactivate HouseRepository
+
+HouseService --> US01Ctrl: houseID
+
+US01Ctrl -> HouseService: editLocation(houseID, address, gpsCode)
+HouseService -> HouseRepository: findEntityByID(houseID)
+activate HouseRepository
+HouseRepository -> DBDriver: findById(houseID)
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> HouseRepository: houseDataModel
+deactivate DBDriver
+HouseRepository -> HouseDataModel: toDomain(factoryHouse, houseDataModel)
+activate HouseDataModel
+HouseDataModel --> HouseRepository: house
+deactivate HouseDataModel
+HouseRepository --> HouseService: house
+deactivate HouseRepository
+HouseService --> House: editLocation(address, gpsCode)
+activate House
+House --> Location** : <<creates>>
+House --> HouseService: location
+deactivate House
+HouseService --> HouseRepository: update(house)
+activate HouseRepository
+HouseRepository -> DBDriver: save(house)
+activate DBDriver
+DBDriver ->o]: DATABASE QUERY
+DBDriver <--o]: QUERY RESPONSE
+DBDriver --> HouseRepository: houseDataModel
+deactivate DBDriver
+HouseRepository -> HouseDataModel: toDomain(factoryHouse, houseDataModel)
+activate HouseDataModel
+HouseDataModel --> HouseRepository: house
+deactivate HouseDataModel
+HouseRepository --> HouseService: house
+deactivate HouseRepository
+HouseService --> US01Ctrl: location
+deactivate HouseService
+US01Ctrl --> HouseDTO** : <<creates>>
+Router <-- US01Ctrl: houseDTO, HttpStatus.OK
+deactivate US01Ctrl
+[o<-- Router: JSON response, \nHttpStatus.OK
+deactivate Router
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+title PATCH request
+autonumber
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+box "   <<System>> \n:Smarthome " #LightGrey
+participant "<<Subsystem>>\n:Frontend" as fe
+participant "<<Subsystem>>\n:Backend" as be
+end box
+
+[o-> fe++ : Ask to update request
+fe -> be++ : PATCH /Request
+
+be --> fe: Response
+deactivate
+
+[o<--fe: Response
+deactivate
+
+legend bottom
+ **This request can be included in:**
+ |= Request PATCH |= Response |
+ |= /houses/{id} (UC01) |= Location of the House configured  |
+ |= /rooms/{id} (UC03.2) |= Room edited|
+ |= /devices/{id} (UC08) |= Device deactivated |
+ |= /device/{id} (UC37.2) |=  boolean |
+end legend
+
+@enduml

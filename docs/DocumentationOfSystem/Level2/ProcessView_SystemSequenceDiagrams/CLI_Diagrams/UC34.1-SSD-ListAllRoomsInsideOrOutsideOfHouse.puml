@@ -1,0 +1,16 @@
+@startuml
+
+title UC34.1 - List all Rooms inside or outside of House
+autonumber
+
+box "  <<System>>\n:SmartHome " #LightGrey
+participant "<<Subsystem>>\n:Backend" as backend
+end box
+
+[o-> backend: get list of rooms inside or outside house
+activate backend
+
+[o<-- backend: list of rooms
+deactivate backend
+
+@enduml

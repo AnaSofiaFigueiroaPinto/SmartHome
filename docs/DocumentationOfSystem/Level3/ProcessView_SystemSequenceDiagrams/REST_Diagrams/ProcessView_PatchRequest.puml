@@ -1,0 +1,55 @@
+@startuml
+title UC - PATCH Request of Objects
+
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+
+autonumber
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Frontend" #LightGrey
+participant "<<Container>>\n  :UI" as frontend
+end box
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+  participant ":Database" as database <<Container>>
+end box
+end box
+
+autonumber
+[o-> frontend : Update request
+activate frontend
+frontend-> server: PATCH Objects \nUpdate Request
+activate server
+server->database : find Object
+activate database
+
+database-->server : Object
+deactivate database
+
+server->server : Update request
+server->database : save Object
+activate database
+
+database-->server : Object
+deactivate database
+server-->frontend: Object updated JSON
+deactivate server
+[o<--frontend : Updated Object
+deactivate frontend
+
+legend bottom
+ **This request can be included in:**
+ |= Request PATCH |= Response |
+ |= /houses/{id} (UC01) |= HouseDTO  |
+ |= /rooms/{id} (UC03.2) |= RoomDTO|
+ |= /devices/{id} (UC08) |= boolean |
+ |= /device/{id} (UC37.2) |=  boolean |
+end legend
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title "As a Power User [or Administrator], I want to add an actuator to an existing device in a room. The actuator must be of a model of an existing type of actuator. Main Success Scenario"
+participant ":AddNewActuatorToDeviceController" as US12Controller
+participant ":Device" as Device
+participant ":ActuatorCatalogue" as Catalogue
+participant "actuator:Actuator" as Actuator
+
+
+
+-> US12Controller: getRoomList()
+activate US12Controller
+ref over US12Controller
+US06SequenceDiagram
+end ref
+
+<-- US12Controller: List<DeviceDTO>
+
+-> US12Controller: getCatalogueOfAvailableActuatorClasses()
+US12Controller -> Catalogue: getActuatorClasses()
+activate Catalogue
+Catalogue --> US12Controller: List<String>
+deactivate Catalogue
+<-- US12Controller: List<String>
+
+
+-> US12Controller: addActuatorToDevice(DeviceDTO deviceDTO, String actuatorClass,\n String actuatorName, ActuatorProperties actuator properties)
+note right
+ it is necessary to follow all the steps in the correct order,
+  otherwise the hashmap will be empty and the method
+  to add a new actuator will return false;
+end note
+US12Controller -> US12Controller: get.(DeviceDTO deviceDTO)
+US12Controller -> Device: createActuatorAndAddToDevice(String actuatorName, ActuatorCatalogue actuatorClass,\n String actuatorClass, ActuatorProperties actuatorProperties)
+activate Device
+Device -> Catalogue: createActuatorFromCatalogue(String actuatorName, ActuatorCatalogue actuatorCatalogue,\n String actuatorClass, ActuatorProperties actuatorProperties)
+activate Catalogue
+Catalogue --> Actuator**: <<create>>
+Catalogue --> Device: return Actuator
+Device --> US12Controller: return Actuator
+<-- US12Controller: true
+
+@enduml

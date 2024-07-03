@@ -1,0 +1,6 @@
+# Use the latest version of the MariaDB image as the base image
+FROM mariadb:latest
+
+# Copy the base_data.sql script into the container's /docker-entrypoint-initdb.d directory
+# This script will be executed when the container is started, initializing the database with base data
+COPY docker_img_provisions/base_data.sql /docker-entrypoint-initdb.d/base_data.sql

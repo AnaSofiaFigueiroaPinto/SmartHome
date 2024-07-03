@@ -1,0 +1,75 @@
+@startuml
+'https://plantuml.com/object-diagram
+
+object User {
+name
+role
+}
+
+object GPSCode {
+latitude
+longitude
+}
+
+object Location {
+street
+doorNumber
+zipCode
+city
+country
+}
+
+object House {
+}
+
+object Room {
+name
+floor
+}
+
+object Dimensions {
+width
+length
+height
+}
+
+object Device {
+name
+model
+status
+}
+
+object Sensor {
+name
+functionality
+measurements
+unit
+}
+
+object Actuator {
+name
+functionality
+target
+
+}
+
+object WeatherServices {
+}
+
+object Measurements {
+
+}
+
+House "1" -- "0..1" Location : has >
+House "1" -- "1" WeatherServices : uses >
+Location "1" - "1" GPSCode : has >
+
+User "1" -- "0..1" House : owns >
+Room "1" -- "0..*" User : owns <
+Room "1" -- "1" Dimensions : has >
+Room "1" - "0..*" Device : is the location of >
+Device "1" -- "0..*" Sensor : act as >
+Device "1" - "0..*" Actuator : act as >
+Sensor "1" -- "0..*" Measurements : has >
+
+@enduml

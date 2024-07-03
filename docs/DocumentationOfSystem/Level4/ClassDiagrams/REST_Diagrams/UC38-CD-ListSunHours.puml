@@ -1,0 +1,88 @@
+@startuml
+'skinparam linetype ortho
+
+title UC38: List Sun Hours
+
+package server #LightGray {
+
+class HouseControllerWeb {
+-houseService: HouseService
+  -houseID: HouseID
+  -roomService: RoomService
+  -listDevicesByFunctionalityService: ListAllDevicesInHouseByFunctionalityService
+  -roomMapperDTO: RoomMapperDTO
+  -deviceMapperDTO: DeviceMapperDTO
+  -actuatorFunctionalityMapperDTO: ActuatorFunctionalityMapperDTO
+  -sensorFunctionalityMapperDTO: SensorFunctionalityMapperDTO
+  -valueService: ValueService
+- weatherAPIService: WeatherAPIService
++ GET getWeatherInfo(@RequestParam String option): ResponseEntity<Double>
+}
+
+class WeatherAPIService {
+- weatherAPIGateway: WeatherAPIGateway
+- configScrapper: ConfigScrapper
+- houseRepository: HouseRepository
+- valueRepository: InstantTimeValueRepository
+- latitude: double
+- longitude: double
+- defineGroupHouseLocation(): int
++ getSunriseSunsetHour(String option): double
+}
+
+class ConfigScraper{
+    -filePath: String
+    -openingMainBlockTag: String
+    -closingMainBlockTag: String
+    -propertySplitter: String
+    -functionalityProperty: String
+    +loadGroupNumber(): String
+}
+
+interface HouseRepository {
+findAllEntities(): Iterable<House>
+}
+
+class House <root>{
+  -houseID: HouseID houseID
+  -location: Location
+}
+
+class Location <VO>{
+  -gpsCode: GPSCode
+  -address: Address
+}
+
+class GPSCode <VO>{
+  -latitude: double
+  -longitude: double
+}
+
+interface WeatherAPIGateway {
++ getSunriseSunsetHour(int groupNumber, double latitude, double longitude, String option): SunriseSunsetDTO
+}
+
+class WeatherAPIGatewayHttpImpl {
+- BASE_URL: String
+- restTemplate: RestTemplate
++ getSunriseSunsetHour(int groupNumber, double latitude, double longitude, String option): SunriseSunsetDTO
+}
+
+class SunriseSunsetDTO {
++ measurement: double
++ unit: String
++ info: String
+}
+
+HouseControllerWeb -- WeatherAPIService
+WeatherAPIService -- WeatherAPIGatewayHttpImpl
+WeatherAPIService - HouseRepository
+WeatherAPIService -- ConfigScraper
+WeatherAPIGateway -- WeatherAPIGatewayHttpImpl
+WeatherAPIService -- House: <<uses>>
+House -- Location
+Location - GPSCode
+WeatherAPIGatewayHttpImpl -- SunriseSunsetDTO: <<creates>>
+}
+
+@enduml

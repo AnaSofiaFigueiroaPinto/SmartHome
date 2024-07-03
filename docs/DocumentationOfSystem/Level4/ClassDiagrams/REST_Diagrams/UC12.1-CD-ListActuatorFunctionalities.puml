@@ -1,0 +1,46 @@
+@startuml
+title UC12.1: List Actuators Functionalities
+
+skinparam linetype ortho
+
+package server #LightGray {
+
+class ActuatorFunctionalityControllerWeb {
+    -actuatorFunctionalityService: ActuatorFunctionalityService
+    +getListOfActuatorFunctionalities: ResponseEntity<CollectionModel\n<EntityModel<ActuatorFunctionalityDTO>>> collectionModel, HttpStatus.OK
+}
+
+class ActuatorFunctionalityService {
+    -actuatorFunctionalityRepository: ActuatorFunctionalityRepository
+    +getListOfActuatorFunctionalities: List<ActuatorFunctionalityID>
+}
+
+class ActuatorFunctionality <root> {
+    -actuatorFunctionalityID: ActuatorFunctionalityID
+    +identity(): ActuatorFunctionalityID
+}
+
+class ActuatorFunctionalityRepository <repo> {
+    +findAllEntities(): Iterable<ActuatorFunctionality>
+}
+
+class ActuatorFunctionalityMapperDTO {
+    +actuatorFunctionalityToDTO(ActuatorFunctionalityID actuatorFunctionalityID): \n ActuatorFunctionalityDTO
+        +actuatorFunctionalityToDTOList (List<ActuatorFunctionalityID> actuatorFunctionalitiesIDs): \n List<ActuatorFunctionalityDTO>
+}
+
+class ActuatorFunctionalityDTO{
+    +actuatorFunctionalityName : String
+ }
+
+ActuatorFunctionalityControllerWeb -- ActuatorFunctionalityService
+ActuatorFunctionalityService -- ActuatorFunctionalityRepository
+ActuatorFunctionalityService ..> ActuatorFunctionality : <<use>>
+ActuatorFunctionalityControllerWeb ..> ActuatorFunctionalityMapperDTO  : <<creates>>
+ActuatorFunctionalityMapperDTO ..> ActuatorFunctionalityDTO  : <<creates>>
+
+
+
+}
+
+@enduml

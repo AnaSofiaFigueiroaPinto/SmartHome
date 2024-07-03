@@ -1,0 +1,211 @@
+@startuml
+package domain {
+class House {
+- location: Location
+- roomList: RoomList
+- factoryLocation: FactoryLocation
+- factoryRoomList: FactoryRoomList
+- validConstructorArguments(FactoryLocation\n factoryLocation, FactoryRoomList factoryRoomList): boolean
++ editLocation(String street, String doorNumber, String zipCode \n String city, String country, double latitude, double longitude): Location
++ createAndAddRoomToHouse(String roomName, int floorNumber,\n double width, double length, double height): Room
++ getRoomList(): RoomList
++ getListOfAllDevicesInHouseGroupedByFunctionality():\nMap<SensorFunctionality, Map<Device, Room>>
+}
+
+class Location {
+- street: String
+- doorNumber: String
+- zipCode: String
+- city: String
+- country: String
+- gpsCode: GPSCode
+- factoryGPSCode: FactoryGPSCode
+- validConstructorArguments(String street,\n String doorNumber, String zipCode \n String city, String country): boolean
+}
+
+class GPSCode {
+- latitude: double
+- longitude: double
+- validConstructorArguments(double\n latitude, double longitude): boolean
++getLatitude(): double
++getLongitude(): double
+}
+
+class Imp_FactoryLocation {
+- factoryGPSCode: FactoryGPSCode
++ createLocation(String street, String doorNumber, String zipCode \n String city, String country, double latitude, double longitude): Location
+}
+
+class Imp_FactoryGPSCode {
++ createGPSCode(double latitude, double longitude): GPSCode
+}
+
+interface FactoryLocation {
++ createLocation(String street, String doorNumber, String zipCode \n String city, String country, double latitude, double longitude): Location
+}
+
+interface FactoryGPSCode {
++ createGPSCode(double latitude,\n double longitude): GPSCode
+}
+
+
+FactoryLocation <|.. Imp_FactoryLocation
+Imp_FactoryLocation ..> Location: <<creates>>
+House "1"*---- "1"Location: has
+House ---- Imp_FactoryLocation
+
+FactoryGPSCode <|.. Imp_FactoryGPSCode
+Imp_FactoryLocation -- Imp_FactoryGPSCode
+Imp_FactoryGPSCode ..> GPSCode: <<creates>>
+Imp_FactoryGPSCode -- Location
+Location "1"*--"1" GPSCode: has
+
+
+class RoomList {
+- roomList: List<Room>
+- factoryRoom: FactoryRoom
++ getListOfRooms(): List<Room> roomList
+- validConstructorArguments(FactoryRoom\n factoryRoom): boolean
++ createAndAddRoomToHouse(String roomName, int floorNumber,\n double width, double length, double height): Room
++ isRoomNameInRoomList(String roomName): boolean
+}
+
+interface FactoryRoomList {
++ createRoomList(): RoomList
+}
+
+class Imp_FactoryRoomList {
+- factoryRoom: FactoryRoom
++ createRoomList(): RoomList
+}
+
+FactoryRoomList <|.. Imp_FactoryRoomList
+Imp_FactoryRoomList ..> RoomList: <<creates>>
+House "1"---- "1"RoomList: has
+House ---- Imp_FactoryRoomList
+
+
+class Room {
+- roomName: String
+- floorNumber: int
+- dimension: Dimension
+- deviceList: DeviceList
+- factoryDimension: FactoryDimension
+- factoryDeviceList: FactoryDeviceList
+- validConstructorArguments(String roomName): boolean
++ editRoomConfiguration(String roomName, int floorNumber,\n double width, double length, double height): Room
++ getRoomName(): String
++ getFloorNumber(): int
++ getWidth(): double
++ getLength(): double
++ getHeight(): double
++ getDeviceList(): DeviceList
++ createDeviceAndAddToDeviceList(String deviceName): Device
++ getListOfDevicesOfSpecificFunctionality(\nSensorFunctionality sensorFunctionality): List<Device>
+}
+
+interface FactoryRoom {
++ createRoom(String roomName, int floorNumber,\n double width, double length, double height): Room
+}
+
+class Imp_FactoryRoom {
+- factoryDimension: FactoryDimension
+- factoryDeviceList: FactoryDeviceList
++ createRoom(String roomName, int floorNumber,\n double width, double length, double height): Room
+}
+
+
+FactoryRoom <|.. Imp_FactoryRoom
+Imp_FactoryRoomList -- Imp_FactoryRoom
+RoomList -- Imp_FactoryRoom
+Imp_FactoryRoom ..> Room: <<creates>>
+RoomList "1"-- "0..*"Room: has
+Room -- Imp_FactoryDimension
+Room -- Imp_FactoryDeviceList
+
+class Dimension {
+- width: double
+- length: double
+- height: double
+- validConstructorArguments(double width,\n double length, double height): boolean
++ getLength(): double
++ getWidth(): double
++ getHeight(): double
+}
+
+interface FactoryDimension {
++ createDimension(double width,\n double length, double height): Dimension
+}
+
+class Imp_FactoryDimension {
++ createDimension(double width,\n double length, double height): Dimension
+}
+
+FactoryDimension <|.. Imp_FactoryDimension
+Imp_FactoryDimension ..> Dimension: <<creates>>
+
+
+class DeviceList {
+- factoryDevice: FactoryDevice
+- deviceList: List<Device>
++ getListOfDevices(): List<Device>
++ createDeviceAndAddToDeviceList(String deviceName): Device
+- isDeviceNameInDeviceList(String deviceName): boolean
+}
+
+interface FactoryDeviceList {
++ createDeviceList(): DeviceList
+}
+
+class Imp_FactoryDeviceList {
+- factoryDevice: FactoryDevice
++ createDeviceList(): DeviceList
+}
+
+FactoryDeviceList <|.. Imp_FactoryDeviceList
+Imp_FactoryDeviceList ..> DeviceList: <<creates>>
+Room "1"-- "1"DeviceList: has
+Room "1" *-- "1" Dimension: has
+Imp_FactoryRoom -- Imp_FactoryDeviceList
+Imp_FactoryRoom -- Imp_FactoryDimension
+
+
+
+class Device {
+- deviceName: String
+- deviceModel: String
+- status: Status
+- sensorList: List<Sensor>
+- actuatorList: List<Actuator>
+- actuatorProperties: ActuatorProperties
++ getDeviceName(): String
++ getDeviceModel(): String
++ getStatus(): Status
++ getSensorList(): List<Sensor>
++ getActuatorList(): List<Actuator>
++ isActive(): boolean
++ deactivate(): boolean
++ createSensorAndAddToDevice(String sensorName,\n SensorCatalogue sensorCatalogue, String sensorClass): Sensor
+- isSensorInList(String sensorName): boolean
++ createActuatorAndAddToDevice(String actuatorName,\n ActuatorCatalogue actuatorCatalogue, String\n actuatorClass, ActuatorProperties actuatorProperties): Actuator
+- isActuatorInList(String actuatorName): boolean
++ doesDeviceHaveSensorsOfSpecificFunctionality(\nSensorFunctionality sensorFunctionality): boolean
+}
+
+interface FactoryDevice {
++ createDevice(String deviceName): Device
+}
+
+class Imp_FactoryDevice {
++ createDevice(String deviceName): Device
+}
+
+FactoryDevice <|.. Imp_FactoryDevice
+Imp_FactoryDevice ..> Device: <<creates>>
+DeviceList -- Imp_FactoryDevice
+Imp_FactoryDeviceList -- Imp_FactoryDevice
+DeviceList "1" -- "0..*" Device: has
+
+}
+
+@enduml

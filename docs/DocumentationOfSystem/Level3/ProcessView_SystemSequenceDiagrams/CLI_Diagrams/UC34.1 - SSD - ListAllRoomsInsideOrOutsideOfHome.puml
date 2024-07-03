@@ -1,0 +1,20 @@
+@startuml
+
+title UC34.1 - List all Rooms inside or outside of House
+autonumber
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+end box
+
+
+[o-> server: Get list of rooms inside or outside house
+activate server
+server -> server: Get list of rooms
+server -> server: Filter inside/outside rooms
+[o<-- server: List of rooms inside or outside
+deactivate server
+
+@enduml

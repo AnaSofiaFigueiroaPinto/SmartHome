@@ -1,0 +1,129 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam linetype ortho
+
+package ddd {
+interface ValueObject{
+}
+interface DomainID extends ValueObject{
+}
+interface DomainEntity extends DomainID {
++identity(): ID
++isSameAs(Object object): boolean
+}
+interface AggregateRoot extends DomainEntity {
+}
+
+interface Repository extends AggregateRoot{
++updateOrSave(T entity): T
++findAllEntities(): Iterable<T>
++findEntityByID(ID id): Optional<T>
++containsEntityByID(ID id): boolean
+}
+}
+package domain{
+package house {
+class House <root>
+
+
+interface FactoryHouse{
++createHouseWithOutLocation(): House
++createHouseWithLocation(String street, String doorNumber, String zipCode, \nString city, String country, double latitude, double longitude): House
+}
+
+class ImpFactoryHouse implements FactoryHouse{
++createHouseWithOutLocation(): House
++createHouseWithLocation(String street, String doorNumber, String zipCode, \nString city, String country, double latitude, double longitude): House
+}
+
+class House implements ddd.AggregateRoot{
+-houseID: HouseID
+-houseLocation: Location
++editLocation(Address address, GPSCode gpsCode): boolean
++identity(): HouseID
++isSameAs(Object object): boolean
+}
+ImpFactoryHouse --> House: <<creates>>
+}
+
+
+package valueobjects{
+class HouseID <VO> implements ddd.DomainID{
+-id: String
++equals(Object object): boolean
++toString(): String
+}
+class Location <VO> implements ddd.ValueObject{
+- address: Address
+- gpsCode: GPSCode
++getAddress(): Address
++getGPSCode(): GPSCode
++equals(Object object): boolean
++toString(): String
+}
+
+class Address <VO> implements ddd.ValueObject{
+- street: String
+- doorNumber: String
+- postalCode: String
+- city: String
+- country: String
++getStreet(): String
++getDoorNumber(): String
++getPostalCode(): String
++getCity(): String
++getCountry(): String
++equals(Object object): boolean
++toString(): String
+}
+
+class GPSCode <VO> implements ddd.ValueObject{
+- latitude: double
+- longitude: double
++getLatitude(): double
++getLongitude(): double
++equals(Object object): boolean
++toString(): String
+}
+}
+}
+
+ImpFactoryHouse --> Location : <<creates>>
+ImpFactoryHouse --> Address : <<creates>>
+ImpFactoryHouse --> GPSCode : <<creates>>
+
+House  --> HouseID
+House  "1" --> "0..1" Location
+Location "1" ---> "1" Address
+Location "1" ---> "1" GPSCode
+
+
+package repositories{
+
+class HouseRepository <repo> implements ddd.Repository {
+-data: Map<HouseID, House>
++updateOrSave(House entity): House
++findAllEntities(HouseID id)): Iterable<House>
++findEntityByID(HouseID id): Optional<House>
++containsEntityByID(HouseID id): boolean
+}
+
+HouseRepository ..> House
+}
+
+package service {
+    class HouseService <service> {
+        -houseRepository : HouseRepository
+        -factoryHouse : FactoryHouse
+        +createAndSaveHouseWithoutLocation(): House
+        +createAndSaveHouseWithLocation(String street, String doorNumber, \nString zipCode, String city, String country, double latitude, double longitude): boolean
+        +editLocation(LocationDTO locationDTO): boolean
+
+    }
+}
+
+HouseService --> HouseRepository
+HouseService --> FactoryHouse
+}
+
+@enduml

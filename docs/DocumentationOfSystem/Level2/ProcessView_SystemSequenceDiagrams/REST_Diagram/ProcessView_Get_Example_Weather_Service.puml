@@ -1,0 +1,36 @@
+@startuml
+title GET request with Weather Service
+
+autonumber
+skinparam sequenceMessageAlign center
+skinparam actorBackgroundColor white
+skinparam participantBackgroundColor white
+skinparam sequenceReferenceBackgroundColor white
+skinparam sequenceReferenceHeaderBackgroundColor white
+skinparam sequenceGroupBackgroundColor white
+
+box " <<System>> \n:Smarthome " #LightGrey
+participant "<<Subsystem>>\n:Frontend" as fe
+participant "<<Subsystem>>\n:Backend" as be
+end box
+
+[o-> fe++ : Ask for request
+fe --> be++ : GET /Request
+
+be ->o] : GET /Request
+be <--o]: Response
+be --> fe: Response
+deactivate
+[o<--fe: Response
+deactivate
+
+
+legend bottom
+ **This request can be included in:**
+|= Request GET |= Response |
+|= /houses/{id} (UC34.3) |= Double of maximum temperature difference between outside and inside|
+|= /house/weather (UC38) |= Today's Sunrise/Sunset hours|
+|= /house/weather (UC39) |= Get outside temperature for hour|
+end legend
+
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+title US09: As a Power User [or Administrator], I want to get a list of all devices in a house, grouped by device functionality types. It must include device location.
+'https://plantuml.com/class-diagram
+
+class ListAllDevicesInRoomByFunctionalityController {
+-house: House
++getListOfAllDevicesInHouseGroupedByFunctionality()
+}
+
+class RoomMapper {
++roomToDTO(Room room) : RoomDTO
+}
+
+class RoomDTO {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
+}
+
+class DeviceMapper {
++deviceToDTO(Device device) : DeviceDTO
+}
+
+class DeviceDTO {
+-deviceName: String
+-sensorList: List<Sensor>
+}
+
+class House {
+-location: Location
+-roomList: RoomList
+-sensorTypeList: SensorTypeList
++getListOfAllDevicesInHouseGroupedByFunctionality()
+}
+
+class SensorCatalogue{
++getSensorClasses(): List<String>
+}
+
+
+class RoomList {
+-roomList: List<Room>
+}
+
+class Room {
+-roomName: String
+-floorNumber: int
+-dimensions: Dimensions
+-deviceList: DeviceList
++getListOfDevicesOfSpecificFunctionality(SensorType sensorType)
+}
+
+class DeviceList {
+-deviceList: List<Device>
+}
+
+class Device {
+-deviceName: String
+-sensorList: List<Sensor>
+-status: Status
++doesDeviceHaveSensorsOfSpecificSensorType(SensorType sensorType)
+}
+
+interface Sensor {
++getSensorType()
+}
+
+
+
+ListAllDevicesInRoomByFunctionalityController -- House
+ListAllDevicesInRoomByFunctionalityController -- RoomMapper
+RoomMapper -- RoomDTO
+ListAllDevicesInRoomByFunctionalityController -- DeviceMapper
+DeviceMapper -- DeviceDTO
+House "1" *-- "1" RoomList
+House "1" *- "1" SensorCatalogue
+RoomList "1" *-- "0..*" Room
+Room "1" *- "1" DeviceList
+DeviceList "1" *-- "0..*"Device
+Device --  Sensor
+SensorCatalogue -- Device
+
+@enduml

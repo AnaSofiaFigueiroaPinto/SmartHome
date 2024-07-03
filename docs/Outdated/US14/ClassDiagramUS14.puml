@@ -1,0 +1,48 @@
+@startuml
+title US14: As Product Owner, I want the system to have a type of actuator that open/closes a blind roller (0% closed/ 100% fully open).
+'https://plantuml.com/class-diagram
+
+interface Actuator {
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorFunctionality
+}
+
+interface ActuatorSpecificInteger extends Actuator{
++setActuatorSpecificInteger (int specificInteger): boolean
+}
+
+class BlindSetterActuator implements ActuatorSpecificInteger {
+-actuatorName: String
+-actuatorFunctionality: actuatorFunctionality
+-specificValue: int
+-actuatorProperties: ActuatorProperties
++getActuatorName(): String
++getActuatorFunctionality(): ActuatorType
++setActuatorSpecificInteger (int specificValue): boolean
+}
+
+enum ActuatorFunctionality {
+  BINARY_SWITCH,
+  PERCENTAGE_SETTER,
+  INTEGER_SETTER,
+  DECIMAL_SETTER
+}
+
+class ActuatorProperties{
+-upperLimitInt: int
+-lowerLimitInt: int
+-upperLimitDecimal: double
+-lowerLimitDecimal: double
+-precision: int
+-validConstructorArguments(int upperLimitInt, int lowerLimitInt): boolean
+-validConstructorsArgumentsDecimal(double upperLimitDecimal, double lowerLimitDecimal, int precision): boolean
++getUpperLimitInt(): int
++getLowerLimitInt(): int
++getUpperLimitDecimal(): double
++getLowerLimitDecimal(): double
++getPrecision(): int
+}
+
+BlindSetterActuator -- ActuatorProperties: has
+ActuatorFunctionality - BlindSetterActuator: has
+@enduml

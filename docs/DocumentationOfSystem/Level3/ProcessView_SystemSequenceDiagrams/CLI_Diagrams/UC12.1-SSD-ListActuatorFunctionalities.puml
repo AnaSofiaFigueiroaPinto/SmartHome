@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title UC12.1 - List Actuator Functionalities
+
+!pragma teoz true
+box " <<System>>\n:SmartHome" #DarkGrey
+box "<<Subsystem>>\n :Backend" #LightGrey
+  participant ":Server" as server <<Container>>
+
+end box
+
+[o->server: Get list of Actuator Functionalities
+activate server
+server->server: find all actuator functionalities
+
+[o<--server: List of actuator functionalities
+
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+title UC34.1 - List all Rooms inside or outside of House.
+
+autonumber
+
+Actor User
+participant ":SmartHome" as smartHome <<System>>
+
+User -> smartHome: get list of rooms inside or outside house
+activate smartHome
+User <-- smartHome: list of rooms
+deactivate smartHome
+
+@enduml

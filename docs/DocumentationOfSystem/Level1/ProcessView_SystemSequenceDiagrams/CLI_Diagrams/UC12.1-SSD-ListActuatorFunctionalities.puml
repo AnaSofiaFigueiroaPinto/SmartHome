@@ -1,0 +1,13 @@
+@startuml
+
+autonumber
+title UC12.1 - List Actuator Functionalities
+
+Actor User
+participant ":SmartHome" as SmartHome <<System>>
+
+User -> SmartHome: get list of actuator functionalities
+activate SmartHome
+User <--SmartHome: list of actuator functionalities
+deactivate SmartHome
+@enduml
